@@ -1,0 +1,75 @@
+# Compila e prova SpeedVision a ogni invio su GitHub.
+# Quando si crea un'etichetta di versione (es. v0.2.0) prepara anche lo zip per Windows
+# e lo pubblica nella pagina Releases.
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths-ignore: ['docs/**', '**.md']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+  DOTNET_NOLOGO: '1'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Installa FFmpeg
+        run: choco install ffmpeg -y --no-progress
+
+      # I modelli YOLOX servono ai test di rilevamento: si scaricano una volta e restano in cache.
+      - name: Cache dei modelli YOLOX
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\TrafficSpeedAnalyzer\models
+          key: yolox-models-v1
+
+      - name: Compila
+        run: dotnet build SpeedVision.sln -c Release
+
+      - name: Test
+        run: dotnet test SpeedVision.sln -c Release --no-build --blame-hang-timeout 8m
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Versione autonoma: non richiede .NET installato sul PC di chi la scarica.
+      - name: Pubblica
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          dotnet publish src/TrafficSpeedAnalyzer.App -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:Version=$version -o out/SpeedVision
+          Copy-Item LICENSE, THIRD_PARTY_NOTICES.md out/SpeedVision/
+          Compress-Archive -Path out/SpeedVision -DestinationPath "SpeedVision-${{ github.ref_name }}-win-x64.zip"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: SpeedVision-*-win-x64.zip
+          generate_release_notes: true
