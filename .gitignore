@@ -26,3 +26,5 @@ desktop.ini
 
 # Pagine del wiki: si pubblicano nel repository separato SpeedVision.wiki con scripts\wiki-push.cmd
 wiki/
+git-log.txt
+wiki-log.txt
