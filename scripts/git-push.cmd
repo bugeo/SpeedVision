@@ -13,6 +13,9 @@ echo ---- FILE NEL COMMIT ---- >> %LOG%
 git status --short >> %LOG% 2>&1
 git commit -q -m "%MSG%" >> %LOG% 2>&1
 echo COMMIT_EXIT=%ERRORLEVEL% >> %LOG%
+echo ---- AGGIORNAMENTO DA GITHUB ---- >> %LOG%
+git pull --rebase >> %LOG% 2>&1
+echo PULL_EXIT=%ERRORLEVEL% >> %LOG%
 echo ---- PUSH ---- >> %LOG%
 git push >> %LOG% 2>&1
 echo PUSH_EXIT=%ERRORLEVEL% >> %LOG%

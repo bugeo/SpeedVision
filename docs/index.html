@@ -116,6 +116,14 @@ pre { background: #e6ebf2; border-radius: 8px; padding: 14px 16px; overflow-x: a
 .install > div, .results > *, .hero-grid > * { min-width: 0; }
 .install ul { padding-left: 1.1em; margin: 0 0 12px; color: var(--muted); }
 
+/* Offrimi un caffè */
+.coffee .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px 48px; }
+.coffee h2 { margin-bottom: 8px; }
+.coffee p { color: var(--muted); max-width: 52ch; margin: 0; }
+.btn-coffee { background: #ffdd00; color: #142033; }
+.btn-coffee:hover { background: #ffe740; }
+.top nav a.nav-coffee { color: #ffdd00; }
+
 footer { background: var(--night); color: #8796ad; padding-block: 40px; font-size: .95rem; }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: space-between; align-items: center; }
 footer a { color: #c7d3e4; }
@@ -144,6 +152,7 @@ footer a { color: #c7d3e4; }
       <a href="#come"><span lang="it">Come funziona</span><span lang="en">How it works</span></a>
       <a href="#installa"><span lang="it">Installazione</span><span lang="en">Install</span></a>
       <a href="https://github.com/bugeo/SpeedVision">GitHub</a>
+      <a class="nav-coffee" href="https://buymeacoffee.com/bugeo"><span lang="it">Offrimi un caffè</span><span lang="en">Buy me a coffee</span></a>
       <span class="lang" role="group" aria-label="Lingua / Language">
         <button type="button" data-set="it" aria-pressed="true">IT</button>
         <button type="button" data-set="en" aria-pressed="false">EN</button>
@@ -350,6 +359,19 @@ dotnet test SpeedVision.sln -c Release</code></pre>
       <p lang="it">Segnalazioni e proposte sono benvenute nelle <a href="https://github.com/bugeo/SpeedVision/issues">Issues</a>.</p>
       <p lang="en">Bug reports and suggestions are welcome in the <a href="https://github.com/bugeo/SpeedVision/issues">Issues</a>.</p>
     </div>
+  </div>
+</section>
+<section class="coffee">
+  <div class="wrap">
+    <div>
+      <h2><span lang="it">Ti è utile?</span><span lang="en">Find it useful?</span></h2>
+      <p lang="it">SpeedVision è gratuito e lo resterà. Se ti ha aiutato, puoi offrirmi un caffè: mi dà una mano a dedicargli altro tempo.</p>
+      <p lang="en">SpeedVision is free and will stay free. If it helped you, you can buy me a coffee: it helps me put more time into it.</p>
+    </div>
+    <a class="btn btn-coffee" href="https://buymeacoffee.com/bugeo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h13v5a5 5 0 01-5 5H9a5 5 0 01-5-5V9z"/><path d="M17 11h1.5a2.5 2.5 0 010 5H17"/><path d="M8 3v2M12 3v2"/></svg>
+      <span lang="it">Offrimi un caffè</span><span lang="en">Buy me a coffee</span>
+    </a>
   </div>
 </section>
 </main>

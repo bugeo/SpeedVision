@@ -1,0 +1,103 @@
+==== 06/11/2026 21:35:42,78 ==== 
+Cloning into 'C:\Users\stima\AppData\Local\Temp\SpeedVision.wiki'...
+
+-------------------------------------------------------------------------------
+   ROBOCOPY     ::     Copia di file efficace per Windows                              
+-------------------------------------------------------------------------------
+
+  Avviato: venerd 6 novembre 2026 21:35:43
+      Origine : E:\claude cowork\SpeedVision\wiki\
+ Destinazione : C:\Users\stima\AppData\Local\Temp\SpeedVision.wiki\
+
+         File: *.md
+	    
+Directory exc: .git
+	    
+      Opzioni: /S /E /DCOPY:DA /COPY:DAT /PURGE /MIR /R:1000000 /W:30 
+
+-------------------------------------------------------------------------------
+
+	                  16	E:\claude cowork\SpeedVision\wiki\
+	    Nuovo file		    2178	Analisi-veicoli.md100%  
+	    Nuovo file		    4670	Calibrazione.md100%  
+	    Nuovo file		    2090	Come-si-calcola-la-velocita.md100%  
+	    Nuovo file		    1734	Consigli-per-la-ripresa.md100%  
+	    Nuovo file		    2780	Domande-frequenti.md100%  
+	    Nuovo file		    1691	Guida-rapida.md100%  
+	   Pi— vecchio		    1659	Home.md100%  
+	    Nuovo file		    1780	Installazione.md100%  
+	    Nuovo file		    1477	Misura-manuale.md100%  
+	    Nuovo file		    1835	Privacy-e-limiti.md100%  
+	    Nuovo file		    2730	Risultati-ed-esportazione.md100%  
+	    Nuovo file		    1270	Strada.md100%  
+	    Nuovo file		    3508	Sviluppo.md100%  
+	    Nuovo file		    2294	Video.md100%  
+	    Nuovo file		     142	_Footer.md100%  
+	    Nuovo file		     553	_Sidebar.md100%  
+
+-------------------------------------------------------------------------------
+
+              Totale   Copiato  IgnorateNon corrispondentiNon riuscitaSupplementari
+Directory:         1         0         1         0         0         1
+     File:        16        16         0         0         0         0
+     Byte:    31.6 k    31.6 k         0         0         0         0
+   Durata:   0:00:00   0:00:00                       0:00:00   0:00:00
+
+
+ Velocit…:             981.545 Byte/sec.
+ Velocit…:              56,164 MB/min.
+   Terminato: venerd 6 novembre 2026 21:35:43
+
+warning: LF will be replaced by CRLF in Home.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Analisi-veicoli.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Calibrazione.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Come-si-calcola-la-velocita.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Consigli-per-la-ripresa.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Domande-frequenti.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Guida-rapida.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Installazione.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Misura-manuale.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Privacy-e-limiti.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Risultati-ed-esportazione.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Strada.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Sviluppo.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in Video.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in _Footer.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in _Sidebar.md.
+The file will have its original line endings in your working directory
+---- PAGINE MODIFICATE ---- 
+A  Analisi-veicoli.md
+A  Calibrazione.md
+A  Come-si-calcola-la-velocita.md
+A  Consigli-per-la-ripresa.md
+A  Domande-frequenti.md
+A  Guida-rapida.md
+M  Home.md
+A  Installazione.md
+A  Misura-manuale.md
+A  Privacy-e-limiti.md
+A  Risultati-ed-esportazione.md
+A  Strada.md
+A  Sviluppo.md
+A  Video.md
+A  _Footer.md
+A  _Sidebar.md
+COMMIT_EXIT=0 
+To https://github.com/bugeo/SpeedVision.wiki.git
+   9940f61..91b718e  master -> master
+PUSH_EXIT=0 

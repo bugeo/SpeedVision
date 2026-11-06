@@ -4,7 +4,7 @@ Applicazione desktop per Windows che misura la velocità media dei veicoli tra d
 di rilevamento in un video di traffico ripreso da camera fissa. Tutto avviene sul PC:
 il video non viene mai inviato in rete.
 
-Sito del progetto: <https://bugeo.github.io/SpeedVision/>
+Sito del progetto: <https://bugeo.github.io/SpeedVision/> · [Offrimi un caffè](https://buymeacoffee.com/bugeo)
 
 ## Stato (fasi 1–5)
 
@@ -108,6 +108,12 @@ Le misure non sono omologate e non sono utilizzabili per sanzioni. Le immagini p
 contenere targhe e persone: sono dati personali (GDPR), conservale e condividile con cautela.
 
 Registro degli errori: `%LocalAppData%\TrafficSpeedAnalyzer\logs\app.log`.
+
+## Sostieni il progetto
+
+SpeedVision è gratuito e lo resterà. Se ti è utile, puoi offrirmi un caffè:
+
+[![Offrimi un caffè](https://img.shields.io/badge/Offrimi%20un%20caff%C3%A8-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/bugeo)
 
 ## Licenza
 
