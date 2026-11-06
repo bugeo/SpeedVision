@@ -94,7 +94,7 @@ public static class PrivacyMasking
 
     /// <summary>
     /// Pixella una zona di un'immagine (pixel interlacciati, es. BGR) sostituendo ogni blocco con il suo colore medio.
-    /// I blocchi sono abbastanza grandi (almeno 1/8 della zona) da rendere illeggibili targhe e volti.
+    /// I blocchi sono abbastanza grandi da rendere illeggibili targhe e volti, ma lasciano riconoscibile la forma del veicolo.
     /// </summary>
     public static void Pixelate(byte[] pixels, int width, int height, int stride, int bytesPerPixel, BoundingBox region)
     {
@@ -145,9 +145,13 @@ public static class PrivacyMasking
         }
     }
 
-    /// <summary>Lato del blocco: almeno 1/8 del lato minore della zona e almeno 1/90 dell'altezza dell'immagine.</summary>
+    /// <summary>
+    /// Lato del blocco: almeno 1/108 dell'altezza dell'immagine (10 px in Full HD, più grande dei caratteri di una
+    /// targa lontana) e almeno 1/20 del lato minore della zona, così anche un veicolo vicino, con targa e volti
+    /// più grandi, resta illeggibile.
+    /// </summary>
     public static int BlockSize(int regionWidth, int regionHeight, int imageHeight) =>
-        Math.Max(Math.Max(6, imageHeight / 90), Math.Min(regionWidth, regionHeight) / 8);
+        Math.Max(Math.Max(6, imageHeight / 108), Math.Min(regionWidth, regionHeight) / 20);
 
     private static BoundingBox Clamp(BoundingBox r, double w, double h)
     {

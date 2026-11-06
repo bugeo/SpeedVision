@@ -96,8 +96,8 @@ Per ogni esportazione viene creata una cartella `<video>_misure_<data>` con:
 - `immagini_anonimizzate/` — le stesse immagini con i veicoli tracciati pixellati;
 - `passaggi.csv` — UTF-8 con BOM; separatore e decimali secondo la lingua scelta. Colonne:
   `Id;Verso;[Corsia;]Orario ingresso;Orario uscita;Tempo impiegato (s);Velocità (km/h)`;
-- `rapporto.pdf` — riepilogo con statistiche e grafico, poi una pagina per veicolo con i dati e le
-  immagini di ingresso e di uscita pixellate;
+- `rapporto.pdf` e `rapporto_anonimizzato.pdf` — riepilogo con statistiche e grafico, poi una pagina per
+  veicolo con i dati e le immagini di ingresso e di uscita, in chiaro o con i veicoli pixellati;
 - `calibrazione.tsacal.json` e `info.txt`.
 
 I nomi di file e cartelle seguono la lingua dell'interfaccia (italiano, inglese, francese, tedesco, spagnolo).

@@ -648,6 +648,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
     partial void OnSelectedStepChanged(WorkflowStep value)
     {
         RefreshVanishingState();   // punti di riferimento visibili solo nella calibrazione
+        EnsureRoadForEditing();    // passo «Strada»: la zona verde compare subito, da portare sui bordi
 
         // Gli avvisi riguardano il passo in cui sono comparsi (es. «Analisi completata… premi Procedi»):
         // negli altri passi sarebbero solo d'intralcio e indicherebbero un'azione non più valida.

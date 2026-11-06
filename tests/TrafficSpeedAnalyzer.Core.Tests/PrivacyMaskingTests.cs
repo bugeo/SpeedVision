@@ -91,7 +91,9 @@ public class PrivacyMaskingTests
     [Fact]
     public void BlockSize_MakesSmallRegionsUnreadable()
     {
-        Assert.True(PrivacyMasking.BlockSize(40, 12, 1080) >= 12);   // una targa piccola diventa 1 blocco in altezza
-        Assert.Equal(50, PrivacyMasking.BlockSize(400, 600, 1080));
+        // Targa lontana in Full HD: caratteri alti circa 8 px, più piccoli di un blocco.
+        Assert.True(PrivacyMasking.BlockSize(40, 12, 1080) >= 10);
+        // Auto vicina: il blocco cresce con il riquadro, ma la sagoma resta riconoscibile (20×30 blocchi).
+        Assert.Equal(20, PrivacyMasking.BlockSize(400, 600, 1080));
     }
 }

@@ -7,7 +7,7 @@ using TrafficSpeedAnalyzer.Core.Localization;
 namespace TrafficSpeedAnalyzer.App.ViewModels;
 
 /// <summary>
-/// Passo «Strada», dopo il Video: quante corsie, quadrilatero sui bordi della carreggiata, linee tra le corsie.
+/// Passo «Strada», dopo il Video: quadrilatero sui bordi della carreggiata, quante corsie, linee tra le corsie.
 /// La strada limita l'analisi ai veicoli sulla carreggiata e assegna a ognuno la sua corsia; con la
 /// calibrazione tramite le auto ogni corsia ha la sua auto di riferimento.
 /// </summary>
@@ -20,8 +20,15 @@ public sealed partial class MainViewModel
 
     /// <summary>L'utente ha confermato che la strada verde è sui bordi della strada.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsRoadAreaStepActive), nameof(IsRoadDividersStepActive), nameof(ShowRoadDividersCard), nameof(ShowRoadProceed))]
+    [NotifyPropertyChangedFor(nameof(IsRoadAreaStepActive), nameof(IsRoadLanesStepActive), nameof(ShowRoadLanesCard),
+        nameof(IsRoadDividersStepActive), nameof(ShowRoadDividersCard), nameof(ShowRoadProceed))]
     private bool _roadEdgesConfirmed;
+
+    /// <summary>L'utente ha scelto il numero di corsie (finché non lo fa la strada ha una sola corsia provvisoria).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsRoadLanesStepActive), nameof(RoadLaneCount), nameof(IsRoadDividersStepActive),
+        nameof(ShowRoadDividersCard), nameof(ShowRoadProceed))]
+    private bool _roadLanesChosen;
 
     /// <summary>L'utente ha confermato le linee tra le corsie.</summary>
     [ObservableProperty]
@@ -30,26 +37,29 @@ public sealed partial class MainViewModel
 
     public bool HasRoad => Road is not null;
 
-    public int RoadLaneCount => Road?.Lanes ?? 0;
+    /// <summary>Numero di corsie scelto (0 = non ancora scelto): il pulsante corrispondente resta verde.</summary>
+    public int RoadLaneCount => RoadLanesChosen ? Road?.Lanes ?? 0 : 0;
 
     public bool HasLaneDividers => Road is { Lanes: > 1 };
 
     // ───────────── Guida: un riquadro acceso per volta ─────────────
 
-    /// <summary>Primo passo: quante corsie.</summary>
-    public bool IsRoadLanesStepActive => HasVideo && Road is null;
-
-    /// <summary>Secondo passo: quadrilatero sui bordi della strada.</summary>
+    /// <summary>Primo passo: quadrilatero sui bordi della strada.</summary>
     public bool IsRoadAreaStepActive => Road is not null && !RoadEdgesConfirmed;
 
     public bool ShowRoadAreaCard => Road is not null;
 
+    /// <summary>Secondo passo, dopo i bordi: quante corsie.</summary>
+    public bool ShowRoadLanesCard => Road is not null && RoadEdgesConfirmed;
+
+    public bool IsRoadLanesStepActive => ShowRoadLanesCard && !RoadLanesChosen;
+
     /// <summary>Terzo passo (con più corsie): linee tra le corsie.</summary>
-    public bool ShowRoadDividersCard => HasLaneDividers && RoadEdgesConfirmed;
+    public bool ShowRoadDividersCard => HasLaneDividers && RoadEdgesConfirmed && RoadLanesChosen;
 
     public bool IsRoadDividersStepActive => ShowRoadDividersCard && !RoadDividersConfirmed;
 
-    public bool ShowRoadProceed => Road is not null && RoadEdgesConfirmed && (!HasLaneDividers || RoadDividersConfirmed);
+    public bool ShowRoadProceed => Road is not null && RoadEdgesConfirmed && RoadLanesChosen && (!HasLaneDividers || RoadDividersConfirmed);
 
     public string RoadSummary => Road is { } r
         ? (r.Lanes == 1
@@ -60,6 +70,7 @@ public sealed partial class MainViewModel
     partial void OnRoadChanged(RoadLayout? value)
     {
         OnPropertyChanged(nameof(IsRoadLanesStepActive));
+        OnPropertyChanged(nameof(ShowRoadLanesCard));
         OnPropertyChanged(nameof(IsRoadAreaStepActive));
         OnPropertyChanged(nameof(ShowRoadAreaCard));
         OnPropertyChanged(nameof(ShowRoadDividersCard));
@@ -69,7 +80,7 @@ public sealed partial class MainViewModel
         OnLanesChanged();
     }
 
-    /// <summary>«Quante corsie?»: 1–4. La strada compare al centro (o resta dov'era, con le linee ridistribuite).</summary>
+    /// <summary>«Quante corsie?»: 1–4. La strada resta dove l'ha messa l'utente, con le linee tra le corsie ridistribuite.</summary>
     [RelayCommand]
     private void SetLaneCount(string? lanes)
     {
@@ -79,6 +90,7 @@ public sealed partial class MainViewModel
         }
 
         Road = Road is { } r ? r.WithLanes(n) : RoadLayout.CreateCentered(n, VideoWidth, VideoHeight);
+        RoadLanesChosen = true;
         RoadDividersConfirmed = false;
     }
 
@@ -98,13 +110,27 @@ public sealed partial class MainViewModel
     [RelayCommand]
     private void ConfirmRoadDividers() => RoadDividersConfirmed = true;
 
-    /// <summary>«Ricomincia»: di nuovo la domanda sulle corsie.</summary>
+    /// <summary>«Ricomincia»: di nuovo i bordi della strada, poi le corsie.</summary>
     [RelayCommand]
     private void ResetRoad()
     {
         Road = null;
         RoadEdgesConfirmed = false;
+        RoadLanesChosen = false;
         RoadDividersConfirmed = false;
+        EnsureRoadForEditing();
+    }
+
+    /// <summary>
+    /// Entrando nel passo «Strada» compare subito la zona verde da portare sui bordi (una corsia provvisoria):
+    /// il numero di corsie si sceglie dopo. Fuori da questo passo, senza strada indicata, si analizza tutta l'immagine.
+    /// </summary>
+    private void EnsureRoadForEditing()
+    {
+        if (SelectedStep == WorkflowStep.Road && HasVideo && Road is null)
+        {
+            Road = RoadLayout.CreateCentered(1, VideoWidth, VideoHeight);
+        }
     }
 
     /// <summary>Corsia di un veicolo dai punti a terra (0 = la più vicina), −1 se fuori strada, 0 senza strada.</summary>
@@ -115,7 +141,10 @@ public sealed partial class MainViewModel
     {
         if (!keep || Road is not { } r)
         {
-            ResetRoad();
+            Road = null;
+            RoadEdgesConfirmed = false;
+            RoadLanesChosen = false;
+            RoadDividersConfirmed = false;
             return;
         }
 

@@ -259,24 +259,31 @@ public sealed partial class MainViewModel
             string anonFolder = Path.Combine(folder, AnonymizedImagesFolder);
             Directory.CreateDirectory(clearFolder);
             Directory.CreateDirectory(anonFolder);
-            // Il rapporto PDF si scrive mentre si esportano le immagini: una pagina per veicolo, con le immagini anonimizzate.
-            string pdfPath = Path.Combine(folder, Loc.T("rapporto") + ".pdf");
-            await using (FileStream pdfStream = File.Create(pdfPath))
-            using (var report = new PdfReport(pdfStream, SourceFileName, rows.Count, Road is { Lanes: > 1 }, start, ReportLogo()))
+            // I due rapporti PDF (immagini in chiaro e veicoli pixellati) si scrivono mentre si esportano le immagini:
+            // una pagina per veicolo.
+            byte[]? logo = ReportLogo();
+            bool showLane = Road is { Lanes: > 1 };
+            var summary = new PdfReportSummary(
+                SourceFileName,
+                start?.ToString("dd/MM/yyyy HH:mm:ss", It),
+                cal.DistanceMeters,
+                CalibrationMethodText,
+                FilterDescription,
+                rows,
+                [.. SpeedHistogram]);
+            await using (FileStream clearStream = File.Create(Path.Combine(folder, Loc.T("rapporto") + ".pdf")))
+            await using (FileStream anonStream = File.Create(Path.Combine(folder, Loc.T("rapporto_anonimizzato") + ".pdf")))
+            using (var clearReport = new PdfReport(clearStream, SourceFileName, rows.Count, showLane, start, anonymized: false, logo))
+            using (var anonReport = new PdfReport(anonStream, SourceFileName, rows.Count, showLane, start, anonymized: true, logo))
             {
-                report.AddSummary(new PdfReportSummary(
-                    SourceFileName,
-                    start?.ToString("dd/MM/yyyy HH:mm:ss", It),
-                    cal.DistanceMeters,
-                    CalibrationMethodText,
-                    FilterDescription,
-                    rows,
-                    [.. SpeedHistogram]));
+                clearReport.AddSummary(summary);
+                anonReport.AddSummary(summary);
                 for (int i = 0; i < rows.Count; i++)
                 {
                     BusyText = Loc.S($"Esportazione immagini {i + 1} di {rows.Count}…");
-                    (byte[] entry, byte[] exit) = await ExportImagesAsync(session, cal, rows[i], start, clearFolder, anonFolder);
-                    report.AddPassage(rows[i], entry, exit, i + 2);
+                    PassageImages images = await ExportImagesAsync(session, cal, rows[i], start, clearFolder, anonFolder);
+                    clearReport.AddPassage(rows[i], images.ClearEntry, images.ClearExit, i + 2);
+                    anonReport.AddPassage(rows[i], images.AnonEntry, images.AnonExit, i + 2);
                 }
             }
 
@@ -367,10 +374,14 @@ public sealed partial class MainViewModel
         : EstimateDistanceFromVehicle ? Loc.T("Con un'auto che riconosco")
         : Loc.T("Con due riferimenti misurati sul campo");
 
-    /// <summary>Salva le immagini in chiaro e anonimizzate; restituisce le due anonimizzate (ingresso, uscita) per il PDF.</summary>
-    private async Task<(byte[] Entry, byte[] Exit)> ExportImagesAsync(VideoSession session, CalibrationSettings cal, PassageRow row, DateTimeOffset? start, string clearFolder, string anonFolder)
+    /// <summary>Immagini JPEG di un passaggio, in chiaro e anonimizzate, per i rapporti PDF.</summary>
+    private sealed record PassageImages(byte[] ClearEntry, byte[] ClearExit, byte[] AnonEntry, byte[] AnonExit);
+
+    /// <summary>Salva le immagini in chiaro e anonimizzate e le restituisce per i rapporti PDF.</summary>
+    private async Task<PassageImages> ExportImagesAsync(VideoSession session, CalibrationSettings cal, PassageRow row, DateTimeOffset? start, string clearFolder, string anonFolder)
     {
         VehiclePassage p = row.Passage;
+        var clear = new byte[2][];
         var anonymized = new byte[2][];
         foreach (bool isEntry in new[] { true, false })
         {
@@ -392,13 +403,14 @@ public sealed partial class MainViewModel
             string name = string.Create(CultureInfo.InvariantCulture, $"{p.Id:0000}_{(isEntry ? Loc.T("ingresso") : Loc.T("uscita"))}.jpg");
             byte[] jpeg = PassageImageRenderer.RenderJpeg(frame, VideoWidth, VideoHeight, cal, line, e.FirstBeyond.Position, text);
             await File.WriteAllBytesAsync(Path.Combine(clearFolder, name), jpeg);
+            clear[isEntry ? 0 : 1] = jpeg;
 
             byte[] anon = PassageImageRenderer.RenderJpeg(frame, VideoWidth, VideoHeight, cal, line, e.FirstBeyond.Position, text, PrivacyRegionsAt(frameIndex));
             await File.WriteAllBytesAsync(Path.Combine(anonFolder, name), anon);
             anonymized[isEntry ? 0 : 1] = anon;
         }
 
-        return (anonymized[0], anonymized[1]);
+        return new PassageImages(clear[0], clear[1], anonymized[0], anonymized[1]);
     }
 
     private static string FormatTimeFor(DateTimeOffset? start, double relativeSeconds) =>
@@ -442,6 +454,7 @@ public sealed partial class MainViewModel
         sb.AppendLine(Loc.T("Avvertenze: misure non omologate, non utilizzabili per sanzioni."));
         sb.AppendLine(Loc.S($"Cartella «{ClearImagesFolder}»: immagini in chiaro. Possono contenere targhe e persone (dati personali, GDPR): conservale e condividile con cautela."));
         sb.AppendLine(Loc.S($"Cartella «{AnonymizedImagesFolder}»: le stesse immagini con pixellato l'intero riquadro di ogni veicolo tracciato."));
+        sb.AppendLine(Loc.S($"«{Loc.T("rapporto")}.pdf» e «{Loc.T("rapporto_anonimizzato")}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati."));
         sb.AppendLine(Loc.T("  Per le misure manuali (senza riquadro) si copre un'area della taglia di un'auto attorno al punto indicato."));
         sb.AppendLine(Loc.T("  Veicoli non tracciati (es. parcheggiati), pedoni e targhe fuori da queste zone restano visibili: controlla le immagini prima di condividerle."));
         return sb.ToString();

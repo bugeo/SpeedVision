@@ -8,6 +8,8 @@
 <meta property="og:title" content="SpeedVision">
 <meta property="og:description" content="Misura la velocità dei veicoli in un video di traffico, direttamente sul tuo PC.">
 <meta property="og:image" content="img/logo.jpg">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,75..125,400..800;1,75..125,600..800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -59,6 +61,9 @@ h1 { font: italic 800 clamp(2.4rem, 5.4vw, 4.1rem)/1.02 var(--display); font-str
 .btn-ghost { color: #dbe6f5; border: 1px solid #33476a; }
 .btn-ghost:hover { border-color: #6d87b0; }
 .btn svg { width: 20px; height: 20px; flex: none; }
+.hero-sample { margin: 18px 0 0; font-size: 1rem; }
+.hero-sample a { color: #9fdcfb; }
+.hero-sample a:hover { color: #fff; }
 
 /* La strada animata */
 .demo { position: relative; }
@@ -178,6 +183,7 @@ footer a { color: #c7d3e4; }
           <span lang="it">Codice sorgente</span><span lang="en">Source code</span>
         </a>
       </div>
+      <p class="hero-sample"><a href="https://github.com/bugeo/SpeedVision/tree/main/samples"><span lang="it">Non hai un video? Scarica un video di esempio</span><span lang="en">No video at hand? Download a sample video</span></a></p>
     </div>
 
     <div class="demo">
@@ -347,6 +353,8 @@ footer a { color: #c7d3e4; }
       <p lang="it">Scarica l'ultima versione dalla pagina <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a>, poi installa FFmpeg da un terminale:</p>
       <p lang="en">Download the latest version from the <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a> page, then install FFmpeg from a terminal:</p>
       <pre><code>winget install --id Gyan.FFmpeg -e</code></pre>
+      <p lang="it">Per provarlo subito, scarica un video dalla <a href="https://github.com/bugeo/SpeedVision/tree/main/samples">cartella dei video di esempio</a> e aprilo con «Apri video». Lo stesso link è nel programma, nel pulsante «Scarica video di esempio».</p>
+      <p lang="en">To try it right away, download a video from the <a href="https://github.com/bugeo/SpeedVision/tree/main/samples">sample videos folder</a> and open it with «Apri video» (Open video). The same link is in the program, on the «Download sample videos» button.</p>
       <p lang="it">Al primo uso del riconoscimento automatico il programma scarica il modello YOLOX una sola volta.</p>
       <p lang="en">The first time you use automatic detection, the program downloads the YOLOX model once.</p>
       <p lang="it">Per l'uso passo per passo, i metodi di calibrazione e le domande frequenti leggi la <a href="https://github.com/bugeo/SpeedVision/wiki">guida nel wiki</a>.</p>

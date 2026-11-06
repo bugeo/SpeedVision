@@ -506,7 +506,6 @@
  "Clicca il riferimento B: un altro segno a terra lungo la strada, di cui hai misurato la distanza da A.": "Click reference B: another mark on the ground along the road, whose distance from A you have measured.",
  "Ora il punto di fuga: muovi il mouse finché le due rette seguono le linee trasversali della strada (strisce pedonali, giunti, bordi dei marciapiedi) e clicca. Può stare anche sopra l'immagine.": "Now the vanishing point: move the mouse until the two lines follow the lines running across the road (pedestrian crossings, joints, kerb edges) and click. It can also be above the image.",
  "Le linee A e B passano per i riferimenti e puntano al punto di fuga. Inserisci qui sotto la distanza misurata tra A e B.": "Lines A and B pass through the references and point to the vanishing point. Enter the measured distance between A and B below.",
- "Trascina i quattro pallini agli angoli della zona verde finché i suoi lati coincidono con i bordi della carreggiata (i cordoli): il bordo in alto è quello lontano, in basso quello vicino. Le linee tra le corsie si sistemano nel passo successivo.": "Drag the four dots at the corners of the green area until its sides match the edges of the carriageway (the kerbs): the top edge is the far one, the bottom edge the near one. The lines between lanes are adjusted in the next step.",
  "Rimisura sulla mappa": "Measure again on the map",
  "Apri la mappa": "Open the map",
  "La distanza tra le linee viene dalla mappa. Puoi rimisurarla o correggerla qui sotto.": "The distance between the lines comes from the map. You can measure it again or correct it below.",
@@ -586,5 +585,15 @@
  "Misure non omologate, non utilizzabili per sanzioni.": "Measurements not certified, not usable for fines.",
  "Pagina {0} di {1}": "Page {0} of {1}",
  "CSV, PDF e immagini": "CSV, PDF and images",
- "Per ogni veicolo: immagine di ingresso e di uscita con l'orario sovrimpresso, in due cartelle: «immagini» (in chiaro) e «immagini_anonimizzate» (veicoli pixellati). Più passaggi.csv e rapporto.pdf, con una pagina per veicolo e le immagini pixellate. Misure non omologate.": "For each vehicle: entry and exit image with the time overlaid, in two folders: «images» (clear) and «images_anonymised» (vehicles pixelated). Plus passages.csv and report.pdf, with one page per vehicle and the pixelated images. Measurements not certified."
+ "Scarica video di esempio": "Download sample videos",
+ "Apre nel browser la cartella con i video di prova del progetto su GitHub": "Opens the project's folder of test videos on GitHub in the browser",
+ "Apri il sito di SpeedVision": "Open the SpeedVision website",
+ "Impossibile aprire il browser": "Cannot open the browser",
+ "Trascina i quattro pallini agli angoli della zona verde finché i suoi lati coincidono con i bordi della carreggiata (i cordoli): il bordo in alto è quello lontano, in basso quello vicino. Dopo indicherai quante corsie ha la strada.": "Drag the four dots at the corners of the green area until its sides match the edges of the carriageway (the kerbs): the top edge is the far one, the bottom edge the near one. Next you will say how many lanes the road has.",
+ "Per ogni veicolo: immagine di ingresso e di uscita con l'orario sovrimpresso, in due cartelle: «immagini» (in chiaro) e «immagini_anonimizzate» (veicoli pixellati). Più passaggi.csv e due rapporti PDF con una pagina per veicolo: rapporto.pdf (in chiaro) e rapporto_anonimizzato.pdf (veicoli pixellati). Misure non omologate.": "For each vehicle: entry and exit image with the time overlaid, in two folders: «images» (clear) and «images_anonymised» (vehicles pixelated). Plus passages.csv and two PDF reports with one page per vehicle: report.pdf (unblurred) and report_anonymised.pdf (vehicles pixelated). Measurements not certified.",
+ "rapporto_anonimizzato": "report_anonymised",
+ "Immagini": "Images",
+ "in chiaro": "unblurred",
+ "Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita in chiaro. Possono contenere targhe e persone (dati personali): per condividerle usa il rapporto anonimizzato.": "On the following pages, one per vehicle: the measurement data (the same as in the CSV) and the unblurred entry and exit images. They may contain number plates and people (personal data): to share them, use the anonymised report.",
+ "«{0}.pdf» e «{1}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati.": "«{0}.pdf» and «{1}.pdf»: one page per vehicle, with the images unblurred and with vehicles pixelated."
 }

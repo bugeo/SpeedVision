@@ -506,7 +506,6 @@
  "Clicca il riferimento B: un altro segno a terra lungo la strada, di cui hai misurato la distanza da A.": "Cliquez le repère B : une autre marque au sol le long de la route, dont vous avez mesuré la distance depuis A.",
  "Ora il punto di fuga: muovi il mouse finché le due rette seguono le linee trasversali della strada (strisce pedonali, giunti, bordi dei marciapiedi) e clicca. Può stare anche sopra l'immagine.": "Maintenant le point de fuite : déplacez la souris jusqu'à ce que les deux droites suivent les lignes transversales de la route (passages piétons, joints, bords des trottoirs) et cliquez. Il peut aussi se trouver au-dessus de l'image.",
  "Le linee A e B passano per i riferimenti e puntano al punto di fuga. Inserisci qui sotto la distanza misurata tra A e B.": "Les lignes A et B passent par les repères et pointent vers le point de fuite. Saisissez ci-dessous la distance mesurée entre A et B.",
- "Trascina i quattro pallini agli angoli della zona verde finché i suoi lati coincidono con i bordi della carreggiata (i cordoli): il bordo in alto è quello lontano, in basso quello vicino. Le linee tra le corsie si sistemano nel passo successivo.": "Faites glisser les quatre points aux coins de la zone verte jusqu'à ce que ses côtés coïncident avec les bords de la chaussée (les bordures) : le bord du haut est le plus éloigné, celui du bas le plus proche. Les lignes entre les voies se règlent à l'étape suivante.",
  "Rimisura sulla mappa": "Remesurer sur la carte",
  "Apri la mappa": "Ouvrir la carte",
  "La distanza tra le linee viene dalla mappa. Puoi rimisurarla o correggerla qui sotto.": "La distance entre les lignes vient de la carte. Vous pouvez la remesurer ou la corriger ci-dessous.",
@@ -586,5 +585,15 @@
  "Misure non omologate, non utilizzabili per sanzioni.": "Mesures non homologuées, non utilisables pour des sanctions.",
  "Pagina {0} di {1}": "Page {0} sur {1}",
  "CSV, PDF e immagini": "CSV, PDF et images",
- "Per ogni veicolo: immagine di ingresso e di uscita con l'orario sovrimpresso, in due cartelle: «immagini» (in chiaro) e «immagini_anonimizzate» (veicoli pixellati). Più passaggi.csv e rapporto.pdf, con una pagina per veicolo e le immagini pixellate. Misure non omologate.": "Pour chaque véhicule : image d'entrée et de sortie avec l'heure incrustée, dans deux dossiers : «images» (en clair) et «images_anonymisees» (véhicules pixellisés). Plus passages.csv et rapport.pdf, avec une page par véhicule et les images pixellisées. Mesures non homologuées."
+ "Scarica video di esempio": "Télécharger des vidéos d'exemple",
+ "Apre nel browser la cartella con i video di prova del progetto su GitHub": "Ouvre dans le navigateur le dossier des vidéos de test du projet sur GitHub",
+ "Apri il sito di SpeedVision": "Ouvrir le site de SpeedVision",
+ "Impossibile aprire il browser": "Impossible d'ouvrir le navigateur",
+ "Trascina i quattro pallini agli angoli della zona verde finché i suoi lati coincidono con i bordi della carreggiata (i cordoli): il bordo in alto è quello lontano, in basso quello vicino. Dopo indicherai quante corsie ha la strada.": "Faites glisser les quatre points aux coins de la zone verte jusqu'à ce que ses côtés coïncident avec les bords de la chaussée (les bordures) : le bord du haut est le plus éloigné, celui du bas le plus proche. Ensuite, vous indiquerez combien de voies a la route.",
+ "Per ogni veicolo: immagine di ingresso e di uscita con l'orario sovrimpresso, in due cartelle: «immagini» (in chiaro) e «immagini_anonimizzate» (veicoli pixellati). Più passaggi.csv e due rapporti PDF con una pagina per veicolo: rapporto.pdf (in chiaro) e rapporto_anonimizzato.pdf (veicoli pixellati). Misure non omologate.": "Pour chaque véhicule : image d'entrée et de sortie avec l'heure incrustée, dans deux dossiers : «images» (en clair) et «images_anonymisees» (véhicules pixellisés). Plus passages.csv et deux rapports PDF avec une page par véhicule : rapport.pdf (non flouté) et rapport_anonymise.pdf (véhicules pixellisés). Mesures non homologuées.",
+ "rapporto_anonimizzato": "rapport_anonymise",
+ "Immagini": "Images",
+ "in chiaro": "non floutées",
+ "Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita in chiaro. Possono contenere targhe e persone (dati personali): per condividerle usa il rapporto anonimizzato.": "Dans les pages suivantes, une par véhicule : les données de la mesure (les mêmes que dans le CSV) et les images d'entrée et de sortie non floutées. Elles peuvent contenir des plaques et des personnes (données personnelles) : pour les partager, utilisez le rapport anonymisé.",
+ "«{0}.pdf» e «{1}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati.": "«{0}.pdf» et «{1}.pdf» : une page par véhicule, avec les images non floutées et avec les véhicules pixellisés."
 }

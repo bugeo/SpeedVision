@@ -25,8 +25,24 @@
 
         <ui:TitleBar Grid.Row="0" Title="">
             <ui:TitleBar.Header>
-                <Image Source="/Assets/speedvision-logo.png" Height="22" Margin="12,0,0,0" VerticalAlignment="Center"
-                       RenderOptions.BitmapScalingMode="HighQuality" ToolTip="SpeedVision" />
+                <!-- Logo: apre il sito -->
+                <Button Command="{Binding OpenWebsiteCommand}" Cursor="Hand" Padding="4,2" Margin="8,0,0,0" VerticalAlignment="Center"
+                        Background="Transparent" BorderThickness="0" Focusable="False"
+                        ToolTip="{loc:Tr 'Apri il sito di SpeedVision'}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bg" Background="Transparent" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Background" Value="#22FFFFFF" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Image Source="/Assets/speedvision-logo.png" Height="22" RenderOptions.BitmapScalingMode="HighQuality" />
+                </Button>
             </ui:TitleBar.Header>
         </ui:TitleBar>
 
@@ -209,7 +225,12 @@
                         </WrapPanel>
                     </StackPanel>
                     <!-- Verde solo finché non c'è un video: dopo non è più l'azione da fare -->
-                    <ui:Button Grid.Column="1" Content="{loc:Tr 'Apri video'}" Icon="{ui:SymbolIcon FolderOpen24}"
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                    <!-- Video di prova su GitHub, per chi vuole provare il programma -->
+                    <ui:Button Content="{loc:Tr 'Scarica video di esempio'}" Icon="{ui:SymbolIcon ArrowDownload24}"
+                               Command="{Binding OpenSamplesCommand}" Padding="16,8" Margin="0,0,8,0" VerticalAlignment="Top"
+                               ToolTip="{loc:Tr 'Apre nel browser la cartella con i video di prova del progetto su GitHub'}" />
+                    <ui:Button Content="{loc:Tr 'Apri video'}" Icon="{ui:SymbolIcon FolderOpen24}"
                                Command="{Binding OpenVideoCommand}" IsEnabled="{Binding IsReady}" Padding="16,8" VerticalAlignment="Top">
                         <ui:Button.Style>
                             <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
@@ -222,6 +243,7 @@
                             </Style>
                         </ui:Button.Style>
                     </ui:Button>
+                    </StackPanel>
                 </Grid>
 
                 <!-- Messaggi -->
@@ -816,8 +838,28 @@
                             <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,14"
                                        Text="{loc:Tr 'Indica dove passano i veicoli: l\'analisi considererà solo la strada e saprà in che corsia passa ogni veicolo.'}" />
 
-                            <!-- 1. Quante corsie -->
-                            <Border Style="{StaticResource GuideCard}" Tag="{Binding IsRoadLanesStepActive}">
+                            <!-- 1. Bordi della strada -->
+                            <Border Style="{StaticResource GuideCard}" Tag="{Binding IsRoadAreaStepActive}"
+                                    Visibility="{Binding ShowRoadAreaCard, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Bordi della strada'}" />
+                                    <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,10"
+                                               Text="{loc:Tr 'Trascina i quattro pallini agli angoli della zona verde finché i suoi lati coincidono con i bordi della carreggiata (i cordoli): il bordo in alto è quello lontano, in basso quello vicino. Dopo indicherai quante corsie ha la strada.'}" />
+                                    <ui:Button Content="{loc:Tr 'I bordi sono a posto'}" Icon="{ui:SymbolIcon Checkmark24}" HorizontalAlignment="Stretch" Padding="12,9"
+                                               Command="{Binding ConfirmRoadEdgesCommand}"
+                                               Visibility="{Binding IsRoadAreaStepActive, Converter={StaticResource BoolToVisibility}}">
+                                        <ui:Button.Style>
+                                            <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                                <Setter Property="Appearance" Value="Primary" />
+                                            </Style>
+                                        </ui:Button.Style>
+                                    </ui:Button>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 2. Quante corsie (dopo i bordi) -->
+                            <Border Style="{StaticResource GuideCard}" Tag="{Binding IsRoadLanesStepActive}"
+                                    Visibility="{Binding ShowRoadLanesCard, Converter={StaticResource BoolToVisibility}}">
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Quante corsie ha la strada?'}" />
                                     <UniformGrid Columns="4">
@@ -898,26 +940,7 @@
                                         </ui:Button>
                                     </UniformGrid>
                                     <TextBlock Style="{StaticResource Caption}" Margin="0,8,0,0" Text="{Binding RoadSummary}"
-                                               Visibility="{Binding HasRoad, Converter={StaticResource BoolToVisibility}}" />
-                                </StackPanel>
-                            </Border>
-
-                            <!-- 2. Bordi della strada -->
-                            <Border Style="{StaticResource GuideCard}" Tag="{Binding IsRoadAreaStepActive}"
-                                    Visibility="{Binding ShowRoadAreaCard, Converter={StaticResource BoolToVisibility}}">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Bordi della strada'}" />
-                                    <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,10"
-                                               Text="{loc:Tr 'Trascina i quattro pallini agli angoli della zona verde finché i suoi lati coincidono con i bordi della carreggiata (i cordoli): il bordo in alto è quello lontano, in basso quello vicino. Le linee tra le corsie si sistemano nel passo successivo.'}" />
-                                    <ui:Button Content="{loc:Tr 'I bordi sono a posto'}" Icon="{ui:SymbolIcon Checkmark24}" HorizontalAlignment="Stretch" Padding="12,9"
-                                               Command="{Binding ConfirmRoadEdgesCommand}"
-                                               Visibility="{Binding IsRoadAreaStepActive, Converter={StaticResource BoolToVisibility}}">
-                                        <ui:Button.Style>
-                                            <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
-                                                <Setter Property="Appearance" Value="Primary" />
-                                            </Style>
-                                        </ui:Button.Style>
-                                    </ui:Button>
+                                               Visibility="{Binding RoadLanesChosen, Converter={StaticResource BoolToVisibility}}" />
                                 </StackPanel>
                             </Border>
 
@@ -1296,7 +1319,7 @@
                             <ui:Button Content="{loc:Tr 'Apri la cartella esportata'}" Icon="{ui:SymbolIcon Folder24}"
                                        HorizontalAlignment="Stretch" Command="{Binding OpenExportFolderCommand}" />
                             <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,16"
-                                       Text="{loc:Tr 'Per ogni veicolo: immagine di ingresso e di uscita con l\'orario sovrimpresso, in due cartelle: «immagini» (in chiaro) e «immagini_anonimizzate» (veicoli pixellati). Più passaggi.csv e rapporto.pdf, con una pagina per veicolo e le immagini pixellate. Misure non omologate.'}" />
+                                       Text="{loc:Tr 'Per ogni veicolo: immagine di ingresso e di uscita con l\'orario sovrimpresso, in due cartelle: «immagini» (in chiaro) e «immagini_anonimizzate» (veicoli pixellati). Più passaggi.csv e due rapporti PDF con una pagina per veicolo: rapporto.pdf (in chiaro) e rapporto_anonimizzato.pdf (veicoli pixellati). Misure non omologate.'}" />
 
                             <TextBlock Text="{Binding PassageCountText}" Style="{StaticResource Label}" Margin="2,0,0,8" />
                             <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,10"

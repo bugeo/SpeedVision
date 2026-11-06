@@ -17,7 +17,8 @@ public sealed record PdfReportSummary(
 
 /// <summary>
 /// Rapporto PDF delle misure: una pagina di riepilogo (video, calibrazione, statistiche e grafico), poi una pagina
-/// per ogni veicolo con gli stessi dati del CSV e le immagini di ingresso e di uscita anonimizzate (veicoli pixellati).
+/// per ogni veicolo con gli stessi dati del CSV e le immagini di ingresso e di uscita. Se ne creano due versioni:
+/// con le immagini in chiaro e con i veicoli pixellati (<see cref="Anonymized"/>).
 /// Le pagine si aggiungono una alla volta durante l'esportazione.
 /// </summary>
 public sealed class PdfReport : IDisposable
@@ -38,9 +39,11 @@ public sealed class PdfReport : IDisposable
     private readonly DateTimeOffset? _recordingStart;
     private readonly byte[]? _logoJpeg;
 
+    /// <param name="anonymized">Rapporto con i veicoli pixellati (true) o con le immagini in chiaro (false).</param>
     /// <param name="logoJpeg">Logo di SpeedVision (JPEG su fondo scuro) per l'intestazione della prima pagina.</param>
-    public PdfReport(Stream output, string videoName, int passageCount, bool showLane, DateTimeOffset? recordingStart, byte[]? logoJpeg = null)
+    public PdfReport(Stream output, string videoName, int passageCount, bool showLane, DateTimeOffset? recordingStart, bool anonymized, byte[]? logoJpeg = null)
     {
+        Anonymized = anonymized;
         _logoJpeg = logoJpeg;
         _pdf = new PdfWriter(output);
         _videoName = videoName;
@@ -48,6 +51,9 @@ public sealed class PdfReport : IDisposable
         _showLane = showLane;
         _recordingStart = recordingStart;
     }
+
+    /// <summary>Versione con i veicoli pixellati.</summary>
+    public bool Anonymized { get; }
 
     private double ContentWidth => PdfWriter.A4Width - (2 * Margin);
 
@@ -64,8 +70,6 @@ public sealed class PdfReport : IDisposable
             double logoH = bandH - 16, logoW = logoH * lw / lh;
             page.FillRect(Margin, Margin - 6, ContentWidth, bandH, LogoBackground);
             page.Jpeg(logo, Margin + 12, Margin - 6 + ((bandH - logoH) / 2), logoW, logoH);
-            string video = _videoName;
-            page.Text(PdfWriter.A4Width - Margin - 12 - PdfWriter.TextWidth(video, 9), Margin - 6 + bandH - 12, video, 9, color: (0.75, 0.80, 0.88));
             y = Margin + bandH + 30;
         }
         else
@@ -84,6 +88,7 @@ public sealed class PdfReport : IDisposable
             (Loc.T("Inizio registrazione"), s.RecordingStart ?? Loc.T("non indicato (orari = tempo del video)")),
             (Loc.T("Distanza tra le linee"), s.DistanceMeters.ToString("0.###", Loc.Culture) + " m"),
             (Loc.T("Calibrazione"), s.CalibrationMethod),
+            (Loc.T("Immagini"), Anonymized ? Loc.T("veicoli pixellati") : Loc.T("in chiaro")),
         };
         if (s.Filter is { } f)
         {
@@ -146,7 +151,9 @@ public sealed class PdfReport : IDisposable
         }
 
         page.Paragraph(Margin, y, ContentWidth,
-            Loc.T("Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita, con tutti i veicoli pixellati."),
+            Anonymized
+                ? Loc.T("Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita, con tutti i veicoli pixellati.")
+                : Loc.T("Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita in chiaro. Possono contenere targhe e persone (dati personali): per condividerle usa il rapporto anonimizzato."),
             9.5, color: Ink);
         Footer(page, 1);
     }
@@ -188,7 +195,7 @@ public sealed class PdfReport : IDisposable
             (int pw, int ph, _) = PdfWriter.JpegSize(jpeg);
             double h = Math.Min(available / 2, ContentWidth * ph / pw);
             double w = h * pw / ph;
-            page.Text(Margin, y + 11, caption + " · " + Loc.T("veicoli pixellati"), 9.5, bold: true, color: Muted);
+            page.Text(Margin, y + 11, Anonymized ? caption + " · " + Loc.T("veicoli pixellati") : caption, 9.5, bold: true, color: Muted);
             y += captionH;
             page.Jpeg(jpeg, Margin + ((ContentWidth - w) / 2), y, w, h);
             y += h + gap;
