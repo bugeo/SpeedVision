@@ -1,0 +1,25 @@
+# Compilazione e strumenti
+bin/
+obj/
+publish/
+.vs/
+*.user
+*.suo
+TestResults/
+*.dmp
+ci-log.txt
+
+# Librerie e modello della versione web: si scaricano a parte
+src/TrafficSpeedAnalyzer.Web/wwwroot/lib/
+src/TrafficSpeedAnalyzer.Web/wwwroot/models/
+node_modules/
+
+# Video di prova ed esportazioni: file grandi e con targhe e persone (dati personali).
+# Resta nel repository solo il piccolo video sintetico di esempio.
+samples/*
+!samples/demo_50kmh_20m.mp4
+
+# Altri file da non versionare
+*.tmp
+Thumbs.db
+desktop.ini

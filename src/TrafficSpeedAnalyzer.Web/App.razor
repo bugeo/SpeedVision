@@ -1,0 +1,273 @@
+@implements IAsyncDisposable
+
+<div class="shell">
+    <header class="topbar">
+        <div class="brand">
+            <span class="brand-mark">◆</span>
+            <span class="brand-name">Traffic Speed Analyzer</span>
+            <span class="badge">prototipo web</span>
+        </div>
+        <div class="chips">
+            @if (_engine is not null)
+            {
+                <span class="chip @(_engine.WebCodecs ? "ok" : "bad")">WebCodecs</span>
+                <span class="chip @(_engine.WebGpu ? "ok" : "warn")">WebGPU</span>
+                <span class="chip @(_engine.CrossOriginIsolated ? "ok" : "warn")" title="Più thread per il modello su CPU">
+                    @(_engine.CrossOriginIsolated ? $"CPU {_engine.Cores} thread" : "CPU 1 thread")
+                </span>
+            }
+            <span class="chip private" title="Il video non viene caricato: il browser lo legge dal tuo disco.">Il video resta sul tuo PC</span>
+            <button class="chip chip-button @SelfTestChipClass" @onclick="ToggleSelfTestPanel" title="Prova l'analisi su un video con due auto a 50 e 72 km/h esatti">
+                <span>Autotest</span>@SelfTestChipSuffix
+            </button>
+        </div>
+        @if (_showSelfTest)
+        {
+            <div class="popover" role="dialog" aria-label="Autotest">
+                <div class="popover-head">
+                    <strong>Autotest</strong>
+                    <button class="link" @onclick="ToggleSelfTestPanel" aria-label="Chiudi">✕</button>
+                </div>
+                <p class="muted small">Analizza il video di prova con due auto a 50 e 72 km/h esatti e confronta i risultati con i valori noti e con FFprobe. Sostituisce il video aperto.</p>
+                <button class="button secondary" @onclick="RunSelfTestAsync" disabled="@(_running || _model is not { Ok: true })">Esegui l'autotest</button>
+                @if (_model is not { Ok: true } && !_modelLoading)
+                {
+                    <p class="warn-text small">Serve il modello di rilevamento (vedi le opzioni dell'analisi).</p>
+                }
+                @if (_selfTest.Count > 0)
+                {
+                    <ul class="checks">
+                        @foreach (SelfTestItem item in _selfTest)
+                        {
+                            <li class="@(item.Ok is null ? "info" : item.Ok == true ? "pass" : "fail")">
+                                <span class="mark">@(item.Ok is null ? "•" : item.Ok == true ? "✓" : "✗")</span>
+                                <span>@item.Text</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+    </header>
+
+    <main class="layout">
+        <section class="side">
+            <div class="card">
+                <h2><span class="step">1</span> Video</h2>
+                @if (_video is null)
+                {
+                    <p class="muted small">Scegli il filmato da analizzare (MP4 o MOV). Il file resta sul tuo computer.</p>
+                }
+                <div class="row">
+                    <label class="button" for="tsa-video-input">Apri un video…</label>
+                    <button class="button secondary" @onclick="OpenSampleAsync" disabled="@_running">Video di prova</button>
+                </div>
+                @if (_video?.Error is { } err)
+                {
+                    <p class="bad-text">@err</p>
+                }
+                else if (_video is not null)
+                {
+                    <dl class="facts">
+                        <dt>File</dt><dd title="@_video.Name">@_video.Name</dd>
+                        <dt>Formato</dt><dd>@_video.Codec @(_video.Hardware ? "· decodifica hardware" : "")</dd>
+                        <dt>Risoluzione</dt><dd>@_video.DisplayWidth × @_video.DisplayHeight@(_video.Rotation != 0 ? $" (ruotato {_video.Rotation}°)" : "")</dd>
+                        <dt>Fotogrammi</dt><dd>@_video.FrameCount · @_video.MeanFps.ToString("0.###", It) fps · @FormatDuration(_video.Duration)</dd>
+                        <dt>Intervalli</dt><dd>@((_video.MinFrameInterval * 1000).ToString("0.0", It))–@((_video.MaxFrameInterval * 1000).ToString("0.0", It)) ms</dd>
+                        <dt>Dimensione</dt><dd>@FormatBytes(_video.FileSize)</dd>
+                    </dl>
+                    @if (!_video.Supported)
+                    {
+                        <p class="bad-text">@_video.Reason</p>
+                    }
+                    <button class="link" @onclick="DownloadPtsAsync">Scarica l'elenco dei pts (per il confronto con FFprobe)</button>
+                }
+            </div>
+
+            @if (_video is { Supported: true })
+            {
+                <div class="card">
+                    <h2><span class="step">2</span> Linee e distanza</h2>
+                    <div class="row">
+                        <button class="button @(_drawMode == "A" ? "active" : "secondary") line-a" @onclick='() => ToggleDrawModeAsync("A")' disabled="@(!CanEdit)">Disegna A</button>
+                        <button class="button @(_drawMode == "B" ? "active" : "secondary") line-b" @onclick='() => ToggleDrawModeAsync("B")' disabled="@(!CanEdit)">Disegna B</button>
+                    </div>
+                    <p class="muted small">Trascina sull'immagine per tracciare la linea; trascina un estremo per correggerla.</p>
+                    <label class="field">
+                        <span>Distanza reale tra A e B (m)</span>
+                        <input type="number" min="0" step="0.01" @bind="_distance" @bind:after="CalibrationChangedAsync" disabled="@(!CanEdit)" />
+                    </label>
+                    @foreach (CalibrationIssue issue in _issues)
+                    {
+                        <p class="@(issue.Severity == IssueSeverity.Error ? "bad-text" : "warn-text") small">@issue.Message</p>
+                    }
+                    @if (Calibration is null)
+                    {
+                        <p class="muted small">Traccia le linee A e B e indica la distanza: poi potrai avviare l'analisi.</p>
+                    }
+                    <div class="row">
+                        <label class="link" for="tsa-cal-input">Carica calibrazione…</label>
+                        <button class="link" @onclick="SaveCalibrationAsync" disabled="@(Calibration is null)">Salva calibrazione</button>
+                    </div>
+                </div>
+
+            }
+
+            @* Il punto 3 compare solo quando linee e distanza sono complete e valide. *@
+            @if (_video is { Supported: true } && (Calibration is not null || _running))
+            {
+                <div class="card">
+                    <h2><span class="step">3</span> Analisi automatica</h2>
+                    @if (_modelLoading)
+                    {
+                        <p class="muted small">Preparazione del modello di rilevamento…</p>
+                    }
+                    else if (_model is { Ok: true })
+                    {
+                        <p class="muted small">Modello: @_model.Name · @_model.Provider</p>
+                        @if (!string.IsNullOrEmpty(_model.Note))
+                        {
+                            <p class="warn-text small">@_model.Note</p>
+                        }
+                    }
+                    else
+                    {
+                        <p class="warn-text small">@(_model?.Error ?? "Modello di rilevamento non caricato.") Sceglilo nelle opzioni avanzate.</p>
+                    }
+                    <div class="row">
+                        @if (_running)
+                        {
+                            <button class="button danger" @onclick="CancelAsync">Interrompi</button>
+                        }
+                        else
+                        {
+                            <button class="button" @onclick="StartAnalysisAsync" disabled="@(!CanAnalyze)">Avvia l'analisi</button>
+                        }
+                    </div>
+                    @if (_progress is not null)
+                    {
+                        <div class="progress"><div class="bar" style="width:@(Percent.ToString("0.0", CultureInfo.InvariantCulture))%"></div></div>
+                        <p class="muted small">
+                            @_progress.Done / @_progress.Total fotogrammi · @_progress.FramesPerSecond.ToString("0.0", It) fps ·
+                            modello eseguito su @_progress.Detected (saltati @_progress.Skipped) · @_progress.MeanDetectMs.ToString("0", It) ms/fotogramma
+                            @if (Remaining is { } rem)
+                            {
+                                <span> · mancano @FormatDuration(rem)</span>
+                            }
+                        </p>
+                    }
+                    @if (_summaryText is not null)
+                    {
+                        <p class="small">@_summaryText</p>
+                    }
+
+                    <details class="advanced" open="@(!_modelLoading && _model is not { Ok: true })">
+                        <summary>Opzioni avanzate</summary>
+                        <label class="check">
+                            <input type="checkbox" @bind="_regionAroundLines" @bind:after="CalibrationChangedAsync" disabled="@_running" />
+                            Analizza solo la zona attorno alle linee
+                        </label>
+                        <label class="check">
+                            <input type="checkbox" @bind="_skipStatic" disabled="@_running" />
+                            Salta i fotogrammi senza movimento
+                        </label>
+                        <label class="check">
+                            <input type="checkbox" @bind="_cpuOnly" @bind:after="CpuOnlyChangedAsync" disabled="@(_running || _modelLoading)" />
+                            Usa solo la CPU (senza scheda grafica)
+                        </label>
+                        <div class="model-box">
+                            @if (_model is { Ok: true })
+                            {
+                                <p class="small"><strong>@_model.Name</strong> @(_model.Verified ? "" : "(file non riconosciuto)")</p>
+                                <p class="muted small">Ingresso @(_model.Size) px · pronto in @((_model.LoadMs / 1000).ToString("0.0", It)) s</p>
+                            }
+                            else if (!_modelLoading)
+                            {
+                                <p class="muted small">Scegli il file <code>yolox_s.onnx</code> (l'app desktop lo conserva in <code>%LocalAppData%\TrafficSpeedAnalyzer\models</code>) oppure esegui <code>scripts\web-deps.ps1</code>.</p>
+                            }
+                            <label class="button secondary" for="tsa-model-input">Usa un altro modello (.onnx)…</label>
+                        </div>
+                    </details>
+                </div>
+            }
+        </section>
+
+        <section class="stage">
+            <div class="canvas-wrap @(_video is null ? "empty" : "")">
+                <canvas @ref="_canvas" class="preview"></canvas>
+                @if (_video is null)
+                {
+                    <div class="placeholder">
+                        <p>Apri un video MP4 o MOV dal tuo computer.</p>
+                        <p class="muted small">Il file non viene caricato in rete: il browser lo legge direttamente dal disco.</p>
+                    </div>
+                }
+            </div>
+            @if (_video is { Supported: true })
+            {
+                <div class="scrubber">
+                    <input type="range" min="0" max="@(_video.FrameCount - 1)" value="@_frameIndex" @onchange="SeekAsync" disabled="@_running" />
+                    <span class="mono">@_frameIndex · @FormatVideoTime(_frameTime)</span>
+                </div>
+            }
+
+            @if (_video is { Supported: true })
+            {
+            <div class="card results">
+                <div class="results-head">
+                    <h2>Passaggi misurati <span class="count">@_rows.Count</span></h2>
+                    <div class="row">
+                        <label class="field inline">
+                            <span>Inizio registrazione</span>
+                            <input type="datetime-local" step="0.001" @bind="_startLocal" @bind:format="yyyy-MM-ddTHH:mm:ss.fff" />
+                        </label>
+                        <button class="button" @onclick="ExportCsvAsync" disabled="@(_rows.Count == 0)">Scarica CSV</button>
+                    </div>
+                </div>
+                @if (_startSource is not null)
+                {
+                    <p class="muted small">Orario letto dai metadati (@_startSource), modificabile.</p>
+                }
+                @if (_rows.Count == 0)
+                {
+                    <p class="muted">Nessun passaggio ancora.</p>
+                }
+                else
+                {
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Id</th><th>Verso</th><th>Veicolo</th><th>Ingresso</th><th>Uscita</th><th class="num">Tempo (s)</th><th class="num">Velocità (km/h)</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (PassageRow row in _rows)
+                                {
+                                    <tr>
+                                        <td>@row.Id</td>
+                                        <td>@(row.Passage.Direction == TravelDirection.AToB ? "A → B" : "B → A")</td>
+                                        <td>@ClassName(row.Class) <span class="muted">@row.Score.ToString("0.00", It)</span></td>
+                                        <td class="mono">@FormatClock(row.Passage.Entry.TimeSeconds)</td>
+                                        <td class="mono">@FormatClock(row.Passage.Exit.TimeSeconds)</td>
+                                        <td class="num mono">@row.Passage.Speed.DurationSeconds.ToString("F3", It)</td>
+                                        <td class="num mono"><strong>@row.Passage.Speed.SpeedKmh.ToString("F1", It)</strong> <span class="muted">± @row.Passage.Speed.UncertaintyKmh.ToString("0.0", It)</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+            }
+        </section>
+    </main>
+
+    @* Selettori di file sempre presenti: JavaScript li usa anche quando i riquadri sono nascosti. *@
+    <input id="tsa-video-input" type="file" accept="video/mp4,video/quicktime,.mp4,.mov,.m4v" @ref="_videoInput" hidden />
+    <input id="tsa-model-input" type="file" accept=".onnx" @ref="_modelInput" @onchange="LoadModelFromFileAsync" hidden />
+    <input id="tsa-cal-input" type="file" accept=".json,.tsacal.json" @ref="_calInput" @onchange="LoadCalibrationAsync" hidden />
+
+    <footer class="foot muted small">
+        Versione script: @(_engine?.Build ?? "?") ·
+        Misure non omologate. Le immagini con targhe sono dati personali: trattale secondo il GDPR.
+    </footer>
+</div>

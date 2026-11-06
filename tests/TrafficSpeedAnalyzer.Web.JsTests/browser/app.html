@@ -1,0 +1,75 @@
+<!doctype html><meta charset="utf-8"><title>Test app.js</title>
+<canvas id="c" style="width:768px;height:432px"></canvas><input type="file" id="v"><input type="file" id="m">
+<script type="module">
+import * as app from '../../../src/TrafficSpeedAnalyzer.Web/wwwroot/js/app.js';
+const calls = [];
+let finished;
+const done = new Promise(r => finished = r);
+const fake = {
+  async invokeMethodAsync(name, ...args) {
+    calls.push({ name, args });
+    if (name === 'OnFrameDetections') return [0, 0];
+    if (name === 'OnAnalysisFinished') finished(args[0]);
+    return null;
+  },
+};
+async function run() {
+  const res = [];
+  const check = (name, ok, detail = '') => { console.log('CHECK', ok ? 'ok' : 'FAIL', name, detail); res.push({ name, ok: !!ok, detail }); };
+  const base = '../../../src/TrafficSpeedAnalyzer.Web/wwwroot/';
+  const canvas = document.getElementById('c');
+  const engine = app.init(fake, canvas, document.getElementById('v'), document.getElementById('m'));
+  check('motore: WebCodecs presente', engine.webCodecs);
+
+  const missing = await app.loadModelFromUrl(base + 'models/non-esiste.onnx');
+  check('modello mancante segnalato', missing.ok === false && missing.missing, missing.error);
+  const noOrt = await app.loadModelFromUrl(base + 'samples/auto_reali_50_e_72kmh_20m.mp4');
+  check('ONNX Runtime mancante: messaggio con lo script da eseguire', !noOrt.ok && /web-deps/.test(noOrt.error), noOrt.error);
+
+  await app.openSample(base + 'samples/auto_reali_50_e_72kmh_20m.mp4');
+  const opened = calls.find(c => c.name === 'OnVideoOpened')?.args[0];
+  check('video di prova aperto', opened && opened.supported && opened.frameCount === 240 && opened.displayWidth === 768, JSON.stringify(opened));
+  check('data di creazione letta', opened?.creationDate === '2026-10-26T07:00:00.000Z', opened?.creationDate);
+
+  const pts = await app.ptsCheck(base + 'samples/auto_reali_50_e_72kmh_20m.mp4.ffprobe.json');
+  check('autotest pts', pts.actual === 240 && pts.expected === 240 && pts.maxError < 2e-6, JSON.stringify(pts));
+
+  const shown = await app.showFrame(100);
+  check('anteprima del fotogramma 100', shown.index === 100 && Math.abs(shown.time - 100 / 30) < 1e-6, JSON.stringify(shown));
+  check('canvas alle dimensioni del video', canvas.width === 768 && canvas.height === 432);
+
+  // Disegno della linea A trascinando il puntatore (coordinate dello schermo → video).
+  app.setDrawMode('A');
+  const r = canvas.getBoundingClientRect();
+  const ev = (type, x, y) => canvas.dispatchEvent(new PointerEvent(type, { clientX: r.left + x, clientY: r.top + y, pointerId: 1, bubbles: true }));
+  ev('pointerdown', 10, 180); ev('pointermove', 400, 181); ev('pointermove', 750, 180); ev('pointerup', 750, 180);
+  await new Promise(r => setTimeout(r, 50));
+  const line = calls.find(c => c.name === 'OnLineDrawn')?.args;
+  check('linea A disegnata col puntatore', line && line[0] === 'A' && Math.abs(line[1] - 10) < 1.5 && Math.abs(line[3] - 750) < 1.5 && Math.abs(line[4] - 180) < 1.5, JSON.stringify(line));
+
+  app.setLines([0, 180, 768, 180], [0, 380, 768, 380], [0, 0, 768, 432]);
+  const pixel = canvas.getContext('2d').getImageData(300, 380, 1, 1).data;
+  check('linea B disegnata sopra il fotogramma', pixel[0] > 200 && pixel[1] > 150 && pixel[2] < 80, Array.from(pixel).join(','));
+
+  // Ciclo di analisi con un rilevatore che non trova nulla (verifica solo decodifica, salto e avanzamento).
+  let detectCalls = 0;
+  app.setDetectorForTests({ provider: 'prova', async detect(src, region) { detectCalls++; if (src.width !== 768) throw new Error('canvas'); return []; }, async release() {} });
+  const started = app.analyze({ region: [0, 0, 768, 432], start: 0, end: 239, skipStatic: true, maxSkipped: 15, minScore: 0.1 });
+  check('analisi avviata', started);
+  const s = await done;
+  check('analisi: 240 fotogrammi letti', s.done === 240 && !s.error, JSON.stringify(s));
+  check('analisi: modello eseguito solo dove serve', s.detected === detectCalls && s.detected + s.skipped === 240 && s.detected >= 16, `eseguito ${s.detected}, saltati ${s.skipped}`);
+  check('analisi: avanzamento inviato', calls.some(c => c.name === 'OnProgress'));
+  const frames = calls.filter(c => c.name === 'OnFrameDetections').map(c => c.args[1]);
+  check('analisi: tempi relativi crescenti dal primo fotogramma', frames.length === s.detected && frames.every((t, i) => i === 0 || t > frames[i - 1]) && frames[0] === 0, frames.slice(0, 4).join(', '));
+
+  // Interruzione
+  const started2 = app.analyze({ region: [0, 0, 768, 432], start: 0, end: 239, skipStatic: false, maxSkipped: 15, minScore: 0.1 });
+  let fin2; const done2 = new Promise(r => fin2 = r);
+  fake.invokeMethodAsync = async (name, ...args) => { if (name === 'OnFrameDetections') { if (args[0] === 30) app.cancel(); return [0, 0]; } if (name === 'OnAnalysisFinished') fin2(args[0]); return null; };
+  const s2 = await done2;
+  check('analisi interrotta', started2 && s2.cancelled && s2.done < 240, JSON.stringify(s2));
+  return res;
+}
+window.testResults = run().catch(e => [{ name: 'eccezione', ok: false, detail: String(e.stack || e) }]);
+</script>

@@ -1,0 +1,29 @@
+<ui:FluentWindow x:Class="TrafficSpeedAnalyzer.App.MapCalibrationWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:loc="clr-namespace:TrafficSpeedAnalyzer.App.Localization"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+                 Title="{loc:Tr 'Distanza dalla mappa'}"
+                 Icon="pack://application:,,,/Assets/app.ico"
+                 Width="1240" Height="820" MinWidth="900" MinHeight="600"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ui:TitleBar Grid.Row="0" Title="{loc:Tr 'Distanza dalla mappa'}" />
+        <Grid Grid.Row="1" Background="#FF202329">
+            <!-- Mappa: pagina locale (Map\map.html) con Leaflet; i tasselli della mappa arrivano da internet. -->
+            <wv2:WebView2 x:Name="Web" DefaultBackgroundColor="#202329" />
+            <StackPanel x:Name="LoadingPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ui:ProgressRing IsIndeterminate="True" />
+                <TextBlock Text="{loc:Tr 'Caricamento della mappa…'}" Margin="0,12,0,0" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</ui:FluentWindow>

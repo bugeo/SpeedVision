@@ -1,0 +1,232 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:conv="clr-namespace:TrafficSpeedAnalyzer.App.Converters"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Palette dell'applicazione (tema scuro) -->
+    <Color x:Key="LineAColor">#FF4CC2FF</Color>
+    <Color x:Key="LineBColor">#FFFFB547</Color>
+    <Color x:Key="PointColor">#FFFF5C8A</Color>
+    <Color x:Key="OkColor">#FF5EE09A</Color>
+    <Color x:Key="ErrorColor">#FFFF6B6B</Color>
+
+    <SolidColorBrush x:Key="LineABrush" Color="{StaticResource LineAColor}" />
+    <SolidColorBrush x:Key="LineBBrush" Color="{StaticResource LineBColor}" />
+    <SolidColorBrush x:Key="PointBrush" Color="{StaticResource PointColor}" />
+    <SolidColorBrush x:Key="OkBrush" Color="{StaticResource OkColor}" />
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}" />
+    <SolidColorBrush x:Key="WarnBrush" Color="{StaticResource LineBColor}" />
+
+    <SolidColorBrush x:Key="RailBackground" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="PanelBackground" Color="#0DFFFFFF" />
+    <SolidColorBrush x:Key="CardBackground" Color="#12FFFFFF" />
+    <SolidColorBrush x:Key="CardBorder" Color="#1AFFFFFF" />
+    <SolidColorBrush x:Key="HoverBackground" Color="#12FFFFFF" />
+    <SolidColorBrush x:Key="SelectedBackground" Color="#22FFFFFF" />
+    <SolidColorBrush x:Key="TextPrimary" Color="#FFF3F5F8" />
+    <SolidColorBrush x:Key="TextSecondary" Color="#FFAAB2BF" />
+    <SolidColorBrush x:Key="TextTertiary" Color="#FF7D8593" />
+    <!-- Colore primario: verde (pulsanti principali, selezioni, indicatori) -->
+    <Color x:Key="AccentColor">#FF2FCB79</Color>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+
+    <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas</FontFamily>
+
+    <!-- Convertitori -->
+    <conv:EnumEqualsConverter x:Key="EnumEquals" />
+    <conv:EnumToVisibilityConverter x:Key="EnumToVisibility" />
+    <conv:TruthyToVisibilityConverter x:Key="TruthyToVisibility" />
+    <conv:InverseBoolConverter x:Key="InverseBool" />
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
+    <!-- Testi -->
+    <Style x:Key="SectionTitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+    </Style>
+
+    <Style x:Key="Caption" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="LineHeight" Value="17" />
+    </Style>
+
+    <Style x:Key="Body" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="LineHeight" Value="19" />
+    </Style>
+
+    <Style x:Key="Label" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{StaticResource TextTertiary}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="Value" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="MonoValue" TargetType="TextBlock" BasedOn="{StaticResource Value}">
+        <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+    </Style>
+
+    <!-- Contenitori -->
+    <Style x:Key="Card" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CardBackground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+    </Style>
+
+    <!-- Riquadro della guida: cornice verde di 3 px quando è il prossimo su cui agire (Tag = True) -->
+    <Style x:Key="GuideCard" TargetType="Border" BasedOn="{StaticResource Card}">
+        <Style.Triggers>
+            <Trigger Property="Tag">
+                <Trigger.Value>
+                    <sys:Boolean>True</sys:Boolean>
+                </Trigger.Value>
+                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                <Setter Property="BorderThickness" Value="3" />
+                <Setter Property="Padding" Value="14" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="Chip" TargetType="Border">
+        <Setter Property="Background" Value="#14FFFFFF" />
+        <Setter Property="BorderBrush" Value="#1FFFFFFF" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="10,3" />
+        <Setter Property="Margin" Value="0,0,8,0" />
+    </Style>
+
+    <Style x:Key="Notice" TargetType="Border">
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="Margin" Value="0,0,0,8" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <!-- Voce della barra dei passi -->
+    <Style x:Key="StepRadio" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="0,2" />
+        <Setter Property="GroupName" Value="Steps" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid>
+                        <Border x:Name="Bg" CornerRadius="8" Background="Transparent" Padding="12,10">
+                            <ContentPresenter />
+                        </Border>
+                        <Border x:Name="Bar" Width="3" CornerRadius="2" HorizontalAlignment="Left" Margin="0,12"
+                                Background="{StaticResource AccentBrush}" Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource HoverBackground}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource SelectedBackground}" />
+                            <Setter TargetName="Bar" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Voce della barra dei passi orizzontale (in alto) -->
+    <Style x:Key="StepRadioH" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="0,0,4,0" />
+        <Setter Property="GroupName" Value="Steps" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid>
+                        <Border x:Name="Bg" CornerRadius="8" Background="Transparent" Padding="12,8,16,8" Margin="0,4">
+                            <ContentPresenter />
+                        </Border>
+                        <Border x:Name="Bar" Height="3" CornerRadius="2" VerticalAlignment="Bottom" Margin="12,0"
+                                Background="{StaticResource AccentBrush}" Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource HoverBackground}" />
+                        </Trigger>
+                        <!-- Passo completato (Tag = true): la sottolineatura verde resta -->
+                        <Trigger Property="Tag">
+                            <Trigger.Value>
+                                <sys:Boolean>True</sys:Boolean>
+                            </Trigger.Value>
+                            <Setter TargetName="Bar" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource SelectedBackground}" />
+                            <Setter TargetName="Bar" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Numero tondo del passo -->
+    <Style x:Key="StepNumber" TargetType="Border">
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Background" Value="#1FFFFFFF" />
+        <Setter Property="Margin" Value="0,0,12,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Voce della lista dei risultati -->
+    <Style x:Key="ResultItem" TargetType="ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Bg" CornerRadius="8" Padding="12,10" Background="{StaticResource CardBackground}"
+                            BorderBrush="{StaticResource CardBorder}" BorderThickness="1">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource SelectedBackground}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource SelectedBackground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

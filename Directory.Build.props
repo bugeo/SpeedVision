@@ -1,0 +1,15 @@
+<Project>
+  <!-- Impostazioni comuni a tutti i progetti della soluzione. -->
+  <PropertyGroup>
+    <!-- Cambia qui il framework se sul PC non è installato l'SDK .NET 10. -->
+    <TsaTargetFramework>net10.0</TsaTargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <Authors>Marco Staffoli</Authors>
+    <Product>SpeedVision</Product>
+    <Version>0.1.0</Version>
+    <NeutralLanguage>it-IT</NeutralLanguage>
+  </PropertyGroup>
+</Project>

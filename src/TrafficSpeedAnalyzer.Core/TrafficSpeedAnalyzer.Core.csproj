@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Nucleo di calcolo: nessuna dipendenza da Windows, video o interfaccia. -->
+  <PropertyGroup>
+    <TargetFramework>$(TsaTargetFramework)</TargetFramework>
+    <RootNamespace>TrafficSpeedAnalyzer.Core</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="TrafficSpeedAnalyzer.Core.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Traduzioni: la chiave è il testo italiano. Nome con «_» e non «.de»: altrimenti MSBuild le prende per risorse di cultura. -->
+    <EmbeddedResource Include="Localization/strings_*.json" LogicalName="%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Elenco delle auto di riferimento: file esterno modificabile (separatore «;»), copiato accanto al programma. -->
+    <None Update="Calibration\veicoli_riferimento.csv" Link="veicoli_riferimento.csv" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

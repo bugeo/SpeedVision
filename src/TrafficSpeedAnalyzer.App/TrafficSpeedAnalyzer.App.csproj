@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(TsaTargetFramework)-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>TrafficSpeedAnalyzer.App</RootNamespace>
+    <AssemblyName>SpeedVision</AssemblyName>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Consente di compilare anche da macchine non Windows (es. integrazione continua). -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WPF-UI" Version="4.0.3" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <!-- Mappa per la calibrazione «con due riferimenti trovati sulla mappa» (runtime WebView2 di Windows). -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Core\TrafficSpeedAnalyzer.Core.csproj" />
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Video\TrafficSpeedAnalyzer.Video.csproj" />
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Detection\TrafficSpeedAnalyzer.Detection.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app.png" />
+    <Resource Include="Assets\app.ico" />
+    <Resource Include="Assets\speedvision-logo.png" />
+    <Resource Include="Assets\speedvision-logo-report.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Pagina della mappa (Leaflet), caricata da Map\map.html accanto al programma. -->
+    <None Update="Map\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

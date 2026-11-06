@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+  <!--
+    Prototipo web: l'analisi avviene nel browser, sul file che l'utente ha sul proprio disco.
+    JavaScript (wwwroot/js): lettura MP4, decodifica WebCodecs, modello YOLOX con ONNX Runtime Web.
+    C# (questo progetto + TrafficSpeedAnalyzer.Core): tracker, passaggi, velocità, CSV.
+    Dipendenze JavaScript e modello: scripts\web-deps.ps1. Avvio locale: scripts\web.cmd.
+  -->
+  <PropertyGroup>
+    <TargetFramework>$(TsaTargetFramework)</TargetFramework>
+    <RootNamespace>TrafficSpeedAnalyzer.Web</RootNamespace>
+    <!-- Il CSV usa la cultura it-IT: servono i dati di globalizzazione completi. -->
+    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+    <!-- Prototipo: niente riduzione del codice (evita problemi con la serializzazione dell'interop). -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <CompressionEnabled>false</CompressionEnabled>
+    <!-- index.html con i nomi dei file del framework completati in compilazione (modello .NET 10). -->
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Core\TrafficSpeedAnalyzer.Core.csproj" />
+  </ItemGroup>
+</Project>

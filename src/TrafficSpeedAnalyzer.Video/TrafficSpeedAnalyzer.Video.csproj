@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Lettura dei video tramite FFmpeg/FFprobe eseguiti come processi separati; stabilizzazione con FFmpeg vidstab.
+    FFmpeg non viene incluso né collegato: l'app lo cerca sul PC (vedi FfmpegLocator).
+  -->
+  <PropertyGroup>
+    <TargetFramework>$(TsaTargetFramework)</TargetFramework>
+    <RootNamespace>TrafficSpeedAnalyzer.Video</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="TrafficSpeedAnalyzer.Video.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Solo per i testi tradotti dei messaggi (Loc): il nucleo non dipende da nulla. -->
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Core\TrafficSpeedAnalyzer.Core.csproj" />
+  </ItemGroup>
+</Project>

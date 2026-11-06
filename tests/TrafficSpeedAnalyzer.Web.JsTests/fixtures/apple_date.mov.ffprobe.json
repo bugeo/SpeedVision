@@ -1,0 +1,365 @@
+{
+"codec_name": "h264",
+"width": 320,
+"height": 240,
+"rotation": 0,
+"tags": {
+"major_brand": "qt  ",
+"minor_version": "512",
+"compatible_brands": "qt  ",
+"com.apple.quicktime.creationdate": "2026-10-25T18:12:34+0200",
+"encoder": "Lavf60.16.100"
+},
+"packets": [
+{
+"pts": 0.0,
+"dts": -0.08,
+"size": 3590,
+"pos": 36,
+"key": true
+},
+{
+"pts": 0.12,
+"dts": -0.04,
+"size": 453,
+"pos": 3626,
+"key": false
+},
+{
+"pts": 0.04,
+"dts": 0.0,
+"size": 108,
+"pos": 4079,
+"key": false
+},
+{
+"pts": 0.08,
+"dts": 0.04,
+"size": 32,
+"pos": 4187,
+"key": false
+},
+{
+"pts": 0.24,
+"dts": 0.08,
+"size": 446,
+"pos": 4219,
+"key": false
+},
+{
+"pts": 0.16,
+"dts": 0.12,
+"size": 134,
+"pos": 4665,
+"key": false
+},
+{
+"pts": 0.2,
+"dts": 0.16,
+"size": 47,
+"pos": 4799,
+"key": false
+},
+{
+"pts": 0.36,
+"dts": 0.2,
+"size": 428,
+"pos": 4846,
+"key": false
+},
+{
+"pts": 0.28,
+"dts": 0.24,
+"size": 84,
+"pos": 5274,
+"key": false
+},
+{
+"pts": 0.32,
+"dts": 0.28,
+"size": 48,
+"pos": 5358,
+"key": false
+},
+{
+"pts": 0.48,
+"dts": 0.32,
+"size": 441,
+"pos": 5406,
+"key": false
+},
+{
+"pts": 0.4,
+"dts": 0.36,
+"size": 65,
+"pos": 5847,
+"key": false
+},
+{
+"pts": 0.44,
+"dts": 0.4,
+"size": 44,
+"pos": 5912,
+"key": false
+},
+{
+"pts": 0.6,
+"dts": 0.44,
+"size": 455,
+"pos": 5956,
+"key": false
+},
+{
+"pts": 0.52,
+"dts": 0.48,
+"size": 79,
+"pos": 6411,
+"key": false
+},
+{
+"pts": 0.56,
+"dts": 0.52,
+"size": 38,
+"pos": 6490,
+"key": false
+},
+{
+"pts": 0.72,
+"dts": 0.56,
+"size": 438,
+"pos": 6528,
+"key": false
+},
+{
+"pts": 0.64,
+"dts": 0.6,
+"size": 81,
+"pos": 6966,
+"key": false
+},
+{
+"pts": 0.68,
+"dts": 0.64,
+"size": 38,
+"pos": 7047,
+"key": false
+},
+{
+"pts": 0.84,
+"dts": 0.68,
+"size": 468,
+"pos": 7085,
+"key": false
+},
+{
+"pts": 0.76,
+"dts": 0.72,
+"size": 85,
+"pos": 7553,
+"key": false
+},
+{
+"pts": 0.8,
+"dts": 0.76,
+"size": 38,
+"pos": 7638,
+"key": false
+},
+{
+"pts": 0.96,
+"dts": 0.8,
+"size": 465,
+"pos": 7676,
+"key": false
+},
+{
+"pts": 0.88,
+"dts": 0.84,
+"size": 92,
+"pos": 8141,
+"key": false
+},
+{
+"pts": 0.92,
+"dts": 0.88,
+"size": 44,
+"pos": 8233,
+"key": false
+},
+{
+"pts": 1.08,
+"dts": 0.92,
+"size": 568,
+"pos": 8277,
+"key": false
+},
+{
+"pts": 1.0,
+"dts": 0.96,
+"size": 102,
+"pos": 8845,
+"key": false
+},
+{
+"pts": 1.04,
+"dts": 1.0,
+"size": 42,
+"pos": 8947,
+"key": false
+},
+{
+"pts": 1.2,
+"dts": 1.04,
+"size": 438,
+"pos": 8989,
+"key": false
+},
+{
+"pts": 1.12,
+"dts": 1.08,
+"size": 74,
+"pos": 9427,
+"key": false
+},
+{
+"pts": 1.16,
+"dts": 1.12,
+"size": 39,
+"pos": 9501,
+"key": false
+},
+{
+"pts": 1.32,
+"dts": 1.16,
+"size": 435,
+"pos": 9540,
+"key": false
+},
+{
+"pts": 1.24,
+"dts": 1.2,
+"size": 74,
+"pos": 9975,
+"key": false
+},
+{
+"pts": 1.28,
+"dts": 1.24,
+"size": 31,
+"pos": 10049,
+"key": false
+},
+{
+"pts": 1.44,
+"dts": 1.28,
+"size": 464,
+"pos": 10080,
+"key": false
+},
+{
+"pts": 1.36,
+"dts": 1.32,
+"size": 74,
+"pos": 10544,
+"key": false
+},
+{
+"pts": 1.4,
+"dts": 1.36,
+"size": 39,
+"pos": 10618,
+"key": false
+},
+{
+"pts": 1.56,
+"dts": 1.4,
+"size": 492,
+"pos": 10657,
+"key": false
+},
+{
+"pts": 1.48,
+"dts": 1.44,
+"size": 68,
+"pos": 11149,
+"key": false
+},
+{
+"pts": 1.52,
+"dts": 1.48,
+"size": 40,
+"pos": 11217,
+"key": false
+},
+{
+"pts": 1.68,
+"dts": 1.52,
+"size": 479,
+"pos": 11257,
+"key": false
+},
+{
+"pts": 1.6,
+"dts": 1.56,
+"size": 65,
+"pos": 11736,
+"key": false
+},
+{
+"pts": 1.64,
+"dts": 1.6,
+"size": 57,
+"pos": 11801,
+"key": false
+},
+{
+"pts": 1.8,
+"dts": 1.64,
+"size": 382,
+"pos": 11858,
+"key": false
+},
+{
+"pts": 1.72,
+"dts": 1.68,
+"size": 67,
+"pos": 12240,
+"key": false
+},
+{
+"pts": 1.76,
+"dts": 1.72,
+"size": 39,
+"pos": 12307,
+"key": false
+},
+{
+"pts": 1.92,
+"dts": 1.76,
+"size": 292,
+"pos": 12346,
+"key": false
+},
+{
+"pts": 1.84,
+"dts": 1.8,
+"size": 58,
+"pos": 12638,
+"key": false
+},
+{
+"pts": 1.88,
+"dts": 1.84,
+"size": 48,
+"pos": 12696,
+"key": false
+},
+{
+"pts": 1.96,
+"dts": 1.88,
+"size": 169,
+"pos": 12744,
+"key": false
+}
+]
+}

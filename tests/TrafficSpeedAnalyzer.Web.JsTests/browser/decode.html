@@ -1,0 +1,63 @@
+<!doctype html><meta charset="utf-8"><title>Test decodifica</title>
+<script type="module">
+import { openMp4, blobSource } from '../../../src/TrafficSpeedAnalyzer.Web/wwwroot/js/mp4demux.js';
+import { checkSupport, frames, frameAt, drawFrame } from '../../../src/TrafficSpeedAnalyzer.Web/wwwroot/js/decoder.js';
+const fx = '../fixtures/';
+async function open(name) {
+  const blob = await (await fetch(fx + name)).blob();
+  return openMp4(blobSource(new File([blob], name)));
+}
+async function run() {
+  const results = [];
+  const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail });
+  for (const name of ['h264_known_speed.mp4', 'h264_vfr_faststart.mp4', 'apple_date.mov', 'h264_rot90.mp4', 'hevc_bframes_rot90.mp4']) {
+    const v = await open(name);
+    const sup = await checkSupport(v);
+    if (!sup.supported) { check(`${name}: supporto`, name.startsWith('hevc'), sup.reason); continue; }
+    const expected = await (await fetch(fx + name + '.ffprobe.json')).json();
+    const sorted = expected.packets.map(p => p.pts).sort((a, b) => a - b);
+    let n = 0, maxErr = 0, inOrder = true, last = -1;
+    const t0 = performance.now();
+    for await (const { frame, index, time } of frames(v, sup.config, 0, v.frameCount - 1)) {
+      maxErr = Math.max(maxErr, Math.abs(time - sorted[index]), Math.abs(frame.timestamp / 1e6 - sorted[index]));
+      if (index !== last + 1) inOrder = false;
+      last = index; n++; frame.close();
+    }
+    const ms = performance.now() - t0;
+    check(`${name}: tutti i fotogrammi`, n === v.frameCount, `${n}/${v.frameCount}`);
+    check(`${name}: ordine di presentazione`, inOrder);
+    check(`${name}: pts uguali a FFprobe`, maxErr < 2e-6, `errore massimo ${maxErr}`);
+    check(`${name}: velocità`, true, `${(n / ms * 1000).toFixed(0)} fps, hw=${sup.hardware}`);
+    // posizionamento casuale e sottointervalli
+    for (const i of [0, Math.floor(v.frameCount / 3), v.frameCount - 1, 7]) {
+      const { frame, index } = await frameAt(v, sup.config, i);
+      check(`${name}: posizionamento sul fotogramma ${i}`, index === i && Math.abs(frame.timestamp / 1e6 - sorted[i]) < 2e-6);
+      frame.close();
+    }
+    let sub = [];
+    const a = Math.min(20, v.frameCount - 16), b = a + 15;
+    for await (const { frame, index } of frames(v, sup.config, a, b)) { sub.push(index); frame.close(); }
+    check(`${name}: intervallo ${a}–${b}`, sub.length === 16 && sub[0] === a && sub[15] === b, sub.join(','));
+  }
+  // rotazione: pixel confrontati con il fotogramma ruotato da FFmpeg
+  const v = await open('h264_rot90.mp4');
+  const sup = await checkSupport(v);
+  const ref = new Uint8Array(await (await fetch(fx + 'h264_rot90.frame10.rgba')).arrayBuffer());
+  const mads = {};
+  for (const rot of [0, 90, 180, 270]) {
+    const { frame } = await frameAt(v, sup.config, 10);
+    const c = new OffscreenCanvas(1, 1); const ctx = c.getContext('2d', { willReadFrequently: true });
+    const vv = { ...v, rotation: rot, displayWidth: rot % 180 ? v.codedHeight : v.codedWidth, displayHeight: rot % 180 ? v.codedWidth : v.codedHeight };
+    drawFrame(ctx, frame, vv); frame.close();
+    if (c.width * c.height * 4 !== ref.length || c.width !== 240) { mads[rot] = 999; continue; }
+    const got = ctx.getImageData(0, 0, c.width, c.height).data;
+    let diff = 0; for (let i = 0; i < ref.length; i += 4) diff += Math.abs(got[i] - ref[i]) + Math.abs(got[i + 1] - ref[i + 1]) + Math.abs(got[i + 2] - ref[i + 2]);
+    mads[rot] = diff / (ref.length / 4 * 3);
+  }
+  check('rotazione 90°: dimensioni di visualizzazione', v.displayWidth === 240 && v.displayHeight === 320);
+  check('rotazione 90°: pixel uguali a FFmpeg (solo differenze di colore)', mads[90] < 10 && mads[90] * 4 < mads[270],
+    `differenza media 90°: ${mads[90].toFixed(1)}, 270°: ${mads[270].toFixed(1)}`);
+  return results;
+}
+window.testResults = run().catch(e => [{ name: 'eccezione', ok: false, detail: String(e.stack || e) }]);
+</script>

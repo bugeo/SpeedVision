@@ -1,0 +1,215 @@
+﻿Marca;Modello;Generazione;Dal anno;Al anno;Lunghezza mm;Passo mm;Tipo
+Fiat;Panda;II (169);2003;2012;3538;2299;auto
+Fiat;Panda;III (319);2012;2024;3653;2300;auto
+Fiat;Panda Cross / City Cross;III (319);2014;2024;3705;2300;auto
+Fiat;Grande Panda;;2025;;3999;2540;auto
+Fiat;500;prima serie (312);2007;2015;3546;2300;auto
+Fiat;500;restyling (312);2015;2024;3571;2300;auto
+Fiat;500 elettrica;(332);2020;;3632;2322;auto
+Fiat;500L;;2012;2017;4147;2612;auto
+Fiat;500L;restyling;2017;2022;4242;2612;auto
+Fiat;500X;;2014;;4248;2570;suv
+Fiat;600;;2023;;4171;2557;suv
+Fiat;Grande Punto / Punto Evo / Punto;(199);2005;2018;4065;2510;auto
+Fiat;Tipo;5 porte (356);2016;;4368;2638;auto
+Fiat;Tipo;berlina 4 porte (356);2015;;4532;2638;auto
+Fiat;Tipo;Station Wagon (356);2016;;4571;2638;auto
+Fiat;Bravo;(198);2007;2014;4336;2600;auto
+Fiat;Idea;;2003;2012;3930;2511;auto
+Fiat;Sedici;;2006;2014;4115;2500;suv
+Fiat;Freemont;;2011;2016;4888;2890;suv
+Fiat;Qubo / Fiorino;;2008;2021;3970;2513;furgone
+Fiat;Doblò;(263);2010;2022;4390;2755;furgone
+Fiat;Doblò;(2022);2022;;4403;2785;furgone
+Fiat;Ducato;passo corto L1;2006;;4963;3000;furgone
+Fiat;Ducato;passo medio L2;2006;;5413;3450;furgone
+Fiat;Ducato;passo lungo L3;2006;;5998;4035;furgone
+Fiat;Scudo;(2022) M;2022;;4983;3275;furgone
+Lancia;Ypsilon;(843);2003;2011;3780;2388;auto
+Lancia;Ypsilon;(846);2011;2024;3842;2390;auto
+Lancia;Ypsilon;(2024);2024;;4080;2540;auto
+Lancia;Musa;;2004;2012;4045;2511;auto
+Lancia;Delta;(844);2008;2014;4520;2700;auto
+Alfa Romeo;MiTo;;2008;2018;4063;2511;auto
+Alfa Romeo;Giulietta;;2010;2020;4351;2634;auto
+Alfa Romeo;147;;2000;2010;4223;2546;auto
+Alfa Romeo;159;berlina;2005;2011;4661;2700;auto
+Alfa Romeo;Giulia;;2016;;4643;2820;auto
+Alfa Romeo;Stelvio;;2017;;4687;2818;suv
+Alfa Romeo;Tonale;;2022;;4528;2636;suv
+Alfa Romeo;Junior;;2024;;4173;2560;suv
+Jeep;Avenger;;2023;;4084;2562;suv
+Jeep;Renegade;;2014;;4236;2570;suv
+Jeep;Compass;(2017);2017;;4394;2636;suv
+Dacia;Sandero;II;2012;2020;4069;2589;auto
+Dacia;Sandero / Sandero Stepway;III;2020;;4088;2604;auto
+Dacia;Duster;I;2010;2017;4315;2673;suv
+Dacia;Duster;II;2018;2023;4341;2676;suv
+Dacia;Duster;III;2024;;4343;2657;suv
+Dacia;Logan MCV;II;2013;2020;4492;2634;auto
+Dacia;Jogger;;2022;;4547;2897;auto
+Dacia;Spring;;2021;;3734;2423;auto
+Renault;Clio;III;2005;2012;3986;2575;auto
+Renault;Clio;IV;2012;2019;4062;2589;auto
+Renault;Clio;V;2019;;4050;2583;auto
+Renault;Captur;I;2013;2019;4122;2606;suv
+Renault;Captur;II;2019;;4227;2639;suv
+Renault;Twingo;III;2014;2024;3595;2492;auto
+Renault;Mégane;IV berlina 5 porte;2016;2022;4359;2669;auto
+Renault;Scénic;III;2009;2016;4344;2703;auto
+Renault;Arkana;;2021;;4568;2720;suv
+Renault;Austral;;2022;;4510;2667;suv
+Renault;Kangoo;II;2008;2021;4213;2697;furgone
+Renault;Trafic;III L1;2014;;4999;3098;furgone
+Toyota;Aygo;I;2005;2014;3405;2340;auto
+Toyota;Aygo;II;2014;2022;3455;2340;auto
+Toyota;Aygo X;;2022;;3700;2430;auto
+Toyota;Yaris;II;2005;2011;3750;2460;auto
+Toyota;Yaris;III;2011;2020;3945;2510;auto
+Toyota;Yaris;IV;2020;;3940;2560;auto
+Toyota;Yaris Cross;;2021;;4180;2560;suv
+Toyota;Auris;II;2012;2018;4330;2600;auto
+Toyota;Corolla;XII 5 porte;2019;;4370;2640;auto
+Toyota;Corolla Touring Sports;XII;2019;;4650;2700;auto
+Toyota;C-HR;I;2016;2023;4360;2640;suv
+Toyota;C-HR;II;2023;;4362;2640;suv
+Toyota;RAV4;V;2019;;4600;2690;suv
+Peugeot;107;;2005;2014;3430;2340;auto
+Peugeot;108;;2014;2021;3475;2340;auto
+Peugeot;207;;2006;2012;4030;2540;auto
+Peugeot;208;I;2012;2019;3962;2538;auto
+Peugeot;208;II;2019;;4055;2540;auto
+Peugeot;2008;I;2013;2019;4159;2538;suv
+Peugeot;2008;II;2019;;4300;2605;suv
+Peugeot;308;II;2013;2021;4253;2620;auto
+Peugeot;308;III;2021;;4367;2675;auto
+Peugeot;3008;II;2016;2023;4447;2675;suv
+Peugeot;5008;II;2017;2023;4641;2840;suv
+Citroën;C1;II;2014;2022;3466;2340;auto
+Citroën;C3;II;2009;2016;3941;2466;auto
+Citroën;C3;III;2016;2024;3996;2540;auto
+Citroën;C3;IV;2024;;4015;2540;auto
+Citroën;C3 Aircross;;2017;2024;4154;2604;suv
+Citroën;C4 Cactus;;2014;2020;4157;2595;auto
+Citroën;C5 Aircross;;2018;;4500;2730;suv
+Citroën;Berlingo;III M;2018;;4403;2785;furgone
+Opel;Corsa;D;2006;2014;3999;2511;auto
+Opel;Corsa;E;2014;2019;4021;2510;auto
+Opel;Corsa;F;2019;;4060;2538;auto
+Opel;Astra;J 5 porte;2009;2015;4419;2685;auto
+Opel;Astra;K 5 porte;2015;2021;4370;2662;auto
+Opel;Astra;L 5 porte;2021;;4374;2675;auto
+Opel;Meriva;B;2010;2017;4288;2644;auto
+Opel;Mokka / Mokka X;I;2012;2019;4275;2555;suv
+Opel;Mokka;II;2020;;4151;2557;suv
+Opel;Crossland;;2017;2024;4212;2604;suv
+Opel;Grandland;I;2017;2024;4477;2675;suv
+Volkswagen;up!;;2011;2016;3540;2420;auto
+Volkswagen;up!;restyling;2016;2023;3600;2420;auto
+Volkswagen;Polo;V;2009;2017;3970;2470;auto
+Volkswagen;Polo;VI;2017;;4053;2564;auto
+Volkswagen;Golf;VI;2008;2012;4199;2578;auto
+Volkswagen;Golf;VII;2012;2019;4255;2637;auto
+Volkswagen;Golf;VIII;2019;;4284;2636;auto
+Volkswagen;T-Cross;;2019;;4108;2551;suv
+Volkswagen;T-Roc;;2017;;4234;2595;suv
+Volkswagen;Taigo;;2021;;4266;2566;suv
+Volkswagen;Tiguan;II;2016;2024;4486;2681;suv
+Volkswagen;Tiguan;III;2024;;4539;2680;suv
+Volkswagen;Passat Variant;B8;2014;2023;4767;2791;auto
+Volkswagen;ID.3;;2020;;4261;2770;auto
+Volkswagen;Caddy;IV;2015;2020;4408;2682;furgone
+Volkswagen;Transporter / Multivan;T6 passo corto;2015;;4904;3000;furgone
+Skoda;Fabia;III;2014;2021;3992;2470;auto
+Skoda;Fabia;IV;2021;;4108;2564;auto
+Skoda;Kamiq;;2019;;4241;2651;suv
+Skoda;Karoq;;2017;;4382;2638;suv
+Skoda;Octavia Wagon;III;2013;2020;4659;2686;auto
+Skoda;Octavia Wagon;IV;2020;;4689;2686;auto
+Skoda;Kodiaq;I;2016;2024;4697;2791;suv
+Seat;Ibiza;IV;2008;2017;4052;2469;auto
+Seat;Ibiza;V;2017;;4059;2564;auto
+Seat;Arona;;2017;;4138;2566;suv
+Seat;Leon;III 5 porte;2012;2020;4263;2636;auto
+Seat / Cupra;Leon;IV 5 porte;2020;;4368;2686;auto
+Seat;Ateca;;2016;;4363;2638;suv
+Cupra;Formentor;;2020;;4450;2680;suv
+Audi;A1 Sportback;II;2018;;4029;2563;auto
+Audi;A3 Sportback;8V;2012;2020;4313;2637;auto
+Audi;A3 Sportback;8Y;2020;;4343;2636;auto
+Audi;Q2;;2016;;4191;2601;suv
+Audi;Q3;II;2018;;4484;2680;suv
+Audi;A4 Avant;B9;2015;2024;4725;2820;auto
+Audi;Q5;II;2017;;4663;2819;suv
+Ford;Ka+;;2016;2021;3929;2489;auto
+Ford;Fiesta;VII;2008;2017;3950;2489;auto
+Ford;Fiesta;VIII;2017;2023;4040;2493;auto
+Ford;EcoSport;restyling;2017;2022;4096;2519;suv
+Ford;Puma;;2019;;4186;2588;suv
+Ford;Focus;III 5 porte;2011;2018;4358;2648;auto
+Ford;Focus;IV 5 porte;2018;;4378;2700;auto
+Ford;Kuga;II;2013;2019;4524;2690;suv
+Ford;Kuga;III;2019;;4614;2710;suv
+Ford;Transit Connect;L1;2013;;4425;2662;furgone
+Ford;Transit Custom;L1;2012;2023;4973;2933;furgone
+Hyundai;i10;II;2013;2019;3665;2385;auto
+Hyundai;i10;III;2019;;3670;2425;auto
+Hyundai;i20;II;2014;2020;4035;2570;auto
+Hyundai;i20;III;2020;;4040;2580;auto
+Hyundai;ix35;;2010;2015;4410;2640;suv
+Hyundai;Tucson;III;2015;2020;4475;2670;suv
+Hyundai;Tucson;IV;2020;;4500;2680;suv
+Hyundai;Kona;I;2017;2023;4165;2600;suv
+Hyundai;Kona;II;2023;;4350;2660;suv
+Kia;Picanto;II;2011;2017;3595;2385;auto
+Kia;Picanto;III;2017;;3595;2400;auto
+Kia;Rio;IV;2017;2023;4065;2580;auto
+Kia;Stonic;;2017;;4140;2580;suv
+Kia;Ceed;III;2018;;4310;2650;auto
+Kia;Niro;I;2016;2022;4355;2700;suv
+Kia;Sportage;IV;2016;2021;4480;2670;suv
+Kia;Sportage;V;2021;;4515;2680;suv
+Nissan;Micra;K14;2017;2023;3999;2525;auto
+Nissan;Juke;I;2010;2019;4135;2530;suv
+Nissan;Juke;II;2019;;4210;2636;suv
+Nissan;Qashqai;I;2007;2013;4315;2630;suv
+Nissan;Qashqai;II;2014;2021;4377;2646;suv
+Nissan;Qashqai;III;2021;;4425;2665;suv
+Nissan;X-Trail;III;2014;2022;4640;2705;suv
+Suzuki;Swift;(2010);2010;2017;3850;2430;auto
+Suzuki;Swift;(2017);2017;2024;3840;2450;auto
+Suzuki;Swift;(2024);2024;;3860;2450;auto
+Suzuki;Ignis;;2016;;3700;2435;auto
+Suzuki;Vitara;;2015;;4175;2500;suv
+Suzuki;S-Cross;(2022);2022;;4300;2600;suv
+Suzuki;Jimny;(2018) con ruota di scorta;2018;;3645;2250;suv
+Honda;Jazz;IV;2020;;4044;2517;auto
+Honda;HR-V;III;2021;;4330;2610;suv
+Mazda;2;III;2014;2023;4065;2570;auto
+Mazda;CX-30;;2019;;4395;2655;suv
+MG;ZS;I;2017;2024;4314;2585;suv
+MG;ZS;II;2024;;4430;2610;suv
+MG;MG4;;2022;;4287;2705;auto
+MG;HS;I;2018;2024;4574;2720;suv
+BYD;Atto 3;;2022;;4455;2720;suv
+BMW;Serie 1;F20;2011;2019;4329;2690;auto
+BMW;Serie 1;F40;2019;;4319;2670;auto
+BMW;Serie 3 berlina;G20;2019;;4709;2851;auto
+BMW;X1;F48;2015;2022;4439;2670;suv
+BMW;X1;U11;2022;;4500;2692;suv
+BMW;X3;G01;2017;2024;4708;2864;suv
+Mini;Mini 3 porte;F56;2014;2024;3821;2495;auto
+Mini;Countryman;F60;2017;2024;4299;2670;suv
+Mercedes;Classe A;W176;2012;2018;4292;2699;auto
+Mercedes;Classe A;W177;2018;;4419;2729;auto
+Mercedes;Classe B;W247;2019;;4419;2729;auto
+Mercedes;GLA;H247;2020;;4410;2729;suv
+Mercedes;Classe C berlina;W205;2014;2021;4686;2840;auto
+Mercedes;Classe V / Vito;passo lungo;2014;;5140;3200;furgone
+Smart;fortwo;453;2014;2024;2695;1873;auto
+Smart;forfour;453;2014;2021;3495;2494;auto
+Volvo;XC40;;2017;;4425;2702;suv
+Volvo;XC60;II;2017;;4688;2865;suv
+Land Rover;Range Rover Evoque;II;2019;;4371;2681;suv
+Tesla;Model 3;;2017;;4694;2875;auto
+Tesla;Model Y;;2020;;4751;2890;suv

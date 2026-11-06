@@ -1,0 +1,22 @@
+{
+ "fps": 30,
+ "meters_per_pixel": 0.1,
+ "lineA_y": 180,
+ "lineB_y": 380,
+ "distance_m": 20,
+ "reference": "bordo inferiore del riquadro",
+ "cars": [
+  {
+   "kmh": 50.0,
+   "tA": 2.588,
+   "tB": 1.1480000000000001,
+   "dirn": -1
+  },
+  {
+   "kmh": 72.0,
+   "tA": 4.65,
+   "tB": 3.6500000000000004,
+   "dirn": -1
+  }
+ ]
+}

@@ -1,0 +1,224 @@
+{
+"codec_name": "h264",
+"width": 320,
+"height": 240,
+"rotation": 90,
+"tags": {
+"major_brand": "isom",
+"minor_version": "512",
+"compatible_brands": "isomiso2avc1mp41",
+"encoder": "Lavf60.16.100"
+},
+"packets": [
+{
+"pts": 0.0,
+"dts": -0.066667,
+"size": 3528,
+"pos": 48,
+"key": true
+},
+{
+"pts": 0.1,
+"dts": -0.033333,
+"size": 374,
+"pos": 3576,
+"key": false
+},
+{
+"pts": 0.033333,
+"dts": 0.0,
+"size": 75,
+"pos": 3950,
+"key": false
+},
+{
+"pts": 0.066667,
+"dts": 0.033333,
+"size": 17,
+"pos": 4025,
+"key": false
+},
+{
+"pts": 0.166667,
+"dts": 0.066667,
+"size": 355,
+"pos": 4042,
+"key": false
+},
+{
+"pts": 0.133333,
+"dts": 0.1,
+"size": 60,
+"pos": 4397,
+"key": false
+},
+{
+"pts": 0.266667,
+"dts": 0.133333,
+"size": 407,
+"pos": 4457,
+"key": false
+},
+{
+"pts": 0.2,
+"dts": 0.166667,
+"size": 54,
+"pos": 4864,
+"key": false
+},
+{
+"pts": 0.233333,
+"dts": 0.2,
+"size": 19,
+"pos": 4918,
+"key": false
+},
+{
+"pts": 0.366667,
+"dts": 0.233333,
+"size": 423,
+"pos": 4937,
+"key": false
+},
+{
+"pts": 0.3,
+"dts": 0.266667,
+"size": 60,
+"pos": 5360,
+"key": false
+},
+{
+"pts": 0.333333,
+"dts": 0.3,
+"size": 44,
+"pos": 5420,
+"key": false
+},
+{
+"pts": 0.466667,
+"dts": 0.333333,
+"size": 408,
+"pos": 5464,
+"key": false
+},
+{
+"pts": 0.4,
+"dts": 0.366667,
+"size": 81,
+"pos": 5872,
+"key": false
+},
+{
+"pts": 0.433333,
+"dts": 0.4,
+"size": 38,
+"pos": 5953,
+"key": false
+},
+{
+"pts": 0.566667,
+"dts": 0.433333,
+"size": 411,
+"pos": 5991,
+"key": false
+},
+{
+"pts": 0.5,
+"dts": 0.466667,
+"size": 71,
+"pos": 6402,
+"key": false
+},
+{
+"pts": 0.533333,
+"dts": 0.5,
+"size": 20,
+"pos": 6473,
+"key": false
+},
+{
+"pts": 0.666667,
+"dts": 0.533333,
+"size": 334,
+"pos": 6493,
+"key": false
+},
+{
+"pts": 0.6,
+"dts": 0.566667,
+"size": 36,
+"pos": 6827,
+"key": false
+},
+{
+"pts": 0.633333,
+"dts": 0.6,
+"size": 30,
+"pos": 6863,
+"key": false
+},
+{
+"pts": 0.766667,
+"dts": 0.633333,
+"size": 296,
+"pos": 6893,
+"key": false
+},
+{
+"pts": 0.7,
+"dts": 0.666667,
+"size": 27,
+"pos": 7189,
+"key": false
+},
+{
+"pts": 0.733333,
+"dts": 0.7,
+"size": 25,
+"pos": 7216,
+"key": false
+},
+{
+"pts": 0.866667,
+"dts": 0.733333,
+"size": 247,
+"pos": 7241,
+"key": false
+},
+{
+"pts": 0.8,
+"dts": 0.766667,
+"size": 35,
+"pos": 7488,
+"key": false
+},
+{
+"pts": 0.833333,
+"dts": 0.8,
+"size": 21,
+"pos": 7523,
+"key": false
+},
+{
+"pts": 0.966667,
+"dts": 0.833333,
+"size": 213,
+"pos": 7544,
+"key": false
+},
+{
+"pts": 0.9,
+"dts": 0.866667,
+"size": 37,
+"pos": 7757,
+"key": false
+},
+{
+"pts": 0.933333,
+"dts": 0.9,
+"size": 19,
+"pos": 7794,
+"key": false
+}
+]
+}

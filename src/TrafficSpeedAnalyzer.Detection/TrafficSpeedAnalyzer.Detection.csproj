@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Rilevamento veicoli con ONNX Runtime (GPU tramite DirectML, con ripiego automatico su CPU),
+    tracking e pipeline di analisi automatica. Modelli YOLOX (Apache-2.0) scaricati su richiesta.
+  -->
+  <PropertyGroup>
+    <TargetFramework>$(TsaTargetFramework)</TargetFramework>
+    <RootNamespace>TrafficSpeedAnalyzer.Detection</RootNamespace>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Licenza MIT. Include anche l'esecutore CPU. -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Core\TrafficSpeedAnalyzer.Core.csproj" />
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Video\TrafficSpeedAnalyzer.Video.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="TrafficSpeedAnalyzer.Detection.Tests" />
+  </ItemGroup>
+</Project>

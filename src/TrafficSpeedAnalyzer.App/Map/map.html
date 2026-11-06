@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Distanza dalla mappa</title>
+    <link rel="stylesheet" href="leaflet/leaflet.css" />
+    <link rel="stylesheet" href="map.css" />
+</head>
+<body>
+    <div id="map"></div>
+
+    <!-- Pannello della guida: un solo passo evidenziato alla volta, un solo pulsante verde. -->
+    <aside id="panel">
+        <div class="title" data-s="title"></div>
+
+        <section id="step-find" class="card">
+            <div class="section" data-s="findTitle"></div>
+            <p class="caption" id="find-hint"></p>
+            <form id="search">
+                <input id="search-text" type="search" autocomplete="off" />
+                <button type="submit" id="search-button" class="btn"></button>
+            </form>
+            <ul id="search-results"></ul>
+            <p class="caption error" id="search-error"></p>
+        </section>
+
+        <section id="step-a" class="card">
+            <div class="row"><span class="badge a">A</span><span class="section" data-s="pointA"></span></div>
+            <p class="caption" id="hint-a"></p>
+        </section>
+
+        <section id="step-b" class="card">
+            <div class="row"><span class="badge b">B</span><span class="section" data-s="pointB"></span></div>
+            <p class="caption" id="hint-b"></p>
+        </section>
+
+        <section id="step-result" class="card">
+            <div class="section" data-s="distance"></div>
+            <div class="distance"><span id="distance">–</span> <span class="dim">m</span></div>
+            <p class="caption" id="precision"></p>
+            <button id="use" class="btn primary wide" disabled></button>
+            <button id="reset" class="btn transparent wide"></button>
+        </section>
+
+        <details id="snapshot-box">
+            <summary data-s="snapshot"></summary>
+            <img id="snapshot" alt="" />
+        </details>
+        <p class="caption small" data-s="privacy"></p>
+        <button id="cancel" class="btn transparent wide"></button>
+    </aside>
+
+    <div id="zoom-hint" class="toast"></div>
+
+    <script src="leaflet/leaflet.js"></script>
+    <script src="geo.js"></script>
+    <script src="map.js"></script>
+</body>
+</html>
