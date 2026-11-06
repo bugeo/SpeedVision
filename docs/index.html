@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="it" data-l="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SpeedVision</title>
+<meta name="description" content="SpeedVision misura la velocità dei veicoli in un video di traffico, direttamente sul tuo PC. Software libero per Windows.">
+<meta property="og:title" content="SpeedVision">
+<meta property="og:description" content="Misura la velocità dei veicoli in un video di traffico, direttamente sul tuo PC.">
+<meta property="og:image" content="img/logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,75..125,400..800;1,75..125,600..800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #010819;      /* fondo del logo */
+  --asphalt: #1c2433;
+  --lane: #e9eef5;
+  --paper: #f4f6f9;
+  --ink: #142033;
+  --muted: #4f5d72;
+  --cyan: #19b4f5;       /* colore del logo */
+  --line-a: #3ba6f0;     /* linea A, come nel programma */
+  --line-b: #f5a524;     /* linea B */
+  --ok: #22b35e;
+  --rule: #d5dce6;
+  --display: "Saira", system-ui, sans-serif;
+  --text: "Source Sans 3", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.125rem/1.6 var(--text); }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; border-radius: 4px; }
+
+html[data-l="it"] [lang="en"], html[data-l="en"] [lang="it"] { display: none !important; }
+
+.wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+
+/* ───── Intestazione e hero ───── */
+.hero { background: var(--night); color: #dbe6f5; padding-bottom: 72px; overflow: hidden; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px; }
+.top img { height: 44px; width: auto; }
+.top nav { display: flex; align-items: center; gap: 20px; font-size: 1rem; }
+.top nav a { text-decoration: none; color: #b8c6da; }
+.top nav a:hover { color: #fff; }
+.lang { display: inline-flex; border: 1px solid #2a3a55; border-radius: 999px; padding: 2px; }
+.lang button { font: 600 .875rem var(--text); color: #9fb0c8; background: none; border: 0; padding: 4px 10px; border-radius: 999px; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: #1d2c45; color: #fff; }
+
+.hero-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: center; padding-top: 40px; }
+h1 { font: italic 800 clamp(2.4rem, 5.4vw, 4.1rem)/1.02 var(--display); font-stretch: 112%; letter-spacing: -.01em; color: #fff; margin: 0 0 20px; }
+.lead { font-size: 1.25rem; color: #b8c6da; max-width: 34ch; margin: 0 0 32px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { display: inline-flex; align-items: center; gap: 10px; font: 600 1.05rem var(--text); text-decoration: none; padding: 13px 22px; border-radius: 10px; }
+.btn-main { background: var(--cyan); color: var(--night); }
+.btn-main:hover { background: #4cc6fa; }
+.btn-ghost { color: #dbe6f5; border: 1px solid #33476a; }
+.btn-ghost:hover { border-color: #6d87b0; }
+.btn svg { width: 20px; height: 20px; flex: none; }
+
+/* La strada animata */
+.demo { position: relative; }
+.road { width: 100%; height: auto; display: block; border-radius: 14px; }
+.readout { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 6px 32px; margin-top: 18px; font-family: var(--display); }
+.readout dt { font-size: .85rem; color: #7f91ab; font-weight: 500; }
+.readout dd { margin: 0; font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; color: #fff; font-stretch: 95%; }
+.readout dd.speed { color: var(--cyan); }
+.demo-note { font-size: .9rem; color: #7f91ab; margin: 10px 0 0; }
+
+/* ───── Sezioni ───── */
+section { padding-block: 88px; }
+section + section { border-top: 1px solid var(--rule); }
+h2 { font: italic 800 clamp(1.9rem, 3.6vw, 2.6rem)/1.1 var(--display); font-stretch: 108%; margin: 0 0 16px; color: var(--ink); }
+.intro { color: var(--muted); max-width: 62ch; margin: 0 0 48px; }
+h3 { font: 700 1.25rem/1.25 var(--display); margin: 0 0 6px; }
+p { margin: 0 0 12px; }
+
+/* I passi del programma: è una sequenza vera, come la barra in alto nell'app */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; counter-reset: step; }
+.steps li { counter-increment: step; padding: 22px 26px 26px 0; border-top: 3px solid var(--ok); margin-right: 26px; }
+.steps li::before { content: counter(step); display: block; font: 800 1rem var(--display); color: var(--ok); margin-bottom: 10px; }
+.steps p { color: var(--muted); font-size: 1.02rem; }
+
+.shot { margin: 56px 0 0; }
+.shot img { border-radius: 10px; box-shadow: 0 24px 48px -24px rgba(1, 8, 25, .45); }
+.shot figcaption, .report figcaption { font-size: .95rem; color: var(--muted); margin-top: 12px; }
+
+/* Calibrazione: quattro metodi alternativi */
+.methods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 36px 56px; }
+.methods div { padding-left: 20px; border-left: 3px solid var(--line-a); }
+.methods div:nth-child(even) { border-left-color: var(--line-b); }
+.methods p { color: var(--muted); }
+
+/* Risultati */
+.results { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 64px; align-items: start; }
+.results ul { margin: 0; padding: 0; list-style: none; }
+.results li { padding: 18px 0; border-bottom: 1px solid var(--rule); }
+.results li:first-child { padding-top: 0; }
+.results li p { color: var(--muted); margin: 0; }
+.report img { border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 18px 40px -22px rgba(1, 8, 25, .35); }
+
+/* Privacy e limiti: fondo scuro come la strada */
+.honest { background: var(--asphalt); color: #d2dbe8; border-top: 0; }
+.honest h2 { color: #fff; }
+.honest .intro { color: #a9b6c9; }
+.pair { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px; }
+.pair h3 { color: #fff; }
+.pair p { color: #a9b6c9; }
+
+/* Installazione */
+.install { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px; }
+code, pre { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: .92rem; }
+pre { background: #e6ebf2; border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 8px 0 16px; }
+.install > div, .results > *, .hero-grid > * { min-width: 0; }
+.install ul { padding-left: 1.1em; margin: 0 0 12px; color: var(--muted); }
+
+footer { background: var(--night); color: #8796ad; padding-block: 40px; font-size: .95rem; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 32px; justify-content: space-between; align-items: center; }
+footer a { color: #c7d3e4; }
+
+@media (max-width: 900px) {
+  .hero-grid, .results, .install { grid-template-columns: 1fr; }
+  .hero-grid { gap: 40px; }
+  .steps { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 620px) {
+  .top nav a { display: none; }
+  .steps, .methods, .pair { grid-template-columns: 1fr; }
+  .steps li { margin-right: 0; }
+  .readout { gap: 4px 20px; }
+  .readout dd { font-size: 1.3rem; }
+  section { padding-block: 64px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap top">
+    <a href="./"><img src="img/logo.jpg" alt="SpeedVision" width="779" height="173"></a>
+    <nav aria-label="Sezioni">
+      <a href="#come"><span lang="it">Come funziona</span><span lang="en">How it works</span></a>
+      <a href="#installa"><span lang="it">Installazione</span><span lang="en">Install</span></a>
+      <a href="https://github.com/bugeo/SpeedVision">GitHub</a>
+      <span class="lang" role="group" aria-label="Lingua / Language">
+        <button type="button" data-set="it" aria-pressed="true">IT</button>
+        <button type="button" data-set="en" aria-pressed="false">EN</button>
+      </span>
+    </nav>
+  </div>
+
+  <div class="wrap hero-grid">
+    <div>
+      <h1><span lang="it">Quanto vanno veloci sulla tua strada?</span><span lang="en">How fast are they going on your street?</span></h1>
+      <p class="lead">
+        <span lang="it">SpeedVision misura la velocità dei veicoli in un video ripreso da una telecamera ferma. Il video resta sul tuo PC.</span>
+        <span lang="en">SpeedVision measures vehicle speeds in a video shot from a fixed camera. The video stays on your PC.</span>
+      </p>
+      <div class="actions">
+        <a class="btn btn-main" href="https://github.com/bugeo/SpeedVision/releases">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 19h16"/></svg>
+          <span lang="it">Scarica per Windows</span><span lang="en">Download for Windows</span>
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/bugeo/SpeedVision">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 00-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 015.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.08 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0012 .5z"/></svg>
+          <span lang="it">Codice sorgente</span><span lang="en">Source code</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="demo">
+      <svg class="road" viewBox="0 0 640 300" role="img" aria-labelledby="road-title">
+        <title id="road-title">Un'auto attraversa la linea A e la linea B: dal tempo impiegato si calcola la velocità.</title>
+        <rect width="640" height="300" fill="#0b1426"/>
+        <rect y="70" width="640" height="160" fill="#2a3346"/>
+        <rect y="70" width="640" height="4" fill="#e9eef5"/>
+        <rect y="226" width="640" height="4" fill="#e9eef5"/>
+        <g fill="#e9eef5" opacity=".75">
+          <rect x="0" y="148" width="40" height="4"/><rect x="72" y="148" width="40" height="4"/><rect x="144" y="148" width="40" height="4"/>
+          <rect x="216" y="148" width="40" height="4"/><rect x="288" y="148" width="40" height="4"/><rect x="360" y="148" width="40" height="4"/>
+          <rect x="432" y="148" width="40" height="4"/><rect x="504" y="148" width="40" height="4"/><rect x="576" y="148" width="40" height="4"/>
+        </g>
+        <!-- Linee di rilevamento -->
+        <line x1="180" y1="56" x2="180" y2="244" stroke="#3ba6f0" stroke-width="4"/>
+        <line x1="480" y1="56" x2="480" y2="244" stroke="#f5a524" stroke-width="4"/>
+        <circle cx="180" cy="262" r="14" fill="#3ba6f0"/><text x="180" y="268" text-anchor="middle" font-family="Saira, sans-serif" font-weight="800" font-size="16" fill="#010819">A</text>
+        <circle cx="480" cy="262" r="14" fill="#f5a524"/><text x="480" y="268" text-anchor="middle" font-family="Saira, sans-serif" font-weight="800" font-size="16" fill="#010819">B</text>
+        <!-- Distanza misurata -->
+        <g stroke="#7f91ab" stroke-width="1.5">
+          <line x1="184" y1="36" x2="476" y2="36"/><line x1="184" y1="30" x2="184" y2="42"/><line x1="476" y1="30" x2="476" y2="42"/>
+        </g>
+        <rect x="290" y="25" width="80" height="22" fill="#0b1426"/>
+        <text x="330" y="41" text-anchor="middle" font-family="Saira, sans-serif" font-weight="600" font-size="15" fill="#b8c6da" id="svg-dist">18,50 m</text>
+        <!-- Auto vista dall'alto, con il riquadro del rilevamento -->
+        <g id="car" transform="translate(-120 0)">
+          <rect x="-4" y="166" width="104" height="54" rx="4" fill="none" stroke="#22b35e" stroke-width="2" stroke-dasharray="6 4"/>
+          <rect x="4" y="172" width="88" height="42" rx="12" fill="#e2e8f0"/>
+          <rect x="52" y="177" width="22" height="32" rx="5" fill="#2a3346"/>
+          <rect x="16" y="178" width="16" height="30" rx="4" fill="#2a3346"/>
+          <rect x="86" y="175" width="5" height="9" rx="2" fill="#fff7cc"/><rect x="86" y="202" width="5" height="9" rx="2" fill="#fff7cc"/>
+          <circle id="corner" cx="100" cy="220" r="5" fill="#19b4f5"/>
+        </g>
+      </svg>
+      <dl class="readout" aria-live="off">
+        <div><dt><span lang="it">Tempo da A a B</span><span lang="en">Time from A to B</span></dt><dd id="r-time">–</dd></div>
+        <div><dt><span lang="it">Distanza</span><span lang="en">Distance</span></dt><dd id="r-dist">18,50 m</dd></div>
+        <div><dt><span lang="it">Velocità</span><span lang="en">Speed</span></dt><dd class="speed" id="r-speed">–</dd></div>
+      </dl>
+      <p class="demo-note">
+        <span lang="it">Il punto azzurro è lo spigolo anteriore del riquadro: l'istante in cui tocca ogni linea si calcola anche tra un fotogramma e l'altro.</span>
+        <span lang="en">The blue dot is the front corner of the box: the moment it touches each line is computed even between frames.</span>
+      </p>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="come">
+  <div class="wrap">
+    <h2><span lang="it">Come funziona</span><span lang="en">How it works</span></h2>
+    <p class="intro">
+      <span lang="it">Il programma ti guida un passo alla volta, nello stesso ordine della barra in alto: in ogni passo è evidenziato il riquadro su cui agire.</span>
+      <span lang="en">The program guides you one step at a time, in the same order as the bar at the top: each step highlights the box to act on.</span>
+    </p>
+    <ol class="steps">
+      <li><h3>Video</h3>
+        <p lang="it">Apri il video: qualsiasi formato letto da FFmpeg, anche con frame rate variabile. L'orario di inizio arriva dai metadati.</p>
+        <p lang="en">Open the video: any format FFmpeg can read, variable frame rate included. The start time comes from the metadata.</p></li>
+      <li><h3><span lang="it">Strada</span><span lang="en">Road</span></h3>
+        <p lang="it">Segna i quattro bordi della strada e il numero di corsie, così i risultati si possono dividere per corsia.</p>
+        <p lang="en">Mark the four edges of the road and the number of lanes, so results can be split by lane.</p></li>
+      <li><h3><span lang="it">Analisi veicoli</span><span lang="en">Vehicle analysis</span></h3>
+        <p lang="it">Il riconoscimento automatico (YOLOX) trova le auto e le segue fotogramma per fotogramma.</p>
+        <p lang="en">Automatic detection (YOLOX) finds the cars and follows them frame by frame.</p></li>
+      <li><h3><span lang="it">Calibrazione</span><span lang="en">Calibration</span></h3>
+        <p lang="it">Posa le linee A e B e indica quanti metri le separano: è il dato da cui dipende ogni velocità.</p>
+        <p lang="en">Place lines A and B and set how many metres apart they are: every speed depends on it.</p></li>
+      <li><h3><span lang="it">Misura manuale</span><span lang="en">Manual measurement</span></h3>
+        <p lang="it">Controlla i passaggi trovati, correggili o aggiungine a mano indicando la posizione del veicolo.</p>
+        <p lang="en">Check the detected passages, correct them or add new ones by pointing at the vehicle.</p></li>
+      <li><h3><span lang="it">Risultati</span><span lang="en">Results</span></h3>
+        <p lang="it">Velocità media, minima e massima, il grafico per fasce di 5 km/h e l'esportazione.</p>
+        <p lang="en">Average, minimum and maximum speed, a chart in 5 km/h bands, and the export.</p></li>
+    </ol>
+    <figure class="shot">
+      <img src="img/app-calibrazione.jpg" alt="Il passo Calibrazione di SpeedVision, con le due corsie segnate su una strada di prova" width="1576" height="382" loading="lazy">
+      <figcaption>
+        <span lang="it">Il passo Calibrazione su un video di prova: a sinistra il riquadro con l'azione da fare, a destra la strada con le corsie.</span>
+        <span lang="en">The Calibration step on a test video: the box with the next action on the left, the road with its lanes on the right.</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span lang="it">Quattro modi di calibrare</span><span lang="en">Four ways to calibrate</span></h2>
+    <p class="intro">
+      <span lang="it">La precisione della misura dipende dalla distanza tra le linee. Scegli il metodo in base a quello che sai del luogo.</span>
+      <span lang="en">Accuracy depends on the distance between the lines. Pick the method that fits what you know about the place.</span>
+    </p>
+    <div class="methods">
+      <div><h3 lang="it">Due riferimenti misurati sul campo</h3><h3 lang="en">Two references measured on site</h3>
+        <p lang="it">Il più preciso: misuri con un metro la distanza tra due segni a terra e la inserisci.</p>
+        <p lang="en">The most accurate: measure the distance between two marks on the ground with a tape and type it in.</p></div>
+      <div><h3 lang="it">Un'auto che riconosco</h3><h3 lang="en">A car I recognise</h3>
+        <p lang="it">Scegli il modello di un'auto che passa, o scrivi la sua lunghezza: le linee si posano ai suoi spigoli.</p>
+        <p lang="en">Pick the model of a passing car, or type its length: the lines are placed at its corners.</p></div>
+      <div><h3 lang="it">Due riferimenti a terra e punto di fuga</h3><h3 lang="en">Two ground references and vanishing point</h3>
+        <p lang="it">Per le riprese in prospettiva: le linee guida dal punto di fuga aiutano a orientare A e B.</p>
+        <p lang="en">For perspective shots: guide lines from the vanishing point help orient A and B.</p></div>
+      <div><h3 lang="it">Due riferimenti trovati sulla mappa</h3><h3 lang="en">Two references found on the map</h3>
+        <p lang="it">Ritrovi gli stessi punti sulla mappa o sulla vista satellitare e la distanza si calcola da lì.</p>
+        <p lang="en">Find the same points on the map or satellite view and the distance is computed from there.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap results">
+    <div>
+      <h2><span lang="it">Cosa esporti</span><span lang="en">What you export</span></h2>
+      <p class="intro">
+        <span lang="it">Una cartella per ogni esportazione, nella lingua che hai scelto: italiano, inglese, francese, tedesco o spagnolo.</span>
+        <span lang="en">One folder per export, in the language you choose: Italian, English, French, German or Spanish.</span>
+      </p>
+      <ul>
+        <li><h3 lang="it">Tabella CSV</h3><h3 lang="en">CSV table</h3>
+          <p lang="it">Un passaggio per riga: verso, corsia, orari di ingresso e uscita, tempo e velocità. Si apre in Excel.</p>
+          <p lang="en">One passage per row: direction, lane, entry and exit times, duration and speed. Opens in Excel.</p></li>
+        <li><h3 lang="it">Rapporto PDF</h3><h3 lang="en">PDF report</h3>
+          <p lang="it">Un riepilogo con il grafico, poi una pagina per veicolo con i dati e le immagini di ingresso e uscita.</p>
+          <p lang="en">A summary with the chart, then one page per vehicle with the data and the entry and exit images.</p></li>
+        <li><h3 lang="it">Immagini</h3><h3 lang="en">Images</h3>
+          <p lang="it">Il fotogramma di ingresso e quello di uscita con l'orario sovrimpresso, anche in versione con i veicoli pixellati.</p>
+          <p lang="en">The entry and exit frames with the time overlaid, also in a version with vehicles pixelated.</p></li>
+      </ul>
+    </div>
+    <figure class="report">
+      <img src="img/rapporto-pdf.jpg" alt="Prima pagina del rapporto PDF: dati del video, statistiche e grafico delle velocità" width="910" height="1287" loading="lazy">
+      <figcaption>
+        <span lang="it">Prima pagina del rapporto, con dati di prova.</span>
+        <span lang="en">First page of the report, with test data.</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="honest">
+  <div class="wrap">
+    <h2><span lang="it">Il video non lascia il PC</span><span lang="en">The video never leaves your PC</span></h2>
+    <p class="intro">
+      <span lang="it">Analisi, riconoscimento e calcolo avvengono sul tuo computer. Solo la mappa, se la usi per calibrare, si collega a internet.</span>
+      <span lang="en">Analysis, detection and calculation all run on your computer. Only the map, if you use it to calibrate, goes online.</span>
+    </p>
+    <div class="pair">
+      <div><h3 lang="it">Misure non omologate</h3><h3 lang="en">Not certified measurements</h3>
+        <p lang="it">SpeedVision è uno strumento per capire il traffico, non un autovelox: le sue misure non servono per multe o sanzioni. Ogni velocità riporta la sua incertezza.</p>
+        <p lang="en">SpeedVision is a tool for understanding traffic, not a speed camera: its measurements cannot be used for fines. Every speed comes with its uncertainty.</p></div>
+      <div><h3 lang="it">Targhe e persone</h3><h3 lang="en">Plates and people</h3>
+        <p lang="it">Le immagini possono contenere dati personali. Per condividerle usa la versione con i veicoli pixellati e controllala prima.</p>
+        <p lang="en">Images can contain personal data. To share them, use the version with vehicles pixelated and check it first.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="installa">
+  <div class="wrap install">
+    <div>
+      <h2><span lang="it">Installazione</span><span lang="en">Install</span></h2>
+      <ul>
+        <li lang="it">Windows 10 o 11, 64 bit</li><li lang="en">Windows 10 or 11, 64-bit</li>
+        <li lang="it">FFmpeg, gratuito</li><li lang="en">FFmpeg, free</li>
+      </ul>
+      <p lang="it">Scarica l'ultima versione dalla pagina <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a>, poi installa FFmpeg da un terminale:</p>
+      <p lang="en">Download the latest version from the <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a> page, then install FFmpeg from a terminal:</p>
+      <pre><code>winget install --id Gyan.FFmpeg -e</code></pre>
+      <p lang="it">Al primo uso del riconoscimento automatico il programma scarica il modello YOLOX una sola volta.</p>
+      <p lang="en">The first time you use automatic detection, the program downloads the YOLOX model once.</p>
+    </div>
+    <div>
+      <h2><span lang="it">Compilare dai sorgenti</span><span lang="en">Build from source</span></h2>
+      <p lang="it">Serve l'SDK .NET 10.</p><p lang="en">Requires the .NET 10 SDK.</p>
+      <pre><code>git clone https://github.com/bugeo/SpeedVision.git
+cd SpeedVision
+dotnet build SpeedVision.sln -c Release
+dotnet test SpeedVision.sln -c Release</code></pre>
+      <p lang="it">Segnalazioni e proposte sono benvenute nelle <a href="https://github.com/bugeo/SpeedVision/issues">Issues</a>.</p>
+      <p lang="en">Bug reports and suggestions are welcome in the <a href="https://github.com/bugeo/SpeedVision/issues">Issues</a>.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span lang="it">SpeedVision è software libero con licenza <a href="https://github.com/bugeo/SpeedVision/blob/main/LICENSE">MIT</a>.</span>
+    <span lang="en">SpeedVision is free software under the <a href="https://github.com/bugeo/SpeedVision/blob/main/LICENSE">MIT</a> licence.</span>
+    <a href="https://github.com/bugeo/SpeedVision">github.com/bugeo/SpeedVision</a>
+  </div>
+</footer>
+
+<script>
+// Lingua: quella del browser, o quella scelta (ricordata in questo browser).
+(function () {
+  const root = document.documentElement;
+  function setLang(l) {
+    root.dataset.l = l;
+    root.lang = l;
+    document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.set === l)));
+    try { localStorage.setItem('sv-lang', l); } catch (e) {}
+    updateReadout();
+  }
+  let saved = null;
+  try { saved = localStorage.getItem('sv-lang'); } catch (e) {}
+  const initial = saved || ((navigator.language || 'it').toLowerCase().startsWith('it') ? 'it' : 'en');
+  document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.set)));
+
+  // Animazione: un'auto passa da A a B a una velocità diversa ogni volta; il cronometro
+  // parte quando lo spigolo anteriore tocca A e si ferma su B. 300 px = 18,50 m.
+  const car = document.getElementById('car');
+  const timeEl = document.getElementById('r-time');
+  const speedEl = document.getElementById('r-speed');
+  const PX_PER_M = 300 / 18.5, LINE_A = 180, LINE_B = 480, CORNER = 100;
+  const START = -60, END = 680;
+  let kmh = 50, x = START, last = null, t = null, done = null;
+
+  function fmt(n, d) { return n.toLocaleString(root.dataset.l === 'it' ? 'it-IT' : 'en-GB', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function updateReadout() {
+    const dist = fmt(18.5, 2) + ' m';
+    document.getElementById('r-dist').textContent = dist;
+    document.getElementById('svg-dist').textContent = dist;
+    if (done !== null) {
+      timeEl.textContent = fmt(done, 3) + ' s';
+      speedEl.textContent = fmt(18.5 / done * 3.6, 1) + ' km/h';
+    } else if (t !== null) {
+      timeEl.textContent = fmt(t, 3) + ' s';
+      speedEl.textContent = '…';
+    } else {
+      timeEl.textContent = '–';
+      speedEl.textContent = '–';
+    }
+  }
+  function newPass() { kmh = 34 + Math.random() * 30; x = START; t = null; done = null; }
+
+  function frame(now) {
+    if (last === null) last = now;
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    // Rallentatore ×0,35 per poter leggere il cronometro; il tempo mostrato è quello reale.
+    const slow = 0.35;
+    const front = x + CORNER;
+    x += kmh / 3.6 * PX_PER_M * dt * slow;
+    const newFront = x + CORNER;
+    if (front < LINE_A && newFront >= LINE_A) t = (newFront - LINE_A) / (kmh / 3.6 * PX_PER_M);
+    else if (t !== null && done === null) {
+      t += dt * slow;
+      if (newFront >= LINE_B) { done = 18.5 / (kmh / 3.6); }
+    }
+    car.setAttribute('transform', 'translate(' + x.toFixed(1) + ' 0)');
+    updateReadout();
+    if (x > END) { if (!frame.pause) frame.pause = now; if (now - frame.pause > 1400) { frame.pause = 0; newPass(); } }
+    requestAnimationFrame(frame);
+  }
+
+  setLang(initial);
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // Nessuna animazione: l'auto resta oltre la linea B con la misura completa.
+    x = 400; done = 18.5 / (52 / 3.6);
+    car.setAttribute('transform', 'translate(400 0)');
+    updateReadout();
+  } else {
+    newPass();
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>

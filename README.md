@@ -4,6 +4,8 @@ Applicazione desktop per Windows che misura la velocità media dei veicoli tra d
 di rilevamento in un video di traffico ripreso da camera fissa. Tutto avviene sul PC:
 il video non viene mai inviato in rete.
 
+Sito del progetto: <https://bugeo.github.io/SpeedVision/>
+
 ## Stato (fasi 1–5)
 
 | Funzione | Stato |
