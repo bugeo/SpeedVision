@@ -6,6 +6,9 @@ set LOG=%TEMP%\speedvision-git.txt
 echo ==== %DATE% %TIME% RIPARAZIONE ==== > "%LOG%"
 if exist .git\rebase-merge git rebase --abort >> "%LOG%" 2>&1
 if exist .git\rebase-apply git rebase --abort >> "%LOG%" 2>&1
+rem Resto di un aggiornamento mai partito (senza head-name): non contiene lavoro, si elimina.
+if exist .git\rebase-merge if not exist .git\rebase-merge\head-name rmdir /s /q .git\rebase-merge
+if exist .git\rebase-merge echo ATTENZIONE: aggiornamento ancora in sospeso. >> "%LOG%"
 echo ---- STATO DOPO L'ANNULLAMENTO ---- >> "%LOG%"
 git status --short >> "%LOG%" 2>&1
 git stash list >> "%LOG%" 2>&1
