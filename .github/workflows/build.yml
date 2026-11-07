@@ -58,18 +58,15 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      # Versione autonoma: non richiede .NET installato sul PC di chi la scarica.
-      - name: Pubblica
+      # Versione autonoma: SpeedVision.exe con .NET incluso e FFmpeg nella cartella "ffmpeg".
+      # Chi la scarica estrae lo zip e avvia SpeedVision.exe, senza installare nulla.
+      - name: Prepara lo zip per Windows
         shell: pwsh
         run: |
-          $version = "${{ github.ref_name }}".TrimStart('v')
-          dotnet publish src/TrafficSpeedAnalyzer.App -c Release -r win-x64 --self-contained true `
-            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
-            -p:Version=$version -o out/SpeedVision
-          Copy-Item LICENSE, THIRD_PARTY_NOTICES.md out/SpeedVision/
-          Compress-Archive -Path out/SpeedVision -DestinationPath "SpeedVision-${{ github.ref_name }}-win-x64.zip"
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          ./scripts/package-release.ps1 -Version $version -OutDir out
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: SpeedVision-*-win-x64.zip
+          files: out/SpeedVision-*-win-x64.zip
           generate_release_notes: true
