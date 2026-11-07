@@ -260,7 +260,6 @@
  "MP4, MOV, MKV, AVI… anche HEVC degli iPhone e frame rate variabile. Il video resta sul tuo PC: nessun dato viene inviato in rete.": "MP4, MOV, MKV, AVI… including iPhone HEVC and variable frame rate. The video stays on your PC: no data is sent over the network.",
  "Scegli un file…": "Choose a file…",
  "Serve FFmpeg per leggere i video": "FFmpeg is needed to read videos",
- "L'applicazione usa FFmpeg (gratuito) per decodificare qualsiasi formato e leggere il tempo esatto di ogni fotogramma. Installalo con questo comando in PowerShell, poi premi «Riprova».": "The application uses FFmpeg (free) to decode any format and read the exact time of every frame. Install it with this command in PowerShell, then press «Retry».",
  "Copia": "Copy",
  "Riprova": "Retry",
  "Indica dove si trova ffmpeg.exe…": "Show where ffmpeg.exe is…",
@@ -595,5 +594,6 @@
  "Immagini": "Images",
  "in chiaro": "unblurred",
  "Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita in chiaro. Possono contenere targhe e persone (dati personali): per condividerle usa il rapporto anonimizzato.": "On the following pages, one per vehicle: the measurement data (the same as in the CSV) and the unblurred entry and exit images. They may contain number plates and people (personal data): to share them, use the anonymised report.",
- "«{0}.pdf» e «{1}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati.": "«{0}.pdf» and «{1}.pdf»: one page per vehicle, with the images unblurred and with vehicles pixelated."
+ "«{0}.pdf» e «{1}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati.": "«{0}.pdf» and «{1}.pdf»: one page per vehicle, with the images unblurred and with vehicles pixelated.",
+ "L'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».": "The application uses FFmpeg (free) to read videos. It is normally in the «ffmpeg» folder next to SpeedVision.exe: if it is missing, extract the whole zip again, or install it with this command in PowerShell, then press «Retry»."
 }

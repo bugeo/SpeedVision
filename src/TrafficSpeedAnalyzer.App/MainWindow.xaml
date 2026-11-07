@@ -304,7 +304,7 @@
                                                    Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" />
                                     </StackPanel>
                                     <TextBlock Style="{StaticResource Body}" Margin="0,0,0,14"
-                                               Text="{loc:Tr 'L\'applicazione usa FFmpeg (gratuito) per decodificare qualsiasi formato e leggere il tempo esatto di ogni fotogramma. Installalo con questo comando in PowerShell, poi premi «Riprova».'}" />
+                                               Text="{loc:Tr 'L\'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».'}" />
                                     <Border Background="#22000000" CornerRadius="6" Padding="12,8" Margin="0,0,0,14">
                                         <Grid>
                                             <Grid.ColumnDefinitions>

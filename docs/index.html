@@ -121,6 +121,8 @@ code, pre { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; fon
 pre { background: #e6ebf2; border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 8px 0 16px; }
 .install > div, .results > *, .hero-grid > * { min-width: 0; }
 .install ul { padding-left: 1.1em; margin: 0 0 12px; color: var(--muted); }
+.install-steps { padding-left: 1.3em; margin: 4px 0 16px; }
+.install-steps li { padding-left: 4px; margin-bottom: 4px; }
 
 /* Offrimi un caffè */
 .coffee .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px 48px; }
@@ -350,13 +352,18 @@ footer a { color: #c7d3e4; }
   <div class="wrap install">
     <div>
       <h2><span lang="it">Installazione</span><span lang="en">Install</span></h2>
-      <ul>
-        <li lang="it">Windows 10 o 11, 64 bit</li><li lang="en">Windows 10 or 11, 64-bit</li>
-        <li lang="it">FFmpeg, gratuito</li><li lang="en">FFmpeg, free</li>
-      </ul>
-      <p lang="it">Scarica l'ultima versione dalla pagina <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a>, poi installa FFmpeg da un terminale:</p>
-      <p lang="en">Download the latest version from the <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a> page, then install FFmpeg from a terminal:</p>
-      <pre><code>winget install --id Gyan.FFmpeg -e</code></pre>
+      <p lang="it">Non serve installare nulla. Serve Windows 10 o 11 a 64 bit.</p>
+      <p lang="en">Nothing to install. You need Windows 10 or 11, 64-bit.</p>
+      <ol class="install-steps">
+        <li lang="it">Scarica lo zip dell'ultima versione dalla pagina <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a>.</li>
+        <li lang="en">Download the latest zip from the <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a> page.</li>
+        <li lang="it">Clic destro sullo zip, «Estrai tutto».</li>
+        <li lang="en">Right-click the zip, «Extract all».</li>
+        <li lang="it">Avvia <code>SpeedVision.exe</code> dalla cartella estratta.</li>
+        <li lang="en">Run <code>SpeedVision.exe</code> from the extracted folder.</li>
+      </ol>
+      <p lang="it">Lo zip contiene già tutto, anche FFmpeg per leggere i video. Se Windows mostra «Windows ha protetto il PC», premi «Ulteriori informazioni» e poi «Esegui comunque»: succede ai programmi nuovi non ancora firmati.</p>
+      <p lang="en">The zip already contains everything, FFmpeg included. If Windows shows «Windows protected your PC», click «More info» and then «Run anyway»: it happens with new programs that are not yet signed.</p>
       <p lang="it">Per provarlo subito, scarica un video dalla <a href="https://github.com/bugeo/SpeedVision/tree/main/samples">cartella dei video di esempio</a> e aprilo con «Apri video». Lo stesso link è nel programma, nel pulsante «Scarica video di esempio».</p>
       <p lang="en">To try it right away, download a video from the <a href="https://github.com/bugeo/SpeedVision/tree/main/samples">sample videos folder</a> and open it with «Apri video» (Open video). The same link is in the program, on the «Download sample videos» button.</p>
       <p lang="it">Al primo uso del riconoscimento automatico il programma scarica il modello YOLOX una sola volta.</p>

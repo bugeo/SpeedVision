@@ -99,11 +99,11 @@ $ffmpegNote = if ($ffmpegIncluded) {
 }
 
 @"
-Traffic Speed Analyzer $version
-==============================
+SpeedVision $version
+==================
 
-Avvio: estrai lo ZIP in una cartella (per esempio Documenti\TrafficSpeedAnalyzer) e apri
-TrafficSpeedAnalyzer.exe. Non serve installare .NET.
+Avvio: estrai lo ZIP in una cartella (per esempio Documenti\SpeedVision) e apri
+SpeedVision.exe. Non serve installare .NET.
 
 $ffmpegNote
 

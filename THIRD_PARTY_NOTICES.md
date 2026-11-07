@@ -10,6 +10,6 @@ SpeedVision è distribuito con licenza MIT (vedi `LICENSE`). Usa questi componen
 | [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) | Struttura dell'interfaccia | MIT |
 | [Microsoft Edge WebView2](https://www.nuget.org/packages/Microsoft.Web.WebView2) | Pagina della mappa | Licenza Microsoft del pacchetto |
 | [Leaflet](https://leafletjs.com) 1.9.4 | Mappa per la calibrazione (`src/TrafficSpeedAnalyzer.App/Map/leaflet`, con il suo `LICENSE`) | BSD-2-Clause |
-| [FFmpeg](https://ffmpeg.org) | Lettura e stabilizzazione dei video; non incluso, va installato a parte | LGPL/GPL |
+| [FFmpeg](https://ffmpeg.org) | Lettura e stabilizzazione dei video. Lo zip della release include `ffmpeg.exe` e `ffprobe.exe` originali (build «essentials» di [Gyan Doshi](https://www.gyan.dev/ffmpeg/builds/)) nella cartella `ffmpeg`, con licenza, versione e link al codice sorgente; SpeedVision li avvia come programmi separati | GPLv3 |
 
 Le mappe e la ricerca dei luoghi usano servizi in rete (OpenStreetMap, immagini satellitari Esri), con i loro termini d'uso; i video non lasciano mai il PC.

@@ -260,7 +260,6 @@
  "MP4, MOV, MKV, AVI… anche HEVC degli iPhone e frame rate variabile. Il video resta sul tuo PC: nessun dato viene inviato in rete.": "MP4, MOV, MKV, AVI… y compris HEVC des iPhone et fréquence d'images variable. La vidéo reste sur votre PC : aucune donnée n'est envoyée sur le réseau.",
  "Scegli un file…": "Choisir un fichier…",
  "Serve FFmpeg per leggere i video": "FFmpeg est nécessaire pour lire les vidéos",
- "L'applicazione usa FFmpeg (gratuito) per decodificare qualsiasi formato e leggere il tempo esatto di ogni fotogramma. Installalo con questo comando in PowerShell, poi premi «Riprova».": "L'application utilise FFmpeg (gratuit) pour décoder n'importe quel format et lire le temps exact de chaque image. Installez-le avec cette commande dans PowerShell, puis appuyez sur «Réessayer».",
  "Copia": "Copier",
  "Riprova": "Réessayer",
  "Indica dove si trova ffmpeg.exe…": "Indiquer où se trouve ffmpeg.exe…",
@@ -595,5 +594,6 @@
  "Immagini": "Images",
  "in chiaro": "non floutées",
  "Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita in chiaro. Possono contenere targhe e persone (dati personali): per condividerle usa il rapporto anonimizzato.": "Dans les pages suivantes, une par véhicule : les données de la mesure (les mêmes que dans le CSV) et les images d'entrée et de sortie non floutées. Elles peuvent contenir des plaques et des personnes (données personnelles) : pour les partager, utilisez le rapport anonymisé.",
- "«{0}.pdf» e «{1}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati.": "«{0}.pdf» et «{1}.pdf» : une page par véhicule, avec les images non floutées et avec les véhicules pixellisés."
+ "«{0}.pdf» e «{1}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati.": "«{0}.pdf» et «{1}.pdf» : une page par véhicule, avec les images non floutées et avec les véhicules pixellisés.",
+ "L'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».": "L'application utilise FFmpeg (gratuit) pour lire les vidéos. Il se trouve normalement dans le dossier «ffmpeg» à côté de SpeedVision.exe : s'il manque, extrayez à nouveau tout le zip, ou installez-le avec cette commande dans PowerShell, puis appuyez sur «Réessayer»."
 }

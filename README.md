@@ -36,10 +36,11 @@ Sito del progetto: <https://bugeo.github.io/SpeedVision/> · [Offrimi un caffè]
 
 ## Requisiti
 
-- Windows 10 o 11 (64 bit)
-- [SDK .NET 10](https://dotnet.microsoft.com/download) per compilare
-- FFmpeg (gratuito): `winget install --id Gyan.FFmpeg -e`
-  (in alternativa copia `ffmpeg.exe` e `ffprobe.exe` in una cartella `ffmpeg` accanto all'eseguibile)
+- Windows 10 o 11 (64 bit).
+- **Per usarlo non serve installare nulla**: scarica lo zip da [Releases](https://github.com/bugeo/SpeedVision/releases),
+  estrailo e avvia `SpeedVision.exe`. Lo zip contiene già .NET e FFmpeg.
+- Per compilare: [SDK .NET 10](https://dotnet.microsoft.com/download) e FFmpeg (`winget install --id Gyan.FFmpeg -e`,
+  oppure `ffmpeg.exe` e `ffprobe.exe` in una cartella `ffmpeg` accanto all'eseguibile).
 
 Se sul PC è installato solo .NET 8 o 9, cambia `TsaTargetFramework` in `Directory.Build.props`.
 
@@ -51,7 +52,9 @@ dotnet test SpeedVision.sln -c Release
 dotnet run --project src/TrafficSpeedAnalyzer.App -c Release
 ```
 
-Oppure `scripts\build-and-test.ps1`. Per un eseguibile autonomo: `scripts\publish.ps1`.
+Oppure `scripts\build-and-test.ps1`. Per creare lo zip da distribuire, uguale a quello delle release (eseguibile autonomo + FFmpeg
+scaricato da una versione fissa): `scripts\package-release.ps1`. `scripts\publish.ps1` crea un pacchetto
+simile usando l'FFmpeg installato su questo PC.
 
 I test video generano piccoli filmati con FFmpeg e verificano che ogni fotogramma letto sia
 esattamente quello richiesto; se FFmpeg non è installato vengono **saltati** (non superati).
