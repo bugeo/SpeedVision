@@ -98,15 +98,25 @@ public sealed record SavedTrack(
     float Score = 0,
     IReadOnlyList<Core.Tracking.TrackPoint>? Points = null,
     bool AwaitingCalibration = false,
-    int Lane = 0);
+    int Lane = 0,
+    Core.Tracking.ReferencePoint Reference = Core.Tracking.ReferencePoint.BoxCorner);
 
 /// <summary>Riquadro di un veicolo da disegnare sopra il video (coordinate del video).</summary>
 /// <param name="Heading">Punto da segnare: +1 vertice basso destro (verso destra), −1 sinistro, 2 entrambi (perni delle linee), 0 centro del lato inferiore (verso non ancora noto).</param>
 public sealed record OverlayBox(BoundingBox Box, string Label, bool Confirmed, int Heading = 0);
 
 /// <summary>Riga della tabella dei risultati.</summary>
-public sealed class PassageRow
+public sealed class PassageRow : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
 {
+    private bool _isOverLimit;
+
+    /// <summary>Velocità oltre il limite indicato nei risultati: la riga è bordata di rosso.</summary>
+    public bool IsOverLimit
+    {
+        get => _isOverLimit;
+        set => SetProperty(ref _isOverLimit, value);
+    }
+
     private static CultureInfo It => Loc.Culture;
 
     public PassageRow(VehiclePassage passage, SavedTrack saved, Func<double, string> formatTime)
@@ -126,8 +136,11 @@ public sealed class PassageRow
 
     public bool IsAutomatic => Saved.Source == PassageSource.Automatic;
 
+    /// <summary>Punto del veicolo usato dalla misura automatica.</summary>
+    public string ReferenceText => Saved.Reference == Core.Tracking.ReferencePoint.FrontWheel ? Loc.T("ruota anteriore") : Loc.T("spigolo del riquadro");
+
     public string SourceText => IsAutomatic
-        ? "Automatico · " + ClassName(Saved.Class) + " · " + (Saved.Score * 100).ToString("0", It) + "%"
+        ? Loc.T("Automatico") + " · " + ReferenceText + " · " + ClassName(Saved.Class) + " · " + (Saved.Score * 100).ToString("0", It) + "%"
         : Loc.T("Manuale");
 
     public static string ClassName(VehicleClass? c) => c switch

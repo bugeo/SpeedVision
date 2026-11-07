@@ -229,7 +229,6 @@
  "Passaggi: {0} · velocità media {1:0.0} km/h": "Durchfahrten: {0} · Durchschnittsgeschwindigkeit {1:0.0} km/h",
  "Filtro applicato: {0} ({1} passaggi esportati su {2}).": "Angewendeter Filter: {0} ({1} von {2} Durchfahrten exportiert).",
  "Metodo: {0} passaggi da rilevamento automatico ({1}), {2} da posizioni indicate a mano.": "Methode: {0} Durchfahrten aus automatischer Erkennung ({1}), {2} aus von Hand angegebenen Positionen.",
- "Punto di riferimento automatico: vertice in basso sul davanti del riquadro del veicolo (il destro per chi va da sinistra a destra, il sinistro per chi va da destra a sinistra), lo stesso per l'ingresso e per l'uscita.": "Automatischer Bezugspunkt: vordere untere Ecke des Fahrzeugrahmens (die rechte bei Fahrzeugen von links nach rechts, die linke bei Fahrzeugen von rechts nach links), dieselbe für Ein- und Ausfahrt.",
  "Istante di attraversamento stimato con precisione inferiore al fotogramma": "Zeitpunkt der Überquerung mit Genauigkeit unterhalb eines Bildes geschätzt",
  "(interpolazione o regressione sulle posizioni attorno alla linea).": "(Interpolation oder Regression der Positionen um die Linie).",
  "Avvertenze: misure non omologate, non utilizzabili per sanzioni.": "Hinweise: Messungen nicht geeicht, nicht für Bußgelder verwendbar.",
@@ -597,5 +596,18 @@
  "in chiaro": "unverpixelt",
  "Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita in chiaro. Possono contenere targhe e persone (dati personali): per condividerle usa il rapporto anonimizzato.": "Auf den folgenden Seiten, eine pro Fahrzeug: die Messdaten (dieselben wie in der CSV) und die unverpixelten Einfahrts- und Ausfahrtsbilder. Sie können Kennzeichen und Personen enthalten (personenbezogene Daten): Zum Weitergeben den anonymisierten Bericht verwenden.",
  "«{0}.pdf» e «{1}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati.": "«{0}.pdf» und «{1}.pdf»: eine Seite pro Fahrzeug, mit unverpixelten Bildern und mit verpixelten Fahrzeugen.",
- "L'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».": "Die Anwendung verwendet FFmpeg (kostenlos), um Videos zu lesen. Es liegt normalerweise im Ordner «ffmpeg» neben SpeedVision.exe: Fehlt er, entpacke das ganze Zip erneut oder installiere FFmpeg mit diesem Befehl in PowerShell und drücke dann «Erneut versuchen»."
+ "L'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».": "Die Anwendung verwendet FFmpeg (kostenlos), um Videos zu lesen. Es liegt normalerweise im Ordner «ffmpeg» neben SpeedVision.exe: Fehlt er, entpacke das ganze Zip erneut oder installiere FFmpeg mit diesem Befehl in PowerShell und drücke dann «Erneut versuchen».",
+ "ruota anteriore": "Vorderrad",
+ "spigolo del riquadro": "Ecke des Rahmens",
+ "Automatico": "Automatisch",
+ "Punto di riferimento automatico: il punto in cui la ruota anteriore tocca l'asfalto, quando è trovata con coerenza nei fotogrammi (sta sulla strada come le linee, quindi senza errori di parallasse); altrimenti il vertice in basso sul davanti del riquadro del veicolo (il destro per chi va da sinistra a destra, il sinistro per chi va da destra a sinistra). Lo stesso punto per l'ingresso e per l'uscita.": "Automatischer Bezugspunkt: der Punkt, an dem das Vorderrad die Fahrbahn berührt, wenn es in den Bildern stimmig gefunden wird (er liegt wie die Linien auf der Straße, also ohne Parallaxenfehler); sonst die untere vordere Ecke des Fahrzeugrahmens (die rechte bei Verkehr von links nach rechts, die linke bei Verkehr von rechts nach links). Derselbe Punkt für Ein- und Ausfahrt.",
+ "  Passaggi automatici misurati con la ruota anteriore: {0}; con lo spigolo del riquadro: {1}.": "  Automatische Durchfahrten mit dem Vorderrad gemessen: {0}; mit der Ecke des Rahmens: {1}.",
+ "Completa giorno, mese, anno, ore, minuti e secondi.": "Tag, Monat, Jahr, Stunden, Minuten und Sekunden vervollständigen.",
+ "Data o ora non valida: controlla i numeri.": "Ungültiges Datum oder ungültige Uhrzeit: Zahlen prüfen.",
+ "Filtro (attivo)": "Filter (aktiv)",
+ "Inserisci il limite in km/h, per esempio 50.": "Gib das Tempolimit in km/h ein, zum Beispiel 50.",
+ "Limite di velocità": "Tempolimit",
+ "I veicoli più veloci del limite sono in rosso nel grafico e nell'elenco.": "Fahrzeuge über dem Tempolimit sind im Diagramm und in der Liste rot.",
+ "Multe": "Bußgelder",
+ "veicoli": "Fahrzeuge"
 }

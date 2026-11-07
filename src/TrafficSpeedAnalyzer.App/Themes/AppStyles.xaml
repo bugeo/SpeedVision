@@ -224,6 +224,11 @@
                             <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
                             <Setter TargetName="Bg" Property="Background" Value="{StaticResource SelectedBackground}" />
                         </Trigger>
+                        <!-- Oltre il limite di velocità: bordo rosso, anche quando la riga è selezionata -->
+                        <DataTrigger Binding="{Binding IsOverLimit}" Value="True">
+                            <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource ErrorBrush}" />
+                            <Setter TargetName="Bg" Property="BorderThickness" Value="2" />
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

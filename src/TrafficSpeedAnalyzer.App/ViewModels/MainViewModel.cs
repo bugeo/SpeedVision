@@ -42,6 +42,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
         _autoAdvance = _settings.AutoAdvance;
         _autoAdvanceFrames = Math.Clamp(_settings.AutoAdvanceFrames, 1, 10);
         InitializeAnalysisSettings();
+        InitializeSpeedLimit();
     }
 
     // ───────────── Stato generale ─────────────
@@ -367,7 +368,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
         CurrentTime = session.Index.FirstTime;
         _requestedFrame = -1;
 
-        RecordingStartText = session.Info.RecordingStart is { } rs ? rs.ToString("dd/MM/yyyy HH:mm:ss", It) : string.Empty;
+        RecordingStartText = session.Info.RecordingStart is { } rs ? rs.ToString(RecordingStartFormat, CultureInfo.InvariantCulture) : string.Empty;
         NotifyVideoProperties();
         ResetRoadForNewVideo(keepCalibration);
 

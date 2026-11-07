@@ -89,7 +89,8 @@ public sealed partial class MainViewModel
     // ───────────── Orario di inizio registrazione ─────────────
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(EffectiveRecordingStart), nameof(RecordingStartError), nameof(CurrentClockText), nameof(HasClockTime))]
+    [NotifyPropertyChangedFor(nameof(EffectiveRecordingStart), nameof(RecordingStartError), nameof(CurrentClockText), nameof(HasClockTime),
+        nameof(IsRecordingStartModified), nameof(IsRecordingStepActive))]
     [NotifyCanExecuteChangedFor(nameof(ConfirmRecordingStartCommand))]
     private string _recordingStartText = string.Empty;
 
@@ -98,10 +99,11 @@ public sealed partial class MainViewModel
 
     public bool HasClockTime => EffectiveRecordingStart is not null;
 
+    /// <summary>Messaggio sotto la data: da completare (mancano cifre) oppure non valida (es. 31/02).</summary>
     public string? RecordingStartError =>
-        !string.IsNullOrWhiteSpace(RecordingStartText) && EffectiveRecordingStart is null
-            ? Loc.T("Formato non valido. Usa gg/mm/aaaa hh:mm:ss")
-            : null;
+        !Controls.MaskedInput.HasDigits(RecordingStartText) || EffectiveRecordingStart is not null ? null
+        : RecordingStartText.Contains(Controls.MaskedInput.Empty) ? Loc.T("Completa giorno, mese, anno, ore, minuti e secondi.")
+        : Loc.T("Data o ora non valida: controlla i numeri.");
 
     public string RecordingStartSourceText => Info?.RecordingStartSource switch
     {
@@ -112,11 +114,19 @@ public sealed partial class MainViewModel
 
     partial void OnRecordingStartTextChanged(string value) => RefreshPassageTimes();
 
+    /// <summary>Formato della maschera di inserimento, con separatori fissi in tutte le lingue.</summary>
+    internal const string RecordingStartFormat = "dd'/'MM'/'yyyy HH':'mm':'ss";
+
     internal static DateTimeOffset? ParseRecordingStart(string? text)
     {
-        if (string.IsNullOrWhiteSpace(text))
+        if (!Controls.MaskedInput.HasDigits(text) || text!.Contains(Controls.MaskedInput.Empty))
         {
-            return null;
+            return null;   // vuota o ancora da completare
+        }
+
+        if (DateTime.TryParseExact(text.Trim(), RecordingStartFormat, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out DateTime masked))
+        {
+            return new DateTimeOffset(masked);
         }
 
         string[] formats =

@@ -107,6 +107,12 @@ p { margin: 0 0 12px; }
 .results li p { color: var(--muted); margin: 0; }
 .report img { border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 18px 40px -22px rgba(1, 8, 25, .35); }
 
+/* Novità */
+.news-list { list-style: none; margin: 0 0 20px; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 56px; }
+.news-list li { padding-left: 20px; border-left: 3px solid var(--cyan); }
+.news-list p { color: var(--muted); margin: 0; }
+.news-more { margin: 0; }
+
 /* Privacy e limiti: fondo scuro come la strada */
 .honest { background: var(--asphalt); color: #d2dbe8; border-top: 0; }
 .honest h2 { color: #fff; }
@@ -146,7 +152,7 @@ footer a { color: #c7d3e4; }
 }
 @media (max-width: 620px) {
   .top nav a { display: none; }
-  .steps, .methods, .pair { grid-template-columns: 1fr; }
+  .steps, .methods, .pair, .news-list { grid-template-columns: 1fr; }
   .steps li { margin-right: 0; }
   .readout { gap: 4px 20px; }
   .readout dd { font-size: 1.3rem; }
@@ -218,11 +224,15 @@ footer a { color: #c7d3e4; }
         <!-- Auto vista dall'alto, con il riquadro del rilevamento -->
         <g id="car" transform="translate(-120 0)">
           <rect x="-4" y="166" width="104" height="54" rx="4" fill="none" stroke="#22b35e" stroke-width="2" stroke-dasharray="6 4"/>
+          <!-- ruote (sporgono ai lati, viste dall'alto) -->
+          <rect x="15" y="167" width="14" height="7" rx="2" fill="#0b1426"/><rect x="15" y="212" width="14" height="7" rx="2" fill="#0b1426"/>
+          <rect x="66" y="167" width="14" height="7" rx="2" fill="#0b1426"/><rect x="66" y="212" width="14" height="7" rx="2" fill="#0b1426"/>
           <rect x="4" y="172" width="88" height="42" rx="12" fill="#e2e8f0"/>
           <rect x="52" y="177" width="22" height="32" rx="5" fill="#2a3346"/>
           <rect x="16" y="178" width="16" height="30" rx="4" fill="#2a3346"/>
           <rect x="86" y="175" width="5" height="9" rx="2" fill="#fff7cc"/><rect x="86" y="202" width="5" height="9" rx="2" fill="#fff7cc"/>
-          <circle id="corner" cx="100" cy="220" r="5" fill="#19b4f5"/>
+          <!-- punto di riferimento: contatto a terra della ruota anteriore -->
+          <circle id="corner" cx="73" cy="219" r="5" fill="#19b4f5" stroke="#010819" stroke-width="1.5"/>
         </g>
       </svg>
       <dl class="readout" aria-live="off">
@@ -231,8 +241,8 @@ footer a { color: #c7d3e4; }
         <div><dt><span lang="it">Velocità</span><span lang="en">Speed</span></dt><dd class="speed" id="r-speed">–</dd></div>
       </dl>
       <p class="demo-note">
-        <span lang="it">Il punto azzurro è lo spigolo anteriore del riquadro: l'istante in cui tocca ogni linea si calcola anche tra un fotogramma e l'altro.</span>
-        <span lang="en">The blue dot is the front corner of the box: the moment it touches each line is computed even between frames.</span>
+        <span lang="it">Il punto azzurro è dove la ruota anteriore tocca l'asfalto: sta sulla strada come le linee, quindi niente errori di prospettiva. L'istante in cui tocca ogni linea si calcola anche tra un fotogramma e l'altro.</span>
+        <span lang="en">The blue dot is where the front wheel touches the road: it lies on the road like the lines, so there is no perspective error. The moment it touches each line is computed even between frames.</span>
       </p>
     </div>
   </div>
@@ -248,23 +258,20 @@ footer a { color: #c7d3e4; }
     </p>
     <ol class="steps">
       <li><h3>Video</h3>
-        <p lang="it">Apri il video: qualsiasi formato letto da FFmpeg, anche con frame rate variabile. L'orario di inizio arriva dai metadati.</p>
-        <p lang="en">Open the video: any format FFmpeg can read, variable frame rate included. The start time comes from the metadata.</p></li>
+        <p lang="it">Apri il video: qualsiasi formato, anche con frame rate variabile. L'orario di inizio arriva dai metadati, o lo scrivi in una casella guidata.</p>
+        <p lang="en">Open the video: any format, variable frame rate included. The start time comes from the metadata, or you type it in a guided field.</p></li>
       <li><h3><span lang="it">Strada</span><span lang="en">Road</span></h3>
         <p lang="it">Segna i quattro bordi della strada e il numero di corsie, così i risultati si possono dividere per corsia.</p>
         <p lang="en">Mark the four edges of the road and the number of lanes, so results can be split by lane.</p></li>
       <li><h3><span lang="it">Analisi veicoli</span><span lang="en">Vehicle analysis</span></h3>
-        <p lang="it">Il riconoscimento automatico (YOLOX) trova le auto e le segue fotogramma per fotogramma.</p>
-        <p lang="en">Automatic detection (YOLOX) finds the cars and follows them frame by frame.</p></li>
+        <p lang="it">Il riconoscimento automatico (YOLOX) trova le auto, le segue fotogramma per fotogramma e ne individua la ruota anteriore.</p>
+        <p lang="en">Automatic detection (YOLOX) finds the cars, follows them frame by frame and locates their front wheel.</p></li>
       <li><h3><span lang="it">Calibrazione</span><span lang="en">Calibration</span></h3>
         <p lang="it">Posa le linee A e B e indica quanti metri le separano: è il dato da cui dipende ogni velocità.</p>
         <p lang="en">Place lines A and B and set how many metres apart they are: every speed depends on it.</p></li>
-      <li><h3><span lang="it">Misura manuale</span><span lang="en">Manual measurement</span></h3>
-        <p lang="it">Controlla i passaggi trovati, correggili o aggiungine a mano indicando la posizione del veicolo.</p>
-        <p lang="en">Check the detected passages, correct them or add new ones by pointing at the vehicle.</p></li>
       <li><h3><span lang="it">Risultati</span><span lang="en">Results</span></h3>
-        <p lang="it">Velocità media, minima e massima, il grafico per fasce di 5 km/h e l'esportazione.</p>
-        <p lang="en">Average, minimum and maximum speed, a chart in 5 km/h bands, and the export.</p></li>
+        <p lang="it">Velocità media, minima e massima, il grafico per fasce di 5 km/h e l'esportazione. Ogni passaggio si può correggere a mano.</p>
+        <p lang="en">Average, minimum and maximum speed, a chart in 5 km/h bands, and the export. Every passage can be corrected by hand.</p></li>
     </ol>
     <figure class="shot">
       <img src="img/app-calibrazione.jpg" alt="Il passo Risultati di SpeedVision: statistiche, grafico e un passaggio misurato tra le linee A e B" width="1471" height="908" loading="lazy">
@@ -312,9 +319,9 @@ footer a { color: #c7d3e4; }
         <li><h3 lang="it">Tabella CSV</h3><h3 lang="en">CSV table</h3>
           <p lang="it">Un passaggio per riga: verso, corsia, orari di ingresso e uscita, tempo e velocità. Si apre in Excel.</p>
           <p lang="en">One passage per row: direction, lane, entry and exit times, duration and speed. Opens in Excel.</p></li>
-        <li><h3 lang="it">Rapporto PDF</h3><h3 lang="en">PDF report</h3>
-          <p lang="it">Un riepilogo con il grafico, poi una pagina per veicolo con i dati e le immagini di ingresso e uscita.</p>
-          <p lang="en">A summary with the chart, then one page per vehicle with the data and the entry and exit images.</p></li>
+        <li><h3 lang="it">Due rapporti PDF</h3><h3 lang="en">Two PDF reports</h3>
+          <p lang="it">Un riepilogo con il grafico, poi una pagina per veicolo con i dati e le immagini di ingresso e uscita: una versione in chiaro e una con i veicoli pixellati, da condividere.</p>
+          <p lang="en">A summary with the chart, then one page per vehicle with the data and the entry and exit images: one version unblurred and one with vehicles pixelated, for sharing.</p></li>
         <li><h3 lang="it">Immagini</h3><h3 lang="en">Images</h3>
           <p lang="it">Il fotogramma di ingresso e quello di uscita con l'orario sovrimpresso, anche in versione con i veicoli pixellati.</p>
           <p lang="en">The entry and exit frames with the time overlaid, also in a version with vehicles pixelated.</p></li>
@@ -327,6 +334,27 @@ footer a { color: #c7d3e4; }
         <span lang="en">First page of the report, with test data.</span>
       </figcaption>
     </figure>
+  </div>
+</section>
+
+<section class="news">
+  <div class="wrap">
+    <h2><span lang="it">Novità</span><span lang="en">What's new</span></h2>
+    <ul class="news-list">
+      <li><h3 lang="it">Misura dalla ruota anteriore</h3><h3 lang="en">Measured from the front wheel</h3>
+        <p lang="it">La velocità si calcola dal punto in cui la ruota anteriore tocca l'asfalto, non più dal bordo del riquadro: niente errori di prospettiva, anche con la telecamera un po' storta.</p>
+        <p lang="en">Speed is computed from where the front wheel touches the road instead of the box edge: no perspective errors, even with a slightly tilted camera.</p></li>
+      <li><h3 lang="it">Niente da installare</h3><h3 lang="en">Nothing to install</h3>
+        <p lang="it">Lo zip contiene già tutto, anche FFmpeg: si estrae e si avvia SpeedVision.exe.</p>
+        <p lang="en">The zip already contains everything, FFmpeg included: extract it and run SpeedVision.exe.</p></li>
+      <li><h3 lang="it">Rapporti in chiaro e anonimizzati</h3><h3 lang="en">Unblurred and anonymised reports</h3>
+        <p lang="it">Due PDF a ogni esportazione; la pixellatura copre targhe e volti ma lascia riconoscibile il veicolo.</p>
+        <p lang="en">Two PDFs with every export; pixelation hides plates and faces but keeps the vehicle recognisable.</p></li>
+      <li><h3 lang="it">Più guidato</h3><h3 lang="en">More guided</h3>
+        <p lang="it">Data e ora in una casella guidata, passaggio automatico al passo successivo e video di esempio da scaricare con un clic.</p>
+        <p lang="en">Date and time in a guided field, automatic move to the next step and sample videos one click away.</p></li>
+    </ul>
+    <p class="news-more"><a href="https://github.com/bugeo/SpeedVision/wiki/Novita"><span lang="it">Tutte le novità nel wiki</span><span lang="en">All changes in the wiki (Italian)</span></a></p>
   </div>
 </section>
 
@@ -431,7 +459,7 @@ dotnet test SpeedVision.sln -c Release</code></pre>
   const car = document.getElementById('car');
   const timeEl = document.getElementById('r-time');
   const speedEl = document.getElementById('r-speed');
-  const PX_PER_M = 300 / 18.5, LINE_A = 180, LINE_B = 480, CORNER = 100;
+  const PX_PER_M = 300 / 18.5, LINE_A = 180, LINE_B = 480, CORNER = 73;
   const START = -60, END = 680;
   let kmh = 50, x = START, last = null, t = null, done = null;
 

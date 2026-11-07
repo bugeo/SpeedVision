@@ -1,4 +1,5 @@
 using TrafficSpeedAnalyzer.Core.Detection;
+using TrafficSpeedAnalyzer.Core.Geometry;
 using TrafficSpeedAnalyzer.Core.Measurement;
 using TrafficSpeedAnalyzer.Core.Tracking;
 using static TrafficSpeedAnalyzer.Core.Tests.SyntheticTrack;
@@ -289,6 +290,77 @@ public class TrackPassageExtractorTests
         // Fermo: centro del lato inferiore.
         var still = new FinishedTrack(3, right.Points.Select(p => p with { Box = right.Points[0].Box }).ToList());
         Assert.Equal(right.Points[0].Box.CenterX, TrackPassageExtractor.Extract(still, null).Observations[0].Position.X, 9);
+    }
+
+    /// <summary>
+    /// Traccia con le ruote: la ruota anteriore avanza in modo esatto, mentre il muso del riquadro «balla»
+    /// (riflessi, ombre, il veicolo visto prima di fronte e poi di lato), come nei video veri.
+    /// </summary>
+    private static FinishedTrack TrackWithWheels(double kmh, double noseNoisePx, Func<int, bool>? hasWheel = null, int seed = 1)
+    {
+        var rng = new Random(seed);
+        double v = KmhToPxPerS(kmh);
+        var points = new List<TrackPoint>();
+        int i = 0;
+        for (double t = 0.013; t <= 700 / v; t += 1 / 30.0, i++)
+        {
+            double wheelX = 100 + (v * t);                      // contatto a terra della ruota anteriore
+            double right = wheelX + 12 + (Gaussian(rng) * noseNoisePx);
+            var box = new BoundingBox(right - 80, 400, 80, 50);
+            IReadOnlyList<WheelCandidate>? wheels = hasWheel?.Invoke(i) == false ? [] :
+            [
+                new WheelCandidate(new Point2(wheelX, 440), 10, 120),           // anteriore
+                new WheelCandidate(new Point2(wheelX - 50, 440), 10, 110),      // posteriore
+            ];
+            points.Add(new TrackPoint(i, t, box, VehicleClass.Car, 0.9f, false, wheels));
+        }
+
+        return new FinishedTrack(1, points);
+    }
+
+    [Fact]
+    public void FrontWheel_IsTheReference_AndIgnoresTheJitteringNose()
+    {
+        double cornerError = 0;
+        for (int seed = 0; seed < 20; seed++)
+        {
+            FinishedTrack track = TrackWithWheels(60, noseNoisePx: 6, seed: seed);
+            TrackPassageCandidate wheel = TrackPassageExtractor.Extract(track, TestCalibration);
+            Assert.True(wheel.IsPassage, wheel.RejectionReason);
+            Assert.Equal(ReferencePoint.FrontWheel, wheel.Reference);
+            Assert.Equal(60, wheel.Result!.Passage!.Speed.SpeedKmh, 6);   // la ruota è esatta
+            Assert.Equal(450, wheel.Observations[0].Position.Y, 9);       // punto a terra: fondo della ruota
+
+            TrackPassageCandidate corner = TrackPassageExtractor.Extract(track, TestCalibration, TrackPassageOptions.Default with { UseWheels = false });
+            Assert.Equal(ReferencePoint.BoxCorner, corner.Reference);
+            cornerError += Math.Abs(corner.Result!.Passage!.Speed.SpeedKmh - 60) / 20;
+        }
+
+        // Il confronto ha senso solo se il muso che «balla» sposta davvero la misura con il riquadro.
+        Assert.True(cornerError > 0.1, $"errore medio con il riquadro {cornerError:0.000} km/h");
+    }
+
+    [Fact]
+    public void FewWheels_FallBackToTheBoxCorner()
+    {
+        // Ruota trovata solo in un fotogramma su quattro: non abbastanza.
+        TrackPassageCandidate c = TrackPassageExtractor.Extract(TrackWithWheels(60, 0, hasWheel: i => i % 4 == 0), TestCalibration);
+        Assert.True(c.IsPassage, c.RejectionReason);
+        Assert.Equal(ReferencePoint.BoxCorner, c.Reference);
+    }
+
+    [Fact]
+    public void WheelOutliers_AreDropped()
+    {
+        // In qualche fotogramma la ruota «anteriore» trovata è in realtà un'ombra in mezzo al veicolo.
+        FinishedTrack track = TrackWithWheels(60, 0);
+        var points = track.Points.Select(p => p.FrameIndex % 5 == 2
+            ? p with { Wheels = [new WheelCandidate(new Point2(p.Box.CenterX + 3, 440), 10, 130)] }
+            : p).ToList();
+        TrackPassageCandidate c = TrackPassageExtractor.Extract(new FinishedTrack(1, points), TestCalibration);
+        Assert.Equal(ReferencePoint.FrontWheel, c.Reference);
+        Assert.DoesNotContain(c.Observations, o => o.FrameIndex % 5 == 2);
+        Assert.Equal(60, c.Result!.Passage!.Speed.SpeedKmh, 6);
     }
 
     [Fact]

@@ -45,6 +45,9 @@ public sealed class AppSettings
 
     public string? MapLayer { get; set; }
 
+    /// <summary>Limite di velocità dei risultati, in km/h.</summary>
+    public double SpeedLimitKmh { get; set; } = 50;
+
     public static AppSettings Load()
     {
         try

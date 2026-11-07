@@ -4,7 +4,9 @@ namespace TrafficSpeedAnalyzer.Core.Tracking;
 
 /// <summary>Rilevamento associato a una traccia in un fotogramma.</summary>
 /// <param name="Truncated">Il riquadro tocca il bordo dell'immagine o della zona analizzata: il veicolo è parzialmente visibile.</param>
-public sealed record TrackPoint(long FrameIndex, double TimeSeconds, BoundingBox Box, VehicleClass Class, float Score, bool Truncated);
+/// <param name="Wheels">Ruote trovate nel riquadro, null se non cercate.</param>
+public sealed record TrackPoint(long FrameIndex, double TimeSeconds, BoundingBox Box, VehicleClass Class, float Score, bool Truncated,
+    IReadOnlyList<WheelCandidate>? Wheels = null);
 
 /// <summary>Traccia conclusa (veicolo uscito o perso), con tutti i rilevamenti associati.</summary>
 public sealed record FinishedTrack(int TrackId, IReadOnlyList<TrackPoint> Points);
@@ -271,7 +273,7 @@ public sealed class ByteTracker : IVehicleTracker
             LastUpdateTime = time;
             _hits = 1;
             State = minHits <= 1 ? TrackState.Confirmed : TrackState.Tentative;
-            _points.Add(new TrackPoint(frame, time, b, d.Class, d.Score, truncated));
+            _points.Add(new TrackPoint(frame, time, b, d.Class, d.Score, truncated, d.Wheels));
             PredictedBox = b;
         }
 
@@ -312,7 +314,7 @@ public sealed class ByteTracker : IVehicleTracker
             LastUpdateTime = time;
             _hits++;
             State = _hits >= minHits || State is TrackState.Confirmed or TrackState.Lost ? TrackState.Confirmed : TrackState.Tentative;
-            _points.Add(new TrackPoint(frame, time, b, d.Class, d.Score, truncated));
+            _points.Add(new TrackPoint(frame, time, b, d.Class, d.Score, truncated, d.Wheels));
         }
 
         public FinishedTrack ToFinished() => new(Id, _points.ToList());

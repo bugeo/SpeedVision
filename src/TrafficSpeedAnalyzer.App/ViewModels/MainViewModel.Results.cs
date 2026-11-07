@@ -141,11 +141,13 @@ public sealed partial class MainViewModel
         OnPropertyChanged(nameof(IsReferenceStepActive));
         OnPropertyChanged(nameof(DistanceEstimateHint));
         OnPropertyChanged(nameof(IsFilterActive));
+        OnPropertyChanged(nameof(FilterHeaderText));
         OnPropertyChanged(nameof(ExportButtonText));
         OnPropertyChanged(nameof(PassageCountText));
         OnPropertyChanged(nameof(MeanSpeedText));
         OnPropertyChanged(nameof(MinSpeedText));
         OnPropertyChanged(nameof(MaxSpeedText));
+        RefreshSpeedLimitMarks();
         RefreshHistogram();
         OnPropertyChanged(nameof(InvalidPassagesText));
         ExportResultsCommand.NotifyCanExecuteChanged();
@@ -447,7 +449,9 @@ public sealed partial class MainViewModel
         sb.AppendLine();
         int auto = rows.Count(r => r.IsAutomatic);
         sb.AppendLine(Loc.S($"Metodo: {auto} passaggi da rilevamento automatico ({LastModelDescription ?? "YOLOX"}), {rows.Count - auto} da posizioni indicate a mano."));
-        sb.AppendLine(Loc.T("Punto di riferimento automatico: vertice in basso sul davanti del riquadro del veicolo (il destro per chi va da sinistra a destra, il sinistro per chi va da destra a sinistra), lo stesso per l'ingresso e per l'uscita."));
+        sb.AppendLine(Loc.T("Punto di riferimento automatico: il punto in cui la ruota anteriore tocca l'asfalto, quando è trovata con coerenza nei fotogrammi (sta sulla strada come le linee, quindi senza errori di parallasse); altrimenti il vertice in basso sul davanti del riquadro del veicolo (il destro per chi va da sinistra a destra, il sinistro per chi va da destra a sinistra). Lo stesso punto per l'ingresso e per l'uscita."));
+        int wheelRefs = rows.Count(r => r.IsAutomatic && r.Saved.Reference == Core.Tracking.ReferencePoint.FrontWheel);
+        sb.AppendLine(Loc.S($"  Passaggi automatici misurati con la ruota anteriore: {wheelRefs}; con lo spigolo del riquadro: {auto - wheelRefs}."));
         sb.AppendLine(Loc.T("Istante di attraversamento stimato con precisione inferiore al fotogramma"));
         sb.AppendLine(Loc.T("(interpolazione o regressione sulle posizioni attorno alla linea)."));
         sb.AppendLine();

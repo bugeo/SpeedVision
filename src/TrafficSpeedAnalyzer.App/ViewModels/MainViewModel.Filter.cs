@@ -49,6 +49,9 @@ public sealed partial class MainViewModel
     /// <summary>Vero se esiste almeno un passaggio valido, anche se nascosto dal filtro.</summary>
     public bool HasAnyPassage => _allRows.Count > 0;
 
+    /// <summary>Titolo del riquadro (chiuso all'inizio): dice se il filtro sta nascondendo qualcosa.</summary>
+    public string FilterHeaderText => IsFilterActive ? Loc.T("Filtro (attivo)") : Loc.T("Filtro");
+
     public bool IsFilterActive =>
         MinSpeedFilter is not null || !ShowCars || !ShowMotorcycles || !ShowBuses || !ShowTrucks || !ShowManual || !ShowAToB || !ShowBToA
         || LaneFilters.Any(l => !l.IsShown);

@@ -92,6 +92,10 @@ public sealed partial class MainViewModel
         Road = Road is { } r ? r.WithLanes(n) : RoadLayout.CreateCentered(n, VideoWidth, VideoHeight);
         RoadLanesChosen = true;
         RoadDividersConfirmed = false;
+        if (n == 1 && RoadEdgesConfirmed)
+        {
+            SelectedStep = WorkflowStep.Analysis;   // una corsia: niente linee da sistemare, si passa all'analisi
+        }
     }
 
     /// <summary>La strada è stata modificata nel visore.</summary>
@@ -107,8 +111,13 @@ public sealed partial class MainViewModel
     [RelayCommand]
     private void ConfirmRoadEdges() => RoadEdgesConfirmed = true;
 
+    /// <summary>«Le linee sono a posto»: la strada è completa, si passa subito all'analisi.</summary>
     [RelayCommand]
-    private void ConfirmRoadDividers() => RoadDividersConfirmed = true;
+    private void ConfirmRoadDividers()
+    {
+        RoadDividersConfirmed = true;
+        SelectedStep = WorkflowStep.Analysis;
+    }
 
     /// <summary>«Ricomincia»: di nuovo i bordi della strada, poi le corsie.</summary>
     [RelayCommand]

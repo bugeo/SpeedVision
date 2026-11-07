@@ -50,7 +50,8 @@ public readonly record struct BoundingBox(double X, double Y, double Width, doub
     }
 }
 
-public sealed record VehicleDetection(BoundingBox Box, VehicleClass Class, float Score);
+/// <param name="Wheels">Ruote trovate nel riquadro (<see cref="WheelLocator"/>), null se non cercate.</param>
+public sealed record VehicleDetection(BoundingBox Box, VehicleClass Class, float Score, IReadOnlyList<WheelCandidate>? Wheels = null);
 
 /// <summary>Rilevatore di veicoli su un singolo fotogramma (immagine BGR 8 bit).</summary>
 public interface IVehicleDetector : IDisposable

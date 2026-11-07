@@ -39,6 +39,12 @@ public sealed record AnalysisOptions
     public TrackPassageOptions Passages { get; init; } = TrackPassageOptions.Default;
 
     /// <summary>
+    /// Cerca le ruote nel riquadro di ogni veicolo: il punto di contatto a terra della ruota anteriore diventa
+    /// il riferimento della misura quando è trovato con coerenza (vedi <see cref="TrackPassageExtractor"/>).
+    /// </summary>
+    public bool LocateWheels { get; init; } = true;
+
+    /// <summary>
     /// Consegna anche le tracce che non attraversano le linee (abbastanza lunghe e affidabili).
     /// Senza calibrazione è sempre così: le linee arrivano dopo l'analisi.
     /// </summary>
@@ -207,8 +213,19 @@ public static class AnalysisPipeline
                         var truncated = new List<bool>(raw.Count);
                         foreach (VehicleDetection d in raw)
                         {
-                            truncated.Add(AnalysisRegion.IsTruncated(d.Box, regionAnalysis));
-                            dets.Add(d with { Box = AnalysisRegion.Scale(d.Box, 1 / toAnalysisX, 1 / toAnalysisY) });
+                            bool cut = AnalysisRegion.IsTruncated(d.Box, regionAnalysis);
+                            truncated.Add(cut);
+
+                            // Ruote: solo nei veicoli interi, cercate sul fotogramma analizzato e riportate al video.
+                            IReadOnlyList<WheelCandidate>? wheels = null;
+                            if (options.LocateWheels && !cut)
+                            {
+                                wheels = WheelLocator.Locate(frame.Pixels, frame.Width, frame.Height, frame.Stride, d.Box)
+                                    .Select(w => w.Scale(1 / toAnalysisX, 1 / toAnalysisY))
+                                    .ToList();
+                            }
+
+                            dets.Add(d with { Box = AnalysisRegion.Scale(d.Box, 1 / toAnalysisX, 1 / toAnalysisY), Wheels = wheels });
                         }
 
                         vehicles = tracker.Update(frame.Index, t, dets, truncated);

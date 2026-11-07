@@ -393,7 +393,7 @@ public sealed partial class MainViewModel
                 ui.InvokeAsync(() =>
                 {
                     // Non tutti i tracciati attraverseranno le linee: quelli che non lo fanno non sono errori.
-                    _savedTracks.Add(new SavedTrack(NextId++, track, PassageSource.Automatic, c.Class, c.MeanScore, c.Track.Points, AwaitingCalibration: true, Lane: lane));
+                    _savedTracks.Add(new SavedTrack(NextId++, track, PassageSource.Automatic, c.Class, c.MeanScore, c.Track.Points, AwaitingCalibration: true, Lane: lane, Reference: c.Reference));
                     added++;
                     RebuildPassages();
                 });

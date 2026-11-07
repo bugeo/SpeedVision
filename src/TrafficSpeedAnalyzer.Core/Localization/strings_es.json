@@ -228,7 +228,6 @@
  "Passaggi: {0} · velocità media {1:0.0} km/h": "Pasos: {0} · velocidad media {1:0.0} km/h",
  "Filtro applicato: {0} ({1} passaggi esportati su {2}).": "Filtro aplicado: {0} ({1} pasos exportados de {2}).",
  "Metodo: {0} passaggi da rilevamento automatico ({1}), {2} da posizioni indicate a mano.": "Método: {0} pasos por detección automática ({1}), {2} a partir de posiciones indicadas a mano.",
- "Punto di riferimento automatico: vertice in basso sul davanti del riquadro del veicolo (il destro per chi va da sinistra a destra, il sinistro per chi va da destra a sinistra), lo stesso per l'ingresso e per l'uscita.": "Punto de referencia automático: esquina inferior delantera del recuadro del vehículo (la derecha para los que van de izquierda a derecha, la izquierda para los que van de derecha a izquierda), la misma para la entrada y la salida.",
  "Istante di attraversamento stimato con precisione inferiore al fotogramma": "Instante de cruce estimado con precisión inferior al fotograma",
  "(interpolazione o regressione sulle posizioni attorno alla linea).": "(interpolación o regresión de las posiciones alrededor de la línea).",
  "Avvertenze: misure non omologate, non utilizzabili per sanzioni.": "Advertencias: mediciones no homologadas, no utilizables para sanciones.",
@@ -590,5 +589,18 @@
  "in chiaro": "sin pixelar",
  "Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita in chiaro. Possono contenere targhe e persone (dati personali): per condividerle usa il rapporto anonimizzato.": "En las páginas siguientes, una por vehículo: los datos de la medición (los mismos del CSV) y las imágenes de entrada y salida sin pixelar. Pueden contener matrículas y personas (datos personales): para compartirlas usa el informe anonimizado.",
  "«{0}.pdf» e «{1}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati.": "«{0}.pdf» y «{1}.pdf»: una página por vehículo, con las imágenes sin pixelar y con los vehículos pixelados.",
- "L'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».": "La aplicación usa FFmpeg (gratuito) para leer los vídeos. Normalmente está en la carpeta «ffmpeg» junto a SpeedVision.exe: si falta, vuelve a extraer el zip completo o instálalo con este comando en PowerShell y pulsa «Reintentar»."
+ "L'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».": "La aplicación usa FFmpeg (gratuito) para leer los vídeos. Normalmente está en la carpeta «ffmpeg» junto a SpeedVision.exe: si falta, vuelve a extraer el zip completo o instálalo con este comando en PowerShell y pulsa «Reintentar».",
+ "ruota anteriore": "rueda delantera",
+ "spigolo del riquadro": "esquina del recuadro",
+ "Automatico": "Automático",
+ "Punto di riferimento automatico: il punto in cui la ruota anteriore tocca l'asfalto, quando è trovata con coerenza nei fotogrammi (sta sulla strada come le linee, quindi senza errori di parallasse); altrimenti il vertice in basso sul davanti del riquadro del veicolo (il destro per chi va da sinistra a destra, il sinistro per chi va da destra a sinistra). Lo stesso punto per l'ingresso e per l'uscita.": "Punto de referencia automático: el punto en que la rueda delantera toca el asfalto, cuando se encuentra de forma coherente en los fotogramas (está en la calle como las líneas, así que sin errores de paralaje); si no, la esquina inferior delantera del recuadro del vehículo (la derecha para el tráfico de izquierda a derecha, la izquierda para el de derecha a izquierda). El mismo punto para la entrada y la salida.",
+ "  Passaggi automatici misurati con la ruota anteriore: {0}; con lo spigolo del riquadro: {1}.": "  Pasos automáticos medidos con la rueda delantera: {0}; con la esquina del recuadro: {1}.",
+ "Completa giorno, mese, anno, ore, minuti e secondi.": "Completa día, mes, año, horas, minutos y segundos.",
+ "Data o ora non valida: controlla i numeri.": "Fecha u hora no válida: revisa los números.",
+ "Filtro (attivo)": "Filtro (activo)",
+ "Inserisci il limite in km/h, per esempio 50.": "Escribe el límite en km/h, por ejemplo 50.",
+ "Limite di velocità": "Límite de velocidad",
+ "I veicoli più veloci del limite sono in rosso nel grafico e nell'elenco.": "Los vehículos más rápidos que el límite aparecen en rojo en el gráfico y en la lista.",
+ "Multe": "Multas",
+ "veicoli": "vehículos"
 }

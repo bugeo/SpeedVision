@@ -229,7 +229,6 @@
  "Passaggi: {0} · velocità media {1:0.0} km/h": "Passages: {0} · average speed {1:0.0} km/h",
  "Filtro applicato: {0} ({1} passaggi esportati su {2}).": "Filter applied: {0} ({1} passages exported out of {2}).",
  "Metodo: {0} passaggi da rilevamento automatico ({1}), {2} da posizioni indicate a mano.": "Method: {0} passages from automatic detection ({1}), {2} from positions entered manually.",
- "Punto di riferimento automatico: vertice in basso sul davanti del riquadro del veicolo (il destro per chi va da sinistra a destra, il sinistro per chi va da destra a sinistra), lo stesso per l'ingresso e per l'uscita.": "Automatic reference point: bottom front corner of the vehicle box (the right one for vehicles moving left to right, the left one for vehicles moving right to left), the same for entry and exit.",
  "Istante di attraversamento stimato con precisione inferiore al fotogramma": "Crossing time estimated with sub-frame precision",
  "(interpolazione o regressione sulle posizioni attorno alla linea).": "(interpolation or regression on the positions around the line).",
  "Avvertenze: misure non omologate, non utilizzabili per sanzioni.": "Warnings: measurements are not type-approved and cannot be used for fines.",
@@ -595,5 +594,18 @@
  "in chiaro": "unblurred",
  "Nelle pagine seguenti, una per veicolo: i dati della misura (gli stessi del CSV) e le immagini di ingresso e di uscita in chiaro. Possono contenere targhe e persone (dati personali): per condividerle usa il rapporto anonimizzato.": "On the following pages, one per vehicle: the measurement data (the same as in the CSV) and the unblurred entry and exit images. They may contain number plates and people (personal data): to share them, use the anonymised report.",
  "«{0}.pdf» e «{1}.pdf»: una pagina per veicolo, con le immagini in chiaro e con i veicoli pixellati.": "«{0}.pdf» and «{1}.pdf»: one page per vehicle, with the images unblurred and with vehicles pixelated.",
- "L'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».": "The application uses FFmpeg (free) to read videos. It is normally in the «ffmpeg» folder next to SpeedVision.exe: if it is missing, extract the whole zip again, or install it with this command in PowerShell, then press «Retry»."
+ "L'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».": "The application uses FFmpeg (free) to read videos. It is normally in the «ffmpeg» folder next to SpeedVision.exe: if it is missing, extract the whole zip again, or install it with this command in PowerShell, then press «Retry».",
+ "ruota anteriore": "front wheel",
+ "spigolo del riquadro": "box corner",
+ "Automatico": "Automatic",
+ "Punto di riferimento automatico: il punto in cui la ruota anteriore tocca l'asfalto, quando è trovata con coerenza nei fotogrammi (sta sulla strada come le linee, quindi senza errori di parallasse); altrimenti il vertice in basso sul davanti del riquadro del veicolo (il destro per chi va da sinistra a destra, il sinistro per chi va da destra a sinistra). Lo stesso punto per l'ingresso e per l'uscita.": "Automatic reference point: the point where the front wheel touches the road, when it is found consistently across frames (it lies on the road like the lines, so there is no parallax error); otherwise the bottom front corner of the vehicle box (the right one for traffic going left to right, the left one for traffic going right to left). The same point for entry and exit.",
+ "  Passaggi automatici misurati con la ruota anteriore: {0}; con lo spigolo del riquadro: {1}.": "  Automatic passages measured with the front wheel: {0}; with the box corner: {1}.",
+ "Completa giorno, mese, anno, ore, minuti e secondi.": "Fill in day, month, year, hours, minutes and seconds.",
+ "Data o ora non valida: controlla i numeri.": "Invalid date or time: check the numbers.",
+ "Filtro (attivo)": "Filter (active)",
+ "Inserisci il limite in km/h, per esempio 50.": "Enter the limit in km/h, for example 50.",
+ "Limite di velocità": "Speed limit",
+ "I veicoli più veloci del limite sono in rosso nel grafico e nell'elenco.": "Vehicles faster than the limit are shown in red in the chart and in the list.",
+ "Multe": "Fines",
+ "veicoli": "vehicles"
 }

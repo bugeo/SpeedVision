@@ -4,7 +4,8 @@ using TrafficSpeedAnalyzer.Core.Localization;
 namespace TrafficSpeedAnalyzer.App.ViewModels;
 
 /// <summary>Colonna del grafico: passaggi in una fascia di velocità.</summary>
-public sealed record HistogramBin(double From, double? To, int Count, double BarHeight, bool ShowLabel)
+/// <param name="OverLimit">Fascia sopra il limite di velocità: colonna rossa.</param>
+public sealed record HistogramBin(double From, double? To, int Count, double BarHeight, bool ShowLabel, bool OverLimit = false)
 {
     /// <summary>Etichetta sotto la colonna: limite inferiore, una sì e una no per non affollare l'asse.</summary>
     public string Label => ShowLabel ? (To is null ? "100+" : From.ToString("0", Loc.Culture)) : string.Empty;
@@ -53,12 +54,14 @@ public sealed partial class MainViewModel
             for (int i = 0; i < bins; i++)
             {
                 double from = i * HistogramStepKmh;
-                SpeedHistogram.Add(new HistogramBin(from, from + HistogramStepKmh, counts[i], HistogramBarMaxPx * counts[i] / max, i % 2 == 0));
+                SpeedHistogram.Add(new HistogramBin(from, from + HistogramStepKmh, counts[i], HistogramBarMaxPx * counts[i] / max, i % 2 == 0,
+                    SpeedLimitKmh is { } limit && from >= limit));
             }
 
             if (counts[bins] > 0)
             {
-                SpeedHistogram.Add(new HistogramBin(HistogramMaxKmh, null, counts[bins], HistogramBarMaxPx * counts[bins] / max, true));
+                SpeedHistogram.Add(new HistogramBin(HistogramMaxKmh, null, counts[bins], HistogramBarMaxPx * counts[bins] / max, true,
+                    SpeedLimitKmh is { } limit && HistogramMaxKmh >= limit));
             }
         }
 
