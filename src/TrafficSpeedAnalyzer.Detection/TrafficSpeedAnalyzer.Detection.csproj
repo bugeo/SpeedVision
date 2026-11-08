@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
-    Rilevamento veicoli con ONNX Runtime (GPU tramite DirectML, con ripiego automatico su CPU),
+    Rilevamento veicoli con ONNX Runtime (DirectML su Windows, CoreML su Mac, con ripiego automatico su CPU),
     tracking e pipeline di analisi automatica. Modelli YOLOX (Apache-2.0) scaricati su richiesta.
   -->
   <PropertyGroup>
@@ -8,9 +8,18 @@
     <RootNamespace>TrafficSpeedAnalyzer.Detection</RootNamespace>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
+  <!--
+    ONNX Runtime (licenza MIT, include l'esecutore CPU). Su Windows il pacchetto con DirectML;
+    altrove quello generico, che per Mac (osx-arm64) contiene CoreML e per Linux la sola CPU.
+    I due pacchetti hanno le stesse API: cambia solo la libreria nativa.
+    Si può forzare con -p:TsaOnnxRuntimePackage=...
+  -->
+  <PropertyGroup>
+    <TsaOnnxRuntimePackage Condition="'$(TsaOnnxRuntimePackage)' == '' and $([MSBuild]::IsOSPlatform('Windows'))">Microsoft.ML.OnnxRuntime.DirectML</TsaOnnxRuntimePackage>
+    <TsaOnnxRuntimePackage Condition="'$(TsaOnnxRuntimePackage)' == ''">Microsoft.ML.OnnxRuntime</TsaOnnxRuntimePackage>
+  </PropertyGroup>
   <ItemGroup>
-    <!-- Licenza MIT. Include anche l'esecutore CPU. -->
-    <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.24.4" />
+    <PackageReference Include="$(TsaOnnxRuntimePackage)" Version="1.24.4" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TrafficSpeedAnalyzer.Core\TrafficSpeedAnalyzer.Core.csproj" />

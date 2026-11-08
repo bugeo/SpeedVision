@@ -67,12 +67,14 @@ esattamente quello richiesto; se FFmpeg non è installato vengono **saltati** (n
 src/
   TrafficSpeedAnalyzer.Core    calcoli puri: geometria, calibrazione, attraversamenti, velocità, CSV
   TrafficSpeedAnalyzer.Video   FFmpeg/FFprobe: metadati, indice dei fotogrammi, lettura esatta
-  TrafficSpeedAnalyzer.App     interfaccia WPF (Fluent, tema scuro), MVVM
-  TrafficSpeedAnalyzer.Detection  YOLOX con ONNX Runtime, gestione modelli, pipeline di analisi
+  TrafficSpeedAnalyzer.Presentation  view model ed esportazioni, senza WPF (comuni a Windows, Mac e Linux)
+  TrafficSpeedAnalyzer.App     interfaccia WPF (Fluent, tema scuro) per Windows
+  TrafficSpeedAnalyzer.Detection  YOLOX con ONNX Runtime (DirectML / CoreML), gestione modelli, pipeline di analisi
 tests/
   TrafficSpeedAnalyzer.Core.Tests       traiettorie sintetiche a velocità nota, tracker
   TrafficSpeedAnalyzer.Video.Tests      parsing + video generati con contenuto noto
   TrafficSpeedAnalyzer.Detection.Tests  modello reale su video con auto vere a 50 e 72 km/h
+  TrafficSpeedAnalyzer.Presentation.Tests  view model senza interfaccia, immagini esportate
 ```
 
 ## Come viene calcolata la velocità

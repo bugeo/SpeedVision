@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Logica dell'interfaccia (view model) e servizi comuni, senza WPF: la usano l'app per Windows di oggi e
+    l'interfaccia multipiattaforma (Avalonia) per Mac e Linux. Ciò che dipende dal sistema (dialoghi, appunti,
+    browser, immagini dei fotogrammi, mappa) passa da IPlatformServices.
+    I namespace restano TrafficSpeedAnalyzer.App.* per non cambiare lo XAML esistente.
+  -->
+  <PropertyGroup>
+    <TargetFramework>$(TsaTargetFramework)</TargetFramework>
+    <RootNamespace>TrafficSpeedAnalyzer.App</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TrafficSpeedAnalyzer.Presentation.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <!-- Disegno delle immagini esportate e dell'anteprima per la mappa (lo stesso motore grafico di Avalonia 12). -->
+    <PackageReference Include="SkiaSharp" Version="3.119.4" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Core\TrafficSpeedAnalyzer.Core.csproj" />
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Video\TrafficSpeedAnalyzer.Video.csproj" />
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Detection\TrafficSpeedAnalyzer.Detection.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Logo nell'intestazione del rapporto PDF. -->
+    <EmbeddedResource Include="Assets\speedvision-logo-report.jpg" LogicalName="speedvision-logo-report.jpg" />
+  </ItemGroup>
+</Project>

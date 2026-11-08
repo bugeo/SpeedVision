@@ -37,6 +37,7 @@
     <conv:EnumToVisibilityConverter x:Key="EnumToVisibility" />
     <conv:TruthyToVisibilityConverter x:Key="TruthyToVisibility" />
     <conv:InverseBoolConverter x:Key="InverseBool" />
+    <conv:StatusSeverityConverter x:Key="StatusSeverity" />
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
     <!-- Testi -->

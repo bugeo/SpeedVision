@@ -1,15 +1,12 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32;
 using TrafficSpeedAnalyzer.App.Localization;
 using TrafficSpeedAnalyzer.App.Services;
 using TrafficSpeedAnalyzer.Core.Time;
 using TrafficSpeedAnalyzer.Video;
-using InfoBarSeverity = Wpf.Ui.Controls.InfoBarSeverity;
 using TrafficSpeedAnalyzer.Core.Localization;
 using TrafficSpeedAnalyzer.App;
 
@@ -125,7 +122,7 @@ public sealed partial class MainViewModel
             return;
         }
 
-        if (!ConfirmDiscardForVersionSwitch())
+        if (!await ConfirmDiscardForVersionSwitchAsync())
         {
             return;
         }
@@ -176,24 +173,24 @@ public sealed partial class MainViewModel
 
             if (StabilizationWarning.Length > 0)
             {
-                ShowStatus(Loc.T("Video stabilizzato, con riserva"), StabilizationWarning, InfoBarSeverity.Warning);
+                ShowStatus(Loc.T("Video stabilizzato, con riserva"), StabilizationWarning, StatusSeverity.Warning);
             }
             else
             {
                 ShowStatus(Loc.T("Video stabilizzato"),
                     Loc.T("Controlla che le linee siano ancora sui riferimenti a terra."),
-                    InfoBarSeverity.Success);
+                    StatusSeverity.Success);
             }
         }
         catch (OperationCanceledException)
         {
-            ShowStatus(Loc.T("Stabilizzazione annullata"), Loc.T("Resta in uso il video originale."), InfoBarSeverity.Informational);
+            ShowStatus(Loc.T("Stabilizzazione annullata"), Loc.T("Resta in uso il video originale."), StatusSeverity.Informational);
         }
         catch (Exception e) when (e is StabilizationException or VideoProbeException or IOException or UnauthorizedAccessException
             or TimeoutException or InvalidOperationException or System.ComponentModel.Win32Exception)
         {
             AppLog.Error("Stabilizzazione non riuscita", e);
-            ShowStatus(Loc.T("Stabilizzazione non riuscita"), e.Message + Loc.T(" Resta in uso il video originale."), InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Stabilizzazione non riuscita"), e.Message + Loc.T(" Resta in uso il video originale."), StatusSeverity.Error);
             StabilizationAnswered = true;
         }
         finally
@@ -254,7 +251,7 @@ public sealed partial class MainViewModel
     [RelayCommand(CanExecute = nameof(CanUseOriginal))]
     private async Task UseOriginalVideoAsync()
     {
-        if (Tools is not { } tools || _sourceInfo is not { } source || !ConfirmDiscardForVersionSwitch())
+        if (Tools is not { } tools || _sourceInfo is not { } source || !await ConfirmDiscardForVersionSwitchAsync())
         {
             return;
         }
@@ -274,7 +271,7 @@ public sealed partial class MainViewModel
         catch (Exception e) when (e is VideoProbeException or IOException or InvalidOperationException or TimeoutException or System.ComponentModel.Win32Exception)
         {
             AppLog.Error("Riapertura dell'originale non riuscita", e);
-            ShowStatus(Loc.T("Impossibile aprire il video originale"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Impossibile aprire il video originale"), e.Message, StatusSeverity.Error);
         }
         finally
         {
@@ -292,14 +289,13 @@ public sealed partial class MainViewModel
             return;
         }
 
-        var dialog = new SaveFileDialog
-        {
-            Title = Loc.T("Salva una copia del video stabilizzato"),
-            Filter = "Video MP4|*.mp4",
-            FileName = Path.GetFileNameWithoutExtension(SourceFileName) + "_stabilizzato.mp4",
-            InitialDirectory = Path.GetDirectoryName(SourceFilePath) ?? string.Empty,
-        };
-        if (dialog.ShowDialog() != true)
+        string? target = await _platform.PickSaveFileAsync(
+            Loc.T("Salva una copia del video stabilizzato"),
+            [new FileFilter("Video MP4", ["*.mp4"])],
+            Path.GetFileNameWithoutExtension(SourceFileName) + "_stabilizzato.mp4",
+            ".mp4",
+            Path.GetDirectoryName(SourceFilePath));
+        if (target is null)
         {
             return;
         }
@@ -308,13 +304,12 @@ public sealed partial class MainViewModel
         BusyText = Loc.T("Copia del video stabilizzato…");
         try
         {
-            string target = dialog.FileName;
             await Task.Run(() => File.Copy(r.OutputPath, target, overwrite: true));
-            ShowStatus(Loc.T("Copia salvata"), target, InfoBarSeverity.Success);
+            ShowStatus(Loc.T("Copia salvata"), target, StatusSeverity.Success);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            ShowStatus(Loc.T("Copia non riuscita"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Copia non riuscita"), e.Message, StatusSeverity.Error);
         }
         finally
         {
@@ -351,18 +346,17 @@ public sealed partial class MainViewModel
     }
 
     /// <summary>Le posizioni misurate valgono solo per la versione del video su cui sono state prese.</summary>
-    private bool ConfirmDiscardForVersionSwitch()
+    private async Task<bool> ConfirmDiscardForVersionSwitchAsync()
     {
         if (_currentTrack.Count == 0 && _savedTracks.Count == 0)
         {
             return true;
         }
 
-        MessageBoxResult r = MessageBox.Show(
+        return await _platform.AskAsync(
             Loc.T("I passaggi già misurati si riferiscono alla versione attuale del video e verranno rimossi " +
             "(le posizioni dei veicoli cambiano con la stabilizzazione). La calibrazione resta. Continuare?"),
-            AppInfo.Name, MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        return r == MessageBoxResult.Yes;
+            DialogKind.Warning) == DialogAnswer.Yes;
     }
 
     /// <summary>Sostituisce il video in uso con un'altra versione dello stesso video (stessi fotogrammi e tempi).</summary>

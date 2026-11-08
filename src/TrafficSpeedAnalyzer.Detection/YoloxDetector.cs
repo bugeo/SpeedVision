@@ -6,7 +6,10 @@ namespace TrafficSpeedAnalyzer.Detection;
 
 public enum AccelerationMode
 {
-    /// <summary>Scheda grafica (DirectML) se disponibile, altrimenti CPU.</summary>
+    /// <summary>
+    /// Acceleratore del sistema se disponibile e verificato, altrimenti CPU:
+    /// scheda grafica con DirectML su Windows, CoreML (GPU e Neural Engine) sui Mac con chip Apple.
+    /// </summary>
     Auto,
 
     CpuOnly,
@@ -90,20 +93,20 @@ public sealed class YoloxDetector : IVehicleDetector
 
         _session = cpu;
         ExecutionProvider = "CPU";
-        if (_options.Acceleration == AccelerationMode.Auto && OperatingSystem.IsWindows())
+        if (_options.Acceleration == AccelerationMode.Auto && Accelerator() is { } accel)
         {
             InferenceSession? gpu;
             string note;
             lock (GpuInitLock)
             {
-                // Un'inizializzazione DirectML alla volta: in parallelo alcuni driver si bloccano.
-                (gpu, note) = TryCreateVerifiedGpuSession(modelPath, cpu);
+                // Un'inizializzazione alla volta: in parallelo alcuni driver DirectML si bloccano.
+                (gpu, note) = TryCreateVerifiedGpuSession(modelPath, cpu, accel.Candidates);
             }
 
             if (gpu is not null)
             {
                 _session = gpu;
-                ExecutionProvider = Loc.T("GPU (DirectML)");
+                ExecutionProvider = accel.Name;
                 cpu.Dispose();
             }
             else
@@ -123,27 +126,64 @@ public sealed class YoloxDetector : IVehicleDetector
         new(path, new SessionOptions { GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL });
 
     /// <summary>
-    /// Prova la GPU con livelli di ottimizzazione decrescenti e la accetta solo se, su un'immagine
-    /// di prova, dà gli stessi risultati della CPU. Alcune combinazioni di driver e DirectML
-    /// producono uscite non valide senza segnalare errori.
+    /// Acceleratore del sistema operativo, con le configurazioni da provare in ordine.
+    /// Nessuno su Linux e sui Mac Intel: lì si usa la CPU.
     /// </summary>
-    private (InferenceSession?, string) TryCreateVerifiedGpuSession(string path, InferenceSession reference)
+    private static (string Name, IReadOnlyList<Func<SessionOptions>> Candidates)? Accelerator()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            // DirectML con livelli di ottimizzazione decrescenti.
+            return (Loc.T("GPU (DirectML)"),
+                [.. new[] { GraphOptimizationLevel.ORT_ENABLE_ALL, GraphOptimizationLevel.ORT_ENABLE_BASIC, GraphOptimizationLevel.ORT_DISABLE_ALL }
+                    .Select(level => (Func<SessionOptions>)(() =>
+                    {
+                        var so = new SessionOptions
+                        {
+                            GraphOptimizationLevel = level,
+                            EnableMemoryPattern = false,
+                            ExecutionMode = ExecutionMode.ORT_SEQUENTIAL,
+                        };
+                        so.AppendExecutionProvider_DML(0);
+                        return so;
+                    }))]);
+        }
+
+        if (OperatingSystem.IsMacOS() && System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64)
+        {
+            // CoreML: prima GPU e Neural Engine insieme, poi solo GPU (calcoli più vicini a quelli della CPU).
+            return (Loc.T("Chip Apple (CoreML)"),
+                [.. new[] { "ALL", "CPUAndGPU" }.Select(units => (Func<SessionOptions>)(() =>
+                    {
+                        var so = new SessionOptions { GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL };
+                        so.AppendExecutionProvider("CoreML", new Dictionary<string, string>
+                        {
+                            ["ModelFormat"] = "MLProgram",
+                            ["MLComputeUnits"] = units,
+                        });
+                        return so;
+                    }))]);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Prova l'acceleratore con le configurazioni indicate e lo accetta solo se, su un'immagine
+    /// di prova, dà gli stessi risultati della CPU. Alcune combinazioni di driver e DirectML
+    /// producono uscite non valide senza segnalare errori; CoreML può calcolare a precisione ridotta.
+    /// </summary>
+    private (InferenceSession?, string) TryCreateVerifiedGpuSession(string path, InferenceSession reference, IReadOnlyList<Func<SessionOptions>> candidates)
     {
         FillValidationInput(_input);
         float[] expected = Run(reference);
         string note = Loc.T(" (scheda grafica non disponibile)");
-        foreach (GraphOptimizationLevel level in new[] { GraphOptimizationLevel.ORT_ENABLE_ALL, GraphOptimizationLevel.ORT_ENABLE_BASIC, GraphOptimizationLevel.ORT_DISABLE_ALL })
+        foreach (Func<SessionOptions> candidate in candidates)
         {
             InferenceSession? gpu = null;
             try
             {
-                var so = new SessionOptions
-                {
-                    GraphOptimizationLevel = level,
-                    EnableMemoryPattern = false,
-                    ExecutionMode = ExecutionMode.ORT_SEQUENTIAL,
-                };
-                so.AppendExecutionProvider_DML(0);
+                using SessionOptions so = candidate();
                 gpu = new InferenceSession(path, so);
                 float[] actual = Run(gpu);
                 if (OutputsMatch(expected, actual))
@@ -155,7 +195,7 @@ public sealed class YoloxDetector : IVehicleDetector
             }
             catch (Exception e) when (e is OnnxRuntimeException or EntryPointNotFoundException or DllNotFoundException or NotSupportedException)
             {
-                // nessuna GPU compatibile con DirectML
+                // acceleratore non disponibile su questo computer
             }
 
             gpu?.Dispose();

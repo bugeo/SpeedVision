@@ -5,7 +5,6 @@ using System.IO;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32;
 using TrafficSpeedAnalyzer.App.Services;
 using TrafficSpeedAnalyzer.Core.Calibration;
 using TrafficSpeedAnalyzer.Core.Detection;
@@ -14,7 +13,6 @@ using TrafficSpeedAnalyzer.Core.Measurement;
 using TrafficSpeedAnalyzer.Core.Privacy;
 using TrafficSpeedAnalyzer.Core.Time;
 using TrafficSpeedAnalyzer.Video;
-using InfoBarSeverity = Wpf.Ui.Controls.InfoBarSeverity;
 using TrafficSpeedAnalyzer.Core.Localization;
 using TrafficSpeedAnalyzer.App;
 
@@ -211,7 +209,7 @@ public sealed partial class MainViewModel
 
         if (_currentTrack.Count > 0)
         {
-            ShowStatus(Loc.T("Misura in corso"), Loc.T("Salva o annulla il veicolo che stai misurando prima di modificarne un altro."), InfoBarSeverity.Warning);
+            ShowStatus(Loc.T("Misura in corso"), Loc.T("Salva o annulla il veicolo che stai misurando prima di modificarne un altro."), StatusSeverity.Warning);
             return;
         }
 
@@ -223,7 +221,7 @@ public sealed partial class MainViewModel
         SelectedStep = WorkflowStep.Measurement;
         AnalyzeCurrentTrack();
         GoToFrame((int)row.Passage.Entry.FirstBeyond.FrameIndex);
-        ShowStatus(Loc.T("Modifica del veicolo ") + row.IdText, Loc.T("Correggi i punti e salva. «Nuovo veicolo» annulla."), InfoBarSeverity.Informational);
+        ShowStatus(Loc.T("Modifica del veicolo ") + row.IdText, Loc.T("Correggi i punti e salva. «Nuovo veicolo» annulla."), StatusSeverity.Informational);
     }
 
     private bool CanExport() => HasPassages && !IsBusy && !IsAnalyzing && !IsDistanceProvisional;
@@ -236,19 +234,17 @@ public sealed partial class MainViewModel
             return;
         }
 
-        var dialog = new OpenFolderDialog
-        {
-            Title = Loc.T("Scegli dove salvare CSV, PDF e immagini"),
-            InitialDirectory = Directory.Exists(_settings.LastExportFolder) ? _settings.LastExportFolder : _settings.LastVideoFolder ?? string.Empty,
-        };
-        if (dialog.ShowDialog() != true)
+        string? parent = await _platform.PickFolderAsync(
+            Loc.T("Scegli dove salvare CSV, PDF e immagini"),
+            Directory.Exists(_settings.LastExportFolder) ? _settings.LastExportFolder : _settings.LastVideoFolder);
+        if (parent is null)
         {
             return;
         }
 
         StopPlayback();
         string baseName = Path.GetFileNameWithoutExtension(SourceFileName);
-        string folder = Path.Combine(dialog.FolderName, string.Create(CultureInfo.InvariantCulture, $"{baseName}_misure_{DateTime.Now:yyyyMMdd_HHmmss}"));
+        string folder = Path.Combine(parent, string.Create(CultureInfo.InvariantCulture, $"{baseName}_misure_{DateTime.Now:yyyyMMdd_HHmmss}"));
         List<PassageRow> rows = [.. Passages.OrderBy(p => p.Id)];
         DateTimeOffset? start = EffectiveRecordingStart;
         VideoSession session = _session;
@@ -298,19 +294,19 @@ public sealed partial class MainViewModel
                 .SaveAsync(Path.Combine(folder, "calibrazione.tsacal.json"));
             await File.WriteAllTextAsync(Path.Combine(folder, "info.txt"), BuildInfoText(session, cal, rows, start), new UTF8Encoding(true));
 
-            _settings.LastExportFolder = dialog.FolderName;
+            _settings.LastExportFolder = parent;
             _settings.Save();
             _lastExportFolder = folder;
             HasExportFolder = true;
             _hasUnexportedChanges = false;
             RefreshStepProgress();
             AppLog.Info($"Esportati {rows.Count} passaggi in {folder}");
-            ShowStatus(Loc.T("Esportazione completata"), Loc.S($"{rows.Count} passaggi salvati in {folder}"), InfoBarSeverity.Success);
+            ShowStatus(Loc.T("Esportazione completata"), Loc.S($"{rows.Count} passaggi salvati in {folder}"), StatusSeverity.Success);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or VideoProbeException or InvalidOperationException)
         {
             AppLog.Error("Esportazione non riuscita", e);
-            ShowStatus(Loc.T("Esportazione non riuscita"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Esportazione non riuscita"), e.Message, StatusSeverity.Error);
         }
         finally
         {
@@ -352,7 +348,7 @@ public sealed partial class MainViewModel
     {
         try
         {
-            using Stream? stream = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/Assets/speedvision-logo-report.jpg"))?.Stream;
+            using Stream? stream = typeof(MainViewModel).Assembly.GetManifestResourceStream("speedvision-logo-report.jpg");
             if (stream is null)
             {
                 return null;
@@ -371,10 +367,10 @@ public sealed partial class MainViewModel
 
     /// <summary>Metodo di calibrazione scelto, con lo stesso testo dell'opzione nell'interfaccia.</summary>
     private string CalibrationMethodText =>
-        IsMapMode ? Loc.T("Con due riferimenti trovati sulla mappa")
-        : IsVanishingMode ? Loc.T("Con due riferimenti a terra e punto di fuga")
+        (IsVanishingMode ? Loc.T("Con due riferimenti a terra e punto di fuga")
         : EstimateDistanceFromVehicle ? Loc.T("Con un'auto che riconosco")
-        : Loc.T("Con due riferimenti misurati sul campo");
+        : Loc.T("Con due riferimenti misurati sul campo"))
+        + (IsDistanceFromMap ? Loc.T(" (distanza rilevata sulla mappa)") : string.Empty);
 
     /// <summary>Immagini JPEG di un passaggio, in chiaro e anonimizzate, per i rapporti PDF.</summary>
     private sealed record PassageImages(byte[] ClearEntry, byte[] ClearExit, byte[] AnonEntry, byte[] AnonExit);
@@ -469,7 +465,7 @@ public sealed partial class MainViewModel
     {
         if (_lastExportFolder is not null && Directory.Exists(_lastExportFolder))
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", $"\"{_lastExportFolder}\"") { UseShellExecute = true });
+            _platform.OpenFolder(_lastExportFolder);
         }
     }
 
@@ -477,6 +473,6 @@ public sealed partial class MainViewModel
     private void OpenLogFolder()
     {
         Directory.CreateDirectory(AppLog.LogDirectory);
-        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{AppLog.LogDirectory}\"") { UseShellExecute = true });
+        _platform.OpenFolder(AppLog.LogDirectory);
     }
 }

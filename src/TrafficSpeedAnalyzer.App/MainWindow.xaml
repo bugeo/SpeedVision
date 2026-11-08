@@ -5,7 +5,7 @@
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-                 xmlns:vm="clr-namespace:TrafficSpeedAnalyzer.App.ViewModels"
+                 xmlns:vm="clr-namespace:TrafficSpeedAnalyzer.App.ViewModels;assembly=TrafficSpeedAnalyzer.Presentation"
                  xmlns:controls="clr-namespace:TrafficSpeedAnalyzer.App.Controls"
                  mc:Ignorable="d"
                  d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
@@ -131,14 +131,10 @@
                         </RadioButton>
                     </StackPanel>
 
-                    <!-- A destra: privacy e diagnostica -->
+                    <!-- A destra: impostazioni (lingua e registro) in una finestra a parte -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <!-- Lingua dell'interfaccia (e dei file esportati) -->
-                        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" MinWidth="120" Margin="0,0,10,0"
-                                  VerticalAlignment="Center" FontSize="12" ToolTip="{loc:Tr 'Lingua'}" />
-                        <TextBlock FontSize="11.5" VerticalAlignment="Center">
-                            <Hyperlink Command="{Binding OpenLogFolderCommand}" Foreground="{StaticResource TextSecondary}"><Run Text="{loc:Tr 'Registro'}" /></Hyperlink>
-                        </TextBlock>
+                        <ui:Button Content="{loc:Tr 'Impostazioni'}" Icon="{ui:SymbolIcon Settings24}" Appearance="Transparent"
+                                   Padding="10,6" VerticalAlignment="Center" Click="OnSettingsClick" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -229,7 +225,7 @@
                 <!-- Messaggi -->
                 <ui:InfoBar Grid.Row="1" Margin="0,0,0,12"
                             Title="{Binding StatusTitle}" Message="{Binding StatusMessage}"
-                            Severity="{Binding StatusSeverity}" IsOpen="{Binding IsStatusOpen, Mode=TwoWay}" IsClosable="True" />
+                            Severity="{Binding StatusSeverity, Converter={StaticResource StatusSeverity}}" IsOpen="{Binding IsStatusOpen, Mode=TwoWay}" IsClosable="True" />
 
                 <!-- Visore -->
                 <Border Grid.Row="2" CornerRadius="10" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" ClipToBounds="True"
@@ -271,6 +267,10 @@
                                            Text="{loc:Tr 'MP4, MOV, MKV, AVI… Il video resta sul tuo PC.'}" />
                                 <ui:Button Content="{loc:Tr 'Scegli un file…'}" Appearance="Secondary" Icon="{ui:SymbolIcon FolderOpen24}"
                                            Command="{Binding OpenVideoCommand}" HorizontalAlignment="Center" Margin="0,20,0,0" Padding="18,9" />
+                                <!-- Offri un caffè (Buy Me a Coffee): stesso aspetto di «Scegli un file…», più distanziato -->
+                                <ui:Button Content="{loc:Tr 'Supporta lo sviluppo di questa applicazione'}" Appearance="Secondary" Icon="{ui:SymbolIcon DrinkCoffee24}"
+                                           Command="{Binding OpenSupportCommand}" HorizontalAlignment="Center" Margin="0,50,0,0" Padding="18,9"
+                                           ToolTip="buymeacoffee.com/bugeo" />
                             </StackPanel>
                         </Border>
 
@@ -514,15 +514,21 @@
                         <!-- Passo 4: calibrazione (dopo l'analisi: si può cambiare senza rifarla) -->
                         <StackPanel Visibility="{Binding SelectedStep, Converter={StaticResource EnumToVisibility}, ConverterParameter=Calibration}">
                             <TextBlock Text="{loc:Tr 'Calibrazione'}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,6" Foreground="{StaticResource TextPrimary}" />
+
+                            <!-- Calibrazione salvata: in cima, per riusarla subito con un altro video dalla stessa posizione -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <ui:Button Content="{loc:Tr 'Salva'}" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveCalibrationCommand}" Margin="0,0,8,0"
+                                           ToolTip="{loc:Tr 'Salva la calibrazione per riusarla con altri video dalla stessa posizione'}" />
+                                <ui:Button Content="{loc:Tr 'Carica…'}" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding LoadCalibrationCommand}" />
+                            </StackPanel>
                             
                             <!-- Metodo di calibrazione: primo passo, nessuna scelta preselezionata -->
                             <Border Style="{StaticResource GuideCard}" Tag="{Binding IsMethodStepActive}">
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Come calibrare'}" />
                                     <RadioButton GroupName="DistanceMode" Content="{loc:Tr 'Con due riferimenti misurati sul campo'}" IsChecked="{Binding IsDistanceKnownMode}" Margin="0,0,0,6" />
-                                    <RadioButton GroupName="DistanceMode" Content="{loc:Tr 'Con un\'auto che riconosco'}" IsChecked="{Binding EstimateDistanceFromVehicle}" Margin="0,0,0,6" />
                                     <RadioButton GroupName="DistanceMode" Content="{loc:Tr 'Con due riferimenti a terra e punto di fuga'}" IsChecked="{Binding IsVanishingMode}" Margin="0,0,0,6" />
-                                    <RadioButton GroupName="DistanceMode" Content="{loc:Tr 'Con due riferimenti trovati sulla mappa'}" IsChecked="{Binding IsMapMode}" />
+                                    <RadioButton GroupName="DistanceMode" Content="{loc:Tr 'Con un\'auto che riconosco'}" IsChecked="{Binding EstimateDistanceFromVehicle}" />
                                     <!-- Giudizio automatico sulla ripresa: solo informativo, non impedisce la scelta -->
                                     <!-- <TextBlock Style="{StaticResource Caption}" Text="{Binding VehicleMethodNote}" Margin="28,4,0,0"
                                                Visibility="{Binding VehicleMethodNote, Converter={StaticResource TruthyToVisibility}}" />
@@ -730,36 +736,10 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- Calibrazione sulla mappa: dopo le linee, la distanza si misura cliccando i due punti sulla mappa -->
-                            <Border Style="{StaticResource GuideCard}" Tag="{Binding IsMapStepActive}"
-                                    Visibility="{Binding ShowMapCard, Converter={StaticResource BoolToVisibility}}">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Distanza dalla mappa'}" />
-                                    <TextBlock Style="{StaticResource Caption}" Text="{Binding MapHint}" Margin="0,0,0,10" />
-                                    <ui:Button Content="{Binding MapButtonText}" Icon="{ui:SymbolIcon Map24}" HorizontalAlignment="Stretch" Padding="12,9"
-                                               Command="{Binding OpenMapCommand}">
-                                        <ui:Button.Style>
-                                            <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
-                                                <Setter Property="Appearance" Value="Secondary" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsMapStepActive}" Value="True">
-                                                        <Setter Property="Appearance" Value="Primary" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </ui:Button.Style>
-                                    </ui:Button>
-                                    <TextBlock Style="{StaticResource Body}" Text="{Binding MapResultText}" Margin="0,10,0,0"
-                                               Visibility="{Binding MapResultText, Converter={StaticResource TruthyToVisibility}}" />
-                                    <TextBlock Style="{StaticResource Caption}" Foreground="{StaticResource WarnBrush}" Text="{Binding MapWarning}" Margin="0,6,0,0"
-                                               Visibility="{Binding MapWarning, Converter={StaticResource TruthyToVisibility}}" />
-                                </StackPanel>
-                            </Border>
-
                             <Border Style="{StaticResource GuideCard}" Tag="{Binding IsDistanceStepActive}"
                                     Visibility="{Binding ShowDistanceCard, Converter={StaticResource BoolToVisibility}}">
                                 <StackPanel>
-                                    <TextBlock Style="{StaticResource SectionTitle}" Text="{Binding DistanceCardTitle}" />
+                                    <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Distanza tra le linee'}" />
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -770,7 +750,17 @@
                                         <TextBlock Grid.Column="1" Text="{loc:Tr 'metri'}" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}" />
                                     </Grid>
                                     <TextBlock Style="{StaticResource Caption}" Margin="0,8,0,0"
-                                               Text="{Binding DistanceCardHint}" />
+                                               Text="{Binding DistanceCardHint}"
+                                               Visibility="{Binding DistanceCardHint, Converter={StaticResource TruthyToVisibility}}" />
+                                    <!-- In alternativa al metro: i due punti si cercano sulla mappa e la distanza torna qui -->
+                                    <ui:Button Content="{loc:Tr 'Rileva su mappa'}" Icon="{ui:SymbolIcon Map24}" Appearance="Transparent"
+                                               HorizontalAlignment="Left" Margin="0,4,0,0"
+                                               Command="{Binding OpenMapCommand}"
+                                               ToolTip="{loc:Tr 'Clicca sulla mappa dove le linee A e B incontrano lo stesso bordo della strada'}" />
+                                    <TextBlock Style="{StaticResource Body}" Text="{Binding MapResultText}" Margin="0,8,0,0"
+                                               Visibility="{Binding MapResultText, Converter={StaticResource TruthyToVisibility}}" />
+                                    <TextBlock Style="{StaticResource Caption}" Foreground="{StaticResource WarnBrush}" Text="{Binding MapWarning}" Margin="0,6,0,0"
+                                               Visibility="{Binding MapWarning, Converter={StaticResource TruthyToVisibility}}" />
                                 </StackPanel>
                             </Border>
 
@@ -806,12 +796,6 @@
                                     <TextBlock Text="{Binding CalibrationSummary}" Style="{StaticResource Body}" Margin="8,0,0,0" MaxWidth="300" />
                                 </StackPanel>
                             </Border>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,12">
-                                <ui:Button Content="{loc:Tr 'Salva'}" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveCalibrationCommand}" Margin="0,0,8,0"
-                                           ToolTip="{loc:Tr 'Salva la calibrazione per riusarla con altri video dalla stessa posizione'}" />
-                                <ui:Button Content="{loc:Tr 'Carica…'}" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding LoadCalibrationCommand}" />
-                            </StackPanel>
 
                             <ui:Button Content="{loc:Tr 'Procedi &gt;&gt;'}" Appearance="Primary" FontSize="17" FontWeight="Bold"
                                        HorizontalAlignment="Stretch" Padding="12,11" Margin="0,2,0,14"

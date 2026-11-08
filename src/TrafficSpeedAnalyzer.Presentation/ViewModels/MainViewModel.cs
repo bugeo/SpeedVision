@@ -1,15 +1,11 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32;
 using TrafficSpeedAnalyzer.App.Services;
 using TrafficSpeedAnalyzer.Core.Time;
 using TrafficSpeedAnalyzer.Video;
-using InfoBarSeverity = Wpf.Ui.Controls.InfoBarSeverity;
 using TrafficSpeedAnalyzer.Core.Localization;
 using TrafficSpeedAnalyzer.App;
 
@@ -34,8 +30,11 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
     private int _requestedFrame = -1;
     private bool _suppressSliderSeek;
 
-    public MainViewModel()
+    private readonly IPlatformServices _platform;
+
+    public MainViewModel(IPlatformServices platform)
     {
+        _platform = platform;
         _settings = AppSettings.Load();
         HookStepProgress();
         LogReferenceCatalog();
@@ -63,7 +62,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
     private string _statusMessage = string.Empty;
 
     [ObservableProperty]
-    private InfoBarSeverity _statusSeverity = InfoBarSeverity.Informational;
+    private StatusSeverity _statusSeverity = StatusSeverity.Informational;
 
     [ObservableProperty]
     private WorkflowStep _selectedStep = WorkflowStep.Video;
@@ -99,8 +98,12 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
 
     public bool ShowEmptyState => Info is null && !IsBusy && Tools is not null;
 
+    /// <summary>Immagine del fotogramma mostrato, preparata dall'interfaccia (<see cref="IPlatformServices.CreateFrameImage"/>).</summary>
     [ObservableProperty]
-    private ImageSource? _currentFrame;
+    private object? _currentFrame;
+
+    /// <summary>Pixel del fotogramma mostrato (per l'anteprima con le linee da portare sulla mappa).</summary>
+    private VideoFrame? _currentVideoFrame;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FrameCounterText), nameof(IsBeyondFirstFrame))]
@@ -211,37 +214,31 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
     [RelayCommand]
     private async Task ChooseFfmpegAsync()
     {
-        var dialog = new OpenFileDialog
-        {
-            Title = "Seleziona ffmpeg.exe",
-            Filter = "ffmpeg.exe|ffmpeg.exe|Eseguibili|*.exe",
-            CheckFileExists = true,
-        };
-        if (dialog.ShowDialog() != true)
+        string ffmpeg = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
+        string? file = await _platform.PickOpenFileAsync(
+            Loc.S($"Seleziona {ffmpeg}"),
+            OperatingSystem.IsWindows() ? [new FileFilter("ffmpeg.exe", ["ffmpeg.exe"]), new FileFilter(Loc.T("Eseguibili"), ["*.exe"])] : []);
+        if (file is null)
         {
             return;
         }
 
-        _settings.FfmpegDirectory = Path.GetDirectoryName(dialog.FileName);
+        _settings.FfmpegDirectory = Path.GetDirectoryName(file);
         _settings.Save();
         await LocateFfmpegAsync();
         if (Tools is null)
         {
-            ShowStatus(Loc.T("FFmpeg non utilizzabile"), Loc.T("Nella stessa cartella devono esserci ffmpeg.exe e ffprobe.exe funzionanti."), InfoBarSeverity.Error);
+            ShowStatus(Loc.T("FFmpeg non utilizzabile"), Loc.T("Nella stessa cartella devono esserci ffmpeg.exe e ffprobe.exe funzionanti."), StatusSeverity.Error);
         }
     }
 
     [RelayCommand]
     private void CopyInstallCommand()
     {
-        try
+        // Se gli appunti sono occupati da un'altra applicazione non succede nulla: si può ripremere.
+        if (_platform.TryCopyText(FfmpegInstallCommand))
         {
-            System.Windows.Clipboard.SetText(FfmpegInstallCommand);
-            ShowStatus(Loc.T("Comando copiato"), Loc.T("Incollalo in un terminale (PowerShell), poi premi «Riprova»."), InfoBarSeverity.Success);
-        }
-        catch (System.Runtime.InteropServices.ExternalException)
-        {
-            // appunti occupati da un'altra applicazione
+            ShowStatus(Loc.T("Comando copiato"), Loc.T("Incollalo in un terminale (PowerShell), poi premi «Riprova»."), StatusSeverity.Success);
         }
     }
 
@@ -250,15 +247,13 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
     [RelayCommand]
     private async Task OpenVideoAsync()
     {
-        var dialog = new OpenFileDialog
+        string? file = await _platform.PickOpenFileAsync(
+            Loc.T("Apri un video di traffico"),
+            [new FileFilter("Video", [.. VideoExtensions.Select(e => "*" + e)]), new FileFilter(Loc.T("Tutti i file"), ["*.*"])],
+            Directory.Exists(_settings.LastVideoFolder) ? _settings.LastVideoFolder : Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
+        if (file is not null)
         {
-            Title = Loc.T("Apri un video di traffico"),
-            Filter = "Video|" + string.Join(";", VideoExtensions.Select(e => "*" + e)) + Loc.T("|Tutti i file|*.*"),
-            InitialDirectory = Directory.Exists(_settings.LastVideoFolder) ? _settings.LastVideoFolder : Environment.GetFolderPath(Environment.SpecialFolder.MyVideos),
-        };
-        if (dialog.ShowDialog() == true)
-        {
-            await OpenVideoFileAsync(dialog.FileName);
+            await OpenVideoFileAsync(file);
         }
     }
 
@@ -266,23 +261,23 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
     {
         if (Tools is null)
         {
-            ShowStatus(Loc.T("FFmpeg mancante"), Loc.T("Installa FFmpeg prima di aprire un video."), InfoBarSeverity.Warning);
+            ShowStatus(Loc.T("FFmpeg mancante"), Loc.T("Installa FFmpeg prima di aprire un video."), StatusSeverity.Warning);
             return;
         }
 
         if (IsAnalyzing)
         {
-            ShowStatus(Loc.T("Analisi in corso"), Loc.T("Interrompi l'analisi velocità prima di aprire un altro video."), InfoBarSeverity.Warning);
+            ShowStatus(Loc.T("Analisi in corso"), Loc.T("Interrompi l'analisi velocità prima di aprire un altro video."), StatusSeverity.Warning);
             return;
         }
 
         if (IsStabilizing)
         {
-            ShowStatus(Loc.T("Stabilizzazione in corso"), Loc.T("Annulla la stabilizzazione prima di aprire un altro video."), InfoBarSeverity.Warning);
+            ShowStatus(Loc.T("Stabilizzazione in corso"), Loc.T("Annulla la stabilizzazione prima di aprire un altro video."), StatusSeverity.Warning);
             return;
         }
 
-        if (HasUnsavedMeasurements && !ConfirmDiscardMeasurements())
+        if (HasUnsavedMeasurements && !await ConfirmDiscardMeasurementsAsync())
         {
             return;
         }
@@ -291,14 +286,12 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
         bool keepCalibration = false;
         if (LineA is not null || LineB is not null)
         {
-            System.Windows.MessageBoxResult keep = System.Windows.MessageBox.Show(
+            DialogAnswer keep = await _platform.AskAsync(
                 Loc.T("Vuoi mantenere la posizione delle linee A e B e la distanza anche per il nuovo video?\n\n" +
                 "Sì: stesse linee (il telefono è rimasto nello stesso punto).\n" +
                 "No: si riparte da capo, con una nuova calibrazione."),
-                AppInfo.Name,
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Question);
-            keepCalibration = keep == System.Windows.MessageBoxResult.Yes;
+                DialogKind.Question);
+            keepCalibration = keep == DialogAnswer.Yes;
         }
 
         StopPlayback();
@@ -328,7 +321,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
             {
                 ShowStatus(Loc.T("Frame rate variabile"),
                     Loc.T("Nessun problema: ogni misura usa il tempo reale di ciascun fotogramma."),
-                    InfoBarSeverity.Informational);
+                    StatusSeverity.Informational);
             }
         }
         catch (Exception e) when (e is VideoProbeException or IOException or InvalidOperationException or TimeoutException or System.ComponentModel.Win32Exception)
@@ -339,7 +332,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
                 await newSession.DisposeAsync();
             }
 
-            ShowStatus(Loc.T("Impossibile aprire il video"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Impossibile aprire il video"), e.Message, StatusSeverity.Error);
         }
         finally
         {
@@ -493,10 +486,10 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
 
         try
         {
-            (VideoFrame frame, BitmapSource bitmap) = await Task.Run(async () =>
+            (VideoFrame frame, object image) = await Task.Run(async () =>
             {
                 VideoFrame f = await session.Preview.GetFrameAsync(index, ct);
-                return (f, ToBitmap(f));
+                return (f, _platform.CreateFrameImage(f));
             }, ct);
 
             if (session != _session)
@@ -504,7 +497,8 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
                 return; // nel frattempo è stato aperto un altro video
             }
 
-            CurrentFrame = bitmap;
+            _currentVideoFrame = frame;
+            CurrentFrame = image;
             CurrentIndex = frame.Index;
             CurrentTime = frame.TimeSeconds;
             _suppressSliderSeek = true;
@@ -518,15 +512,8 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
         catch (Exception e) when (e is VideoProbeException or IOException or InvalidOperationException)
         {
             AppLog.Error($"Lettura del fotogramma {index} non riuscita", e);
-            ShowStatus(Loc.T("Errore di lettura"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Errore di lettura"), e.Message, StatusSeverity.Error);
         }
-    }
-
-    private static BitmapSource ToBitmap(VideoFrame f)
-    {
-        BitmapSource bmp = BitmapSource.Create(f.Width, f.Height, 96, 96, PixelFormats.Bgr24, null, f.Pixels, f.Stride);
-        bmp.Freeze();
-        return bmp;
     }
 
     // ───────────── Riproduzione ─────────────
@@ -577,10 +564,10 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
         {
             for (int i = firstIndex; i < session.Index.Count; i++)
             {
-                (VideoFrame frame, BitmapSource bitmap) = await Task.Run(async () =>
+                (VideoFrame frame, object image) = await Task.Run(async () =>
                 {
                     VideoFrame f = await session.Preview.GetFrameAsync(i, ct);
-                    return (f, ToBitmap(f));
+                    return (f, _platform.CreateFrameImage(f));
                 }, ct);
 
                 double wait = (frame.TimeSeconds - startTime) - clock.Elapsed.TotalSeconds;
@@ -594,7 +581,8 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
                     return;
                 }
 
-                CurrentFrame = bitmap;
+                _currentVideoFrame = frame;
+                CurrentFrame = image;
                 CurrentIndex = frame.Index;
                 CurrentTime = frame.TimeSeconds;
                 _suppressSliderSeek = true;
@@ -609,7 +597,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
         catch (Exception e) when (e is VideoProbeException or IOException or InvalidOperationException)
         {
             AppLog.Error("Riproduzione interrotta", e);
-            ShowStatus(Loc.T("Riproduzione interrotta"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Riproduzione interrotta"), e.Message, StatusSeverity.Error);
         }
         finally
         {
@@ -631,7 +619,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
     /// <summary>Passo in cui è stato mostrato l'avviso in alto: cambiando passo l'avviso si chiude.</summary>
     private WorkflowStep _statusStep;
 
-    public void ShowStatus(string title, string message, InfoBarSeverity severity)
+    public void ShowStatus(string title, string message, StatusSeverity severity)
     {
         _statusStep = SelectedStep;
         StatusTitle = title;

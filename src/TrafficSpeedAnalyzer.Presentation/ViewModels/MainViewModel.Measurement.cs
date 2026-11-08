@@ -4,9 +4,10 @@ using TrafficSpeedAnalyzer.Core.Calibration;
 using TrafficSpeedAnalyzer.Core.Geometry;
 using TrafficSpeedAnalyzer.Core.Measurement;
 using TrafficSpeedAnalyzer.Core.Time;
-using InfoBarSeverity = Wpf.Ui.Controls.InfoBarSeverity;
 using TrafficSpeedAnalyzer.Core.Localization;
 using TrafficSpeedAnalyzer.App;
+
+using TrafficSpeedAnalyzer.App.Services;
 
 namespace TrafficSpeedAnalyzer.App.ViewModels;
 
@@ -105,7 +106,7 @@ public sealed partial class MainViewModel
         if (Calibration is null)
         {
             SelectedStep = WorkflowStep.Calibration;
-            ShowStatus(Loc.T("Calibrazione incompleta"), Loc.T("Disegna le linee A e B e inserisci la distanza prima di misurare."), InfoBarSeverity.Warning);
+            ShowStatus(Loc.T("Calibrazione incompleta"), Loc.T("Disegna le linee A e B e inserisci la distanza prima di misurare."), StatusSeverity.Warning);
             return;
         }
 
@@ -174,7 +175,7 @@ public sealed partial class MainViewModel
         AnalyzeCurrentTrack();
         ShowStatus(Loc.T("Passaggio salvato"),
             Loc.S($"Veicolo {id:0000} salvato nei risultati."),
-            InfoBarSeverity.Success);
+            StatusSeverity.Success);
     }
 
     private void AnalyzeCurrentTrack()
@@ -348,13 +349,8 @@ public sealed partial class MainViewModel
 
     public bool HasUnsavedMeasurements => _currentTrack.Count > 0 || (_savedTracks.Count > 0 && _hasUnexportedChanges);
 
-    private static bool ConfirmDiscardMeasurements()
-    {
-        System.Windows.MessageBoxResult r = System.Windows.MessageBox.Show(
+    private async Task<bool> ConfirmDiscardMeasurementsAsync() =>
+        await _platform.AskAsync(
             Loc.T("Ci sono misure non esportate. Aprendo un altro video andranno perse. Continuare?"),
-            AppInfo.Name,
-            System.Windows.MessageBoxButton.YesNo,
-            System.Windows.MessageBoxImage.Warning);
-        return r == System.Windows.MessageBoxResult.Yes;
-    }
+            DialogKind.Warning) == DialogAnswer.Yes;
 }

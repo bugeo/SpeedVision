@@ -1,10 +1,6 @@
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TrafficSpeedAnalyzer.App.Localization;
@@ -16,7 +12,6 @@ using TrafficSpeedAnalyzer.Core.Time;
 using TrafficSpeedAnalyzer.Core.Tracking;
 using TrafficSpeedAnalyzer.Detection;
 using TrafficSpeedAnalyzer.Video;
-using InfoBarSeverity = Wpf.Ui.Controls.InfoBarSeverity;
 using TrafficSpeedAnalyzer.Core.Localization;
 using TrafficSpeedAnalyzer.App;
 
@@ -177,7 +172,7 @@ public sealed partial class MainViewModel
             AppLog.Error("Download del modello non riuscito", e);
             ShowStatus(Loc.T("Download del modello non riuscito"),
                 e.Message + Loc.T(" Verifica la connessione, oppure copia il file ") + SelectedModel.FileName + " in " + _models.ModelsDirectory + ".",
-                InfoBarSeverity.Error);
+                StatusSeverity.Error);
             return null;
         }
         finally
@@ -257,7 +252,7 @@ public sealed partial class MainViewModel
         catch (Exception e) when (e is not OutOfMemoryException)
         {
             AppLog.Error("Prova delle prestazioni non riuscita", e);
-            ShowStatus(Loc.T("Prova non riuscita"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Prova non riuscita"), e.Message, StatusSeverity.Error);
         }
         finally
         {
@@ -291,16 +286,17 @@ public sealed partial class MainViewModel
 
         if (_savedTracks.Any(t => t.Source == PassageSource.Automatic))
         {
-            MessageBoxResult answer = MessageBox.Show(
+            DialogAnswer answer = await _platform.AskAsync(
                 Loc.T("Ci sono già risultati automatici. Vuoi sostituirli con quelli della nuova analisi?\n\n" +
                 "Sì: elimina i precedenti automatici · No: li conserva e aggiunge i nuovi."),
-                AppInfo.Name, MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-            if (answer == MessageBoxResult.Cancel)
+                DialogKind.Question,
+                allowCancel: true);
+            if (answer == DialogAnswer.Cancel)
             {
                 return;
             }
 
-            if (answer == MessageBoxResult.Yes)
+            if (answer == DialogAnswer.Yes)
             {
                 _savedTracks.RemoveAll(t => t.Source == PassageSource.Automatic);
                 RebuildPassages();
@@ -329,7 +325,7 @@ public sealed partial class MainViewModel
             VideoSession session = _session;
             AnalysisOptions options = BuildOptions();
             AnalysisStatusText = "Avvio…";
-            Dispatcher ui = Application.Current.Dispatcher;
+            IUiDispatcher ui = _platform.Ui;
             int added = 0;
 
             var progress = new Progress<AnalysisProgress>(p =>
@@ -346,8 +342,7 @@ public sealed partial class MainViewModel
 
             void OnPreview(AnalysisPreview pv)
             {
-                BitmapSource bmp = BitmapSource.Create(pv.Frame.Width, pv.Frame.Height, 96, 96, PixelFormats.Bgr24, null, pv.Frame.Pixels, pv.Frame.Stride);
-                bmp.Freeze();
+                object image = _platform.CreateFrameImage(pv.Frame);
                 int Heading(TrackedVehicle v)
                 {
                     BoundingBox b = v.Detection.Box;
@@ -358,14 +353,15 @@ public sealed partial class MainViewModel
                 var boxes = pv.Vehicles
                     .Select(v => new OverlayBox(v.Detection.Box, $"#{v.TrackId} {PassageRow.ClassName(v.Detection.Class)} {v.Detection.Score:0.00}", v.IsConfirmed, Heading(v)))
                     .ToList();
-                ui.InvokeAsync(() =>
+                _ = ui.InvokeAsync(() =>
                 {
                     if (!IsAnalyzing)
                     {
                         return;
                     }
 
-                    CurrentFrame = bmp;
+                    _currentVideoFrame = pv.Frame;
+                    CurrentFrame = image;
                     CurrentIndex = pv.Frame.Index;
                     CurrentTime = pv.Frame.TimeSeconds;
                     SetSliderSilently(pv.Frame.Index);
@@ -390,7 +386,7 @@ public sealed partial class MainViewModel
                     track.Set(o);
                 }
 
-                ui.InvokeAsync(() =>
+                _ = ui.InvokeAsync(() =>
                 {
                     // Non tutti i tracciati attraverseranno le linee: quelli che non lo fanno non sono errori.
                     _savedTracks.Add(new SavedTrack(NextId++, track, PassageSource.Automatic, c.Class, c.MeanScore, c.Track.Points, AwaitingCalibration: true, Lane: lane, Reference: c.Reference));
@@ -403,7 +399,7 @@ public sealed partial class MainViewModel
                 session, detector, null, options, OnPassage, progress, OnPreview, _analysisCts.Token);
 
             // Lascia arrivare gli ultimi aggiornamenti in coda all'interfaccia.
-            await ui.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.Background);
+            await ui.YieldAsync();
 
             string time = TimeFormatting.FormatVideoTime(summary.Elapsed.TotalSeconds);
             string stats = Loc.S($"{VehiclesText(summary.Passages - offRoad)} in {time} ({summary.FramesProcessed / Math.Max(1e-3, summary.Elapsed.TotalSeconds):0.#} fotogrammi/s, {summary.ExecutionProvider}). Tracce scartate: {summary.RejectedTracks}.");
@@ -423,7 +419,7 @@ public sealed partial class MainViewModel
             ShowStatus(summary.Cancelled ? Loc.T("Analisi interrotta") : Loc.T("Analisi completata"),
                 (summary.Cancelled ? Loc.T("I veicoli tracciati fino all'interruzione sono conservati. ") : string.Empty) + stats +
                 (summary.Passages > 0 ? Loc.T(" Premi «Procedi» per calibrare.") : string.Empty),
-                summary.Cancelled ? InfoBarSeverity.Warning : InfoBarSeverity.Success);
+                summary.Cancelled ? StatusSeverity.Warning : StatusSeverity.Success);
             AnalysisStatusText = summary.Cancelled ? Loc.T("Interrotta") : Loc.T("Completata");
             HasCompletedAnalysis = !summary.Cancelled || summary.Passages > 0;   // guida: si spengono i pulsanti di avvio, resta «Procedi»
             OnPropertyChanged(nameof(HasTrackedVehicles));
@@ -444,7 +440,7 @@ public sealed partial class MainViewModel
         catch (Exception e) when (e is not OutOfMemoryException)
         {
             AppLog.Error("Analisi automatica non riuscita", e);
-            ShowStatus(Loc.T("Analisi non riuscita"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Analisi non riuscita"), e.Message, StatusSeverity.Error);
             AnalysisStatusText = Loc.T("Errore");
         }
         finally

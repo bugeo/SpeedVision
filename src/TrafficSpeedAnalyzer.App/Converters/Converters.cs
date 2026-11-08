@@ -64,3 +64,17 @@ public sealed class InverseBoolConverter : IValueConverter
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => value is not true;
 }
+
+/// <summary>Gravità dell'avviso dei view model (comune a tutte le interfacce) nella gravità dell'InfoBar di WPF-UI.</summary>
+public sealed class StatusSeverityConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value switch
+    {
+        Services.StatusSeverity.Success => Wpf.Ui.Controls.InfoBarSeverity.Success,
+        Services.StatusSeverity.Warning => Wpf.Ui.Controls.InfoBarSeverity.Warning,
+        Services.StatusSeverity.Error => Wpf.Ui.Controls.InfoBarSeverity.Error,
+        _ => Wpf.Ui.Controls.InfoBarSeverity.Informational,
+    };
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => Binding.DoNothing;
+}

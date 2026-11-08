@@ -45,6 +45,57 @@ jobs:
       - name: Test
         run: dotnet test SpeedVision.sln -c Release --no-build --blame-hang-timeout 8m
 
+  # Mac con chip Apple (macos-15, M1): FFmpeg compilato da noi, poi calcoli, video e rilevamento.
+  # L'interfaccia WPF non si compila su Mac: qui si provano solo le parti multipiattaforma.
+  macos:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # FFmpeg si ricompila solo quando cambia lo script (che fissa le versioni).
+      - name: Cache di FFmpeg per Mac
+        id: ffmpeg-cache
+        uses: actions/cache@v4
+        with:
+          path: out/ffmpeg-macos
+          key: ffmpeg-macos-arm64-${{ hashFiles('scripts/build-ffmpeg-macos.sh') }}
+
+      - name: Compila FFmpeg (x264 + vidstab)
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        run: |
+          brew list cmake >/dev/null 2>&1 || brew install cmake
+          brew list pkg-config >/dev/null 2>&1 || brew install pkg-config
+          bash scripts/build-ffmpeg-macos.sh out/ffmpeg-macos
+
+      - name: FFmpeg nel PATH
+        run: |
+          echo "$GITHUB_WORKSPACE/out/ffmpeg-macos" >> "$GITHUB_PATH"
+          out/ffmpeg-macos/ffmpeg -hide_banner -version | head -n1
+
+      - name: Cache dei modelli YOLOX
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Application Support/TrafficSpeedAnalyzer/models
+          key: yolox-models-macos-v1
+
+      - name: Test
+        run: |
+          for t in Core Video Detection Presentation; do
+            dotnet test tests/TrafficSpeedAnalyzer.$t.Tests -c Release --blame-hang-timeout 8m \
+              --logger "console;verbosity=normal" || exit 1
+          done
+
+      # FFmpeg pronto per il pacchetto Mac (fase 5): si scarica dalla pagina dell'esecuzione.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-macos-arm64
+          path: out/ffmpeg-macos
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build

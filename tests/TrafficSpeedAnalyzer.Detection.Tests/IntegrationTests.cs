@@ -87,7 +87,7 @@ public class IntegrationTests(DetectionFixture fx) : IClassFixture<DetectionFixt
         VehicleDetection car = Assert.Single(dets, d => d.Score > 0.5 && Math.Abs(d.Box.CenterX - 250) < 40);
         Assert.Equal(VehicleClass.Car, car.Class);
         Assert.InRange(car.Box.Bottom, 345, 375);
-        Assert.Contains("PU", fx.Detector.ExecutionProvider); // "GPU (DirectML)" oppure "CPU"
+        Assert.Matches("PU|CoreML", fx.Detector.ExecutionProvider); // "GPU (DirectML)", "Chip Apple (CoreML)" oppure "CPU"
     }
 
     [Fact(Timeout = 240_000)]

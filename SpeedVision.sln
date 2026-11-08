@@ -23,6 +23,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrafficSpeedAnalyzer.Detect
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrafficSpeedAnalyzer.Web", "src\TrafficSpeedAnalyzer.Web\TrafficSpeedAnalyzer.Web.csproj", "{7D3E5A12-4C8B-4F2A-B9E1-3A6C2D8F1B70}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrafficSpeedAnalyzer.Presentation", "src\TrafficSpeedAnalyzer.Presentation\TrafficSpeedAnalyzer.Presentation.csproj", "{A0689CDF-7A4F-42FA-8D03-1E51E0397910}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrafficSpeedAnalyzer.Presentation.Tests", "tests\TrafficSpeedAnalyzer.Presentation.Tests\TrafficSpeedAnalyzer.Presentation.Tests.csproj", "{B46EFB25-715E-4999-B397-015AD65C9292}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +65,14 @@ Global
 		{7D3E5A12-4C8B-4F2A-B9E1-3A6C2D8F1B70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D3E5A12-4C8B-4F2A-B9E1-3A6C2D8F1B70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D3E5A12-4C8B-4F2A-B9E1-3A6C2D8F1B70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0689CDF-7A4F-42FA-8D03-1E51E0397910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0689CDF-7A4F-42FA-8D03-1E51E0397910}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0689CDF-7A4F-42FA-8D03-1E51E0397910}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0689CDF-7A4F-42FA-8D03-1E51E0397910}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B46EFB25-715E-4999-B397-015AD65C9292}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B46EFB25-715E-4999-B397-015AD65C9292}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B46EFB25-715E-4999-B397-015AD65C9292}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B46EFB25-715E-4999-B397-015AD65C9292}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,5 +86,7 @@ Global
 		{4B7E2C11-9A3D-4F6B-8C21-7D5E9A1B3C40} = {8EAF1921-269F-42B6-A6C5-34EDB1438CBA}
 		{6C9A1D22-3B4E-4A7F-9D32-8E6F0B2C4D51} = {5D0F2B00-F509-46AD-902D-E0D6C3982C0F}
 		{7D3E5A12-4C8B-4F2A-B9E1-3A6C2D8F1B70} = {8EAF1921-269F-42B6-A6C5-34EDB1438CBA}
+		{A0689CDF-7A4F-42FA-8D03-1E51E0397910} = {8EAF1921-269F-42B6-A6C5-34EDB1438CBA}
+		{B46EFB25-715E-4999-B397-015AD65C9292} = {5D0F2B00-F509-46AD-902D-E0D6C3982C0F}
 	EndGlobalSection
 EndGlobal

@@ -10,20 +10,6 @@ using TrafficSpeedAnalyzer.Core.Localization;
 
 namespace TrafficSpeedAnalyzer.App;
 
-/// <summary>Dati per aprire la mappa: dove centrarla, punti già indicati, anteprima del fotogramma con le linee.</summary>
-public sealed record MapRequest(
-    GeoPosition? Center,
-    double? Zoom,
-    bool CenterFromVideo,
-    GeoPosition? VideoLocation,
-    GeoPosition? A,
-    GeoPosition? B,
-    string? SnapshotDataUrl,
-    string Layer);
-
-/// <summary>Punti indicati sulla mappa e loro distanza (calcolata qui, con <see cref="GeoMath"/>).</summary>
-public sealed record MapResult(GeoPosition A, GeoPosition B, double Meters, double PrecisionMeters, string Layer, GeoPosition ViewCenter, double ViewZoom);
-
 /// <summary>
 /// Finestra con la mappa (WebView2 + Leaflet, pagina locale in <c>Map\map.html</c>). La pagina guida l'utente
 /// e manda al programma i due punti scelti; la distanza viene ricalcolata qui sull'ellissoide WGS84.

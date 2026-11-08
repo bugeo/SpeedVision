@@ -3,11 +3,9 @@ using System.IO;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Win32;
 using TrafficSpeedAnalyzer.App.Services;
 using TrafficSpeedAnalyzer.Core.Calibration;
 using TrafficSpeedAnalyzer.Core.Geometry;
-using InfoBarSeverity = Wpf.Ui.Controls.InfoBarSeverity;
 using TrafficSpeedAnalyzer.Core.Localization;
 
 namespace TrafficSpeedAnalyzer.App.ViewModels;
@@ -42,9 +40,9 @@ public sealed partial class MainViewModel
     // ───────────── Guida visiva: evidenzia il riquadro su cui agire ─────────────
 
     /// <summary>Mancano una o entrambe le linee: si evidenzia «Linee di rilevamento».</summary>
-    public bool IsLinesStepActive => (IsDistanceKnownMode || IsMapMode) && (LineA is null || LineB is null);
+    public bool IsLinesStepActive => IsDistanceKnownMode && (LineA is null || LineB is null);
 
-    /// <summary>Linee pronte, distanza mancante o non valida: si evidenzia «Distanza misurata sul campo».</summary>
+    /// <summary>Linee pronte, distanza mancante o non valida: si evidenzia «Distanza tra le linee».</summary>
     public bool IsDistanceStepActive =>
         (IsDistanceKnownMode && LineA is not null && LineB is not null && DistanceMeters is not > 0) || IsVanishingDistanceStep;
 
@@ -58,7 +56,7 @@ public sealed partial class MainViewModel
             : RefPointB is null ? ViewportMode.PlaceRefB
             : VanishingPoint is null ? ViewportMode.PlaceVanishing
             : ViewportMode.None
-        : !(IsDistanceKnownMode || IsMapMode) ? ViewportMode.None
+        : !IsDistanceKnownMode ? ViewportMode.None
         : LineA is null ? ViewportMode.DrawLineA : LineB is null ? ViewportMode.DrawLineB : ViewportMode.None;
 
     public string LineBStatus => LineB is null ? Loc.T("Da disegnare") : Loc.T("Disegnata");
@@ -72,8 +70,7 @@ public sealed partial class MainViewModel
                 return Loc.T("Calibrazione incompleta");
             }
 
-            double mpp = c.ApproxMetersPerPixel;
-            return Loc.S($"{c.DistanceMeters:0.##} m tra le linee · circa {c.MeanPixelSeparation:0} px · {mpp * 100:0.#} cm/px (indicativo)");
+            return Loc.S($"{c.DistanceMeters:0.##} m tra le linee");
         }
     }
 
@@ -101,8 +98,8 @@ public sealed partial class MainViewModel
 
     /// <summary>Messaggio sotto la data: da completare (mancano cifre) oppure non valida (es. 31/02).</summary>
     public string? RecordingStartError =>
-        !Controls.MaskedInput.HasDigits(RecordingStartText) || EffectiveRecordingStart is not null ? null
-        : RecordingStartText.Contains(Controls.MaskedInput.Empty) ? Loc.T("Completa giorno, mese, anno, ore, minuti e secondi.")
+        !InputMask.HasDigits(RecordingStartText) || EffectiveRecordingStart is not null ? null
+        : RecordingStartText.Contains(InputMask.Empty) ? Loc.T("Completa giorno, mese, anno, ore, minuti e secondi.")
         : Loc.T("Data o ora non valida: controlla i numeri.");
 
     public string RecordingStartSourceText => Info?.RecordingStartSource switch
@@ -119,7 +116,7 @@ public sealed partial class MainViewModel
 
     internal static DateTimeOffset? ParseRecordingStart(string? text)
     {
-        if (!Controls.MaskedInput.HasDigits(text) || text!.Contains(Controls.MaskedInput.Empty))
+        if (!InputMask.HasDigits(text) || text!.Contains(InputMask.Empty))
         {
             return null;   // vuota o ancora da completare
         }
@@ -248,7 +245,7 @@ public sealed partial class MainViewModel
         OnPropertyChanged(nameof(IsDistanceStepActive));
         double? distance = EffectiveDistanceMeters;
         IReadOnlyList<CalibrationIssue> issues = CalibrationValidator.Validate(LineA, LineB, distance);
-        if (!IsDistanceKnownMode && !IsMapMode)
+        if (!IsDistanceKnownMode)
         {
             // La distanza è la lunghezza del veicolo: breve per definizione, e le linee arrivano dopo l'analisi.
             issues = issues.Where(i => i.Code is not ("DIST_SHORT" or "DIST_MISSING" or "A_MISSING" or "B_MISSING")).ToList();
@@ -334,55 +331,52 @@ public sealed partial class MainViewModel
 
         if (IsDistanceProvisional)
         {
-            ShowStatus(Loc.T("Distanza non ancora stimata"), Loc.T("Salva la calibrazione dopo aver indicato il modello di un'auto."), InfoBarSeverity.Warning);
+            ShowStatus(Loc.T("Distanza non ancora stimata"), Loc.T("Salva la calibrazione dopo aver indicato il modello di un'auto."), StatusSeverity.Warning);
             return;
         }
 
-        var dialog = new SaveFileDialog
-        {
-            Title = Loc.T("Salva calibrazione"),
-            Filter = "Calibrazione|*.tsacal.json",
-            FileName = Path.GetFileNameWithoutExtension(Info is null ? "calibrazione" : SourceFileName) + ".tsacal.json",
-            InitialDirectory = _settings.LastVideoFolder ?? string.Empty,
-        };
-        if (dialog.ShowDialog() != true)
+        string? file = await _platform.PickSaveFileAsync(
+            Loc.T("Salva calibrazione"),
+            [new FileFilter(Loc.T("Calibrazione"), ["*.tsacal.json"])],
+            Path.GetFileNameWithoutExtension(Info is null ? "calibrazione" : SourceFileName) + ".tsacal.json",
+            ".tsacal.json",
+            _settings.LastVideoFolder);
+        if (file is null)
         {
             return;
         }
 
         try
         {
-            await CalibrationFile.From(VideoWidth, VideoHeight, c.LineA, c.LineB, c.DistanceMeters, Info?.FileName).SaveAsync(dialog.FileName);
-            ShowStatus(Loc.T("Calibrazione salvata"), Loc.T("Potrai riusarla per altri video girati dalla stessa posizione."), InfoBarSeverity.Success);
+            await CalibrationFile.From(VideoWidth, VideoHeight, c.LineA, c.LineB, c.DistanceMeters, Info?.FileName).SaveAsync(file);
+            ShowStatus(Loc.T("Calibrazione salvata"), Loc.T("Potrai riusarla per altri video girati dalla stessa posizione."), StatusSeverity.Success);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            ShowStatus(Loc.T("Salvataggio non riuscito"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Salvataggio non riuscito"), e.Message, StatusSeverity.Error);
         }
     }
 
     [RelayCommand]
     private async Task LoadCalibrationAsync()
     {
-        var dialog = new OpenFileDialog
-        {
-            Title = Loc.T("Carica calibrazione"),
-            Filter = "Calibrazione|*.tsacal.json;*.json",
-            InitialDirectory = _settings.LastVideoFolder ?? string.Empty,
-        };
-        if (dialog.ShowDialog() != true)
+        string? path = await _platform.PickOpenFileAsync(
+            Loc.T("Carica calibrazione"),
+            [new FileFilter(Loc.T("Calibrazione"), ["*.tsacal.json", "*.json"])],
+            _settings.LastVideoFolder);
+        if (path is null)
         {
             return;
         }
 
         try
         {
-            CalibrationFile file = await CalibrationFile.LoadAsync(dialog.FileName);
+            CalibrationFile file = await CalibrationFile.LoadAsync(path);
             if (!file.HasSameAspect(VideoWidth, VideoHeight))
             {
                 ShowStatus(Loc.T("Proporzioni diverse"),
                     Loc.T("La calibrazione è stata fatta su un video con proporzioni diverse: le linee potrebbero non corrispondere."),
-                    InfoBarSeverity.Warning);
+                    StatusSeverity.Warning);
             }
 
             (LineSegment a, LineSegment b) = file.ScaledTo(VideoWidth, VideoHeight);
@@ -394,7 +388,7 @@ public sealed partial class MainViewModel
         }
         catch (Exception e) when (e is IOException or JsonException or InvalidDataException or UnauthorizedAccessException)
         {
-            ShowStatus(Loc.T("Calibrazione non valida"), e.Message, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Calibrazione non valida"), e.Message, StatusSeverity.Error);
         }
     }
 

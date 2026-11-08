@@ -58,7 +58,7 @@ public interface IVehicleDetector : IDisposable
 {
     string ModelName { get; }
 
-    /// <summary>Esecutore effettivamente in uso, per esempio "GPU (DirectML)" o "CPU".</summary>
+    /// <summary>Esecutore effettivamente in uso, per esempio "GPU (DirectML)", "Chip Apple (CoreML)" o "CPU".</summary>
     string ExecutionProvider { get; }
 
     /// <param name="region">Zona da analizzare (in pixel dell'immagine); null = intero fotogramma.</param>

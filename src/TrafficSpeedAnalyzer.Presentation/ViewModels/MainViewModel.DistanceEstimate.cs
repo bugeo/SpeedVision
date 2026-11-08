@@ -5,7 +5,6 @@ using TrafficSpeedAnalyzer.App.Services;
 using TrafficSpeedAnalyzer.Core.Calibration;
 using TrafficSpeedAnalyzer.Core.Detection;
 using TrafficSpeedAnalyzer.Core.Geometry;
-using InfoBarSeverity = Wpf.Ui.Controls.InfoBarSeverity;
 using TrafficSpeedAnalyzer.Core.Localization;
 
 namespace TrafficSpeedAnalyzer.App.ViewModels;
@@ -105,13 +104,13 @@ public sealed partial class MainViewModel
 
     public ObservableCollection<ReferenceVehicle> FilteredReferenceVehicles { get; } = new(ReferenceVehicleCatalog.All);
 
-    public bool HasCalibrationMethod => IsDistanceKnownMode || EstimateDistanceFromVehicle || IsVanishingMode || IsMapMode;
+    public bool HasCalibrationMethod => IsDistanceKnownMode || EstimateDistanceFromVehicle || IsVanishingMode;
 
     /// <summary>Guida: il primo passo è scegliere come calibrare.</summary>
     public bool IsMethodStepActive => !HasCalibrationMethod;
 
     /// <summary>Il riquadro della distanza compare solo dopo aver disegnato le due linee.</summary>
-    public bool ShowDistanceCard => LineA is not null && LineB is not null && (IsDistanceKnownMode || IsVanishingMode || (IsMapMode && HasMapMeasurement));
+    public bool ShowDistanceCard => LineA is not null && LineB is not null && (IsDistanceKnownMode || IsVanishingMode);
 
     /// <summary>La calibrazione con l'auto è possibile: ripresa adatta (camera perpendicolare, auto utilizzabili).</summary>
     public bool IsVehicleCalibrationAvailable => _shot?.Suitable == true;
@@ -176,7 +175,7 @@ public sealed partial class MainViewModel
     public bool IsReferenceStepActive => IsPickingVehicle || ShowGoToAnalysis;
 
     /// <summary>Linee visibili e modificabili nella calibrazione: misurate a mano oppure ricavate dall'auto.</summary>
-    public bool ShowLinesCard => IsDistanceKnownMode || IsMapMode || (EstimateDistanceFromVehicle && _reference is not null);
+    public bool ShowLinesCard => IsDistanceKnownMode || (EstimateDistanceFromVehicle && _reference is not null);
 
     /// <summary>
     /// Si può passare ai risultati: calibrazione completa. Mentre si propone la seconda auto si risponde
@@ -278,7 +277,7 @@ public sealed partial class MainViewModel
 
     /// <summary>Distanza usata per i calcoli: misurata a mano oppure lunghezza del veicolo di riferimento.</summary>
     private double? EffectiveDistanceMeters =>
-        EstimateDistanceFromVehicle ? _reference?.Vehicle.LengthMeters : IsDistanceKnownMode || IsVanishingMode || IsMapMode ? DistanceMeters : null;
+        EstimateDistanceFromVehicle ? _reference?.Vehicle.LengthMeters : IsDistanceKnownMode || IsVanishingMode ? DistanceMeters : null;
 
     partial void OnEstimateDistanceFromVehicleChanged(bool value)
     {
@@ -286,7 +285,6 @@ public sealed partial class MainViewModel
         {
             IsDistanceKnownMode = false;
             IsVanishingMode = false;
-            IsMapMode = false;
             if (_reference is null)
             {
                 StartReferenceIdentification();   // mostra subito la prima auto da riconoscere
@@ -308,7 +306,6 @@ public sealed partial class MainViewModel
         {
             EstimateDistanceFromVehicle = false;
             IsVanishingMode = false;
-            IsMapMode = false;
         }
 
         OnCalibrationMethodChanged();
@@ -324,6 +321,7 @@ public sealed partial class MainViewModel
 
         UpdateCalibration();
         RefreshEstimateState();
+        RefreshMapState();
     }
 
     partial void OnVehicleSearchTextChanged(string value)
@@ -459,7 +457,7 @@ public sealed partial class MainViewModel
             {
                 ShowStatus(Loc.T("Auto non utilizzabile"),
                     Loc.T("Con queste due auto la prospettiva non si ricava. Restano le linee di prima."),
-                    InfoBarSeverity.Warning);
+                    StatusSeverity.Warning);
                 RefreshEstimateState();
                 return;
             }
@@ -467,7 +465,7 @@ public sealed partial class MainViewModel
             ApplyReference(first with { Second = recognized, Horizon = h });
             ShowStatus(Loc.T("Linee orientate"),
                 Loc.S($"Linee orientate con la {vehicle.DisplayName}: la distanza vale per tutte le corsie. Controllale e premi «Procedi»."),
-                InfoBarSeverity.Success);
+                StatusSeverity.Success);
             return;
         }
 
@@ -484,7 +482,7 @@ public sealed partial class MainViewModel
                 h2 is null
                     ? Loc.T("Con la nuova prima auto quella della corsia lontana non permette di ricavare la prospettiva: riconoscine un'altra con «Modifica».")
                     : Loc.T("Linee A e B ricalcolate con la nuova prima auto e orientate con quella della corsia lontana."),
-                h2 is null ? InfoBarSeverity.Warning : InfoBarSeverity.Success);
+                h2 is null ? StatusSeverity.Warning : StatusSeverity.Success);
             return;
         }
 
@@ -499,7 +497,7 @@ public sealed partial class MainViewModel
             Loc.S($"Linee A e B sulla {vehicle.DisplayName} ({vehicle.LengthMeters:0.00} m). {perspective}") +
             (_askingSecond ? Loc.T(" Ora un'auto della corsia più lontana, per orientare le linee.") : Loc.T(" Controlla le linee e premi «Procedi».")) +
             (m.Warnings.Count > 0 ? " " + string.Join(" ", m.Warnings) : string.Empty),
-            m.Warnings.Count > 0 ? InfoBarSeverity.Warning : InfoBarSeverity.Success);
+            m.Warnings.Count > 0 ? StatusSeverity.Warning : StatusSeverity.Success);
     }
 
     /// <summary>Mette le linee A e B sul veicolo di riferimento e ricalcola tutte le velocità.</summary>
@@ -544,7 +542,7 @@ public sealed partial class MainViewModel
         {
             ShowStatus(Loc.T("Ricomincio dalla prima auto"),
                 Loc.T("Hai visto tutte le auto. Se non ne riconosci nessuna, scegli «Con due riferimenti misurati sul campo»."),
-                InfoBarSeverity.Informational);
+                StatusSeverity.Informational);
         }
     }
 
@@ -558,7 +556,7 @@ public sealed partial class MainViewModel
         RefreshEstimateState();
         ShowStatus(Loc.T("Calibrazione pronta"),
             RoadPerspective.Describe(_reference?.Horizon) + Loc.T(" Controlla le linee e premi «Procedi»."),
-            _reference?.Horizon is null ? InfoBarSeverity.Warning : InfoBarSeverity.Success);
+            _reference?.Horizon is null ? StatusSeverity.Warning : StatusSeverity.Success);
     }
 
     /// <summary>«Modifica» sul riquadro della prima auto: la si sceglie di nuovo, partendo da quella confermata.</summary>
@@ -598,7 +596,7 @@ public sealed partial class MainViewModel
         RefreshEstimateState();
         if (!_askingSecond)
         {
-            ShowStatus(Loc.T("Nessuna auto da proporre"), Loc.T("Non ci sono auto utilizzabili su un'altra corsia."), InfoBarSeverity.Warning);
+            ShowStatus(Loc.T("Nessuna auto da proporre"), Loc.T("Non ci sono auto utilizzabili su un'altra corsia."), StatusSeverity.Warning);
         }
     }
 

@@ -2,6 +2,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using TrafficSpeedAnalyzer.App.Services;
 
 namespace TrafficSpeedAnalyzer.App.Controls;
 
@@ -13,7 +14,7 @@ namespace TrafficSpeedAnalyzer.App.Controls;
 /// </summary>
 public static class MaskedInput
 {
-    public const char Slot = '0', Empty = '_';
+    public const char Slot = InputMask.Slot, Empty = InputMask.Empty;
 
     public static readonly DependencyProperty MaskProperty = DependencyProperty.RegisterAttached(
         "Mask", typeof(string), typeof(MaskedInput), new PropertyMetadata(null, OnMaskChanged));
@@ -23,10 +24,10 @@ public static class MaskedInput
     public static void SetMask(DependencyObject o, string? value) => o.SetValue(MaskProperty, value);
 
     /// <summary>La maschera vuota, per esempio «__/__/____ __:__:__».</summary>
-    public static string Blank(string mask) => new(mask.Select(c => c == Slot ? Empty : c).ToArray());
+    public static string Blank(string mask) => InputMask.Blank(mask);
 
     /// <summary>Il testo contiene almeno una cifra scritta (altrimenti equivale a «vuoto»).</summary>
-    public static bool HasDigits(string? text) => text is not null && text.Any(char.IsDigit);
+    public static bool HasDigits(string? text) => InputMask.HasDigits(text);
 
     private static void OnMaskChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {

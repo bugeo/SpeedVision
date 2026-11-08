@@ -11,7 +11,7 @@ namespace TrafficSpeedAnalyzer.App;
 
 public partial class MainWindow
 {
-    private readonly MainViewModel _vm = new();
+    private readonly MainViewModel _vm = new(new Services.WpfPlatformServices());
     private string? _pendingOpen;
     private bool _closingConfirmed;
 
@@ -30,6 +30,9 @@ public partial class MainWindow
         DragOver += OnDragOver;
         Drop += OnDrop;
     }
+
+    private void OnSettingsClick(object sender, RoutedEventArgs e) =>
+        new SettingsWindow { Owner = this, DataContext = _vm }.ShowDialog();
 
     private void ApplyLanguage() =>
         Language = System.Windows.Markup.XmlLanguage.GetLanguage(Loc.Culture.IetfLanguageTag);

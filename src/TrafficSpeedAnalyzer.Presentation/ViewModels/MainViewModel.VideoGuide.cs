@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using TrafficSpeedAnalyzer.App.Services;
+
 namespace TrafficSpeedAnalyzer.App.ViewModels;
 
 /// <summary>
@@ -43,7 +45,7 @@ public sealed partial class MainViewModel
     public bool ShowVideoProceed => HasVideo && StabilizationAnswered && RecordingStartAnswered;
 
     /// <summary>Testo della data senza la maschera vuota: «__/__/____ __:__:__» vale come nessuna data.</summary>
-    private static string NormalizedRecordingText(string? text) => Controls.MaskedInput.HasDigits(text) ? text!.Trim() : string.Empty;
+    private static string NormalizedRecordingText(string? text) => InputMask.HasDigits(text) ? text!.Trim() : string.Empty;
 
     /// <summary>Le domande della guida ripartono a ogni nuovo video.</summary>
     private void ResetVideoGuide()

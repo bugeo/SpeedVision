@@ -3,11 +3,17 @@ using System.Text.Json;
 
 namespace TrafficSpeedAnalyzer.App.Services;
 
-/// <summary>Preferenze salvate in %LocalAppData%\TrafficSpeedAnalyzer\settings.json.</summary>
+/// <summary>
+/// Preferenze salvate in %LocalAppData%\TrafficSpeedAnalyzer\settings.json (su Mac e Linux nella cartella dati
+/// dell'utente). La variabile d'ambiente SPEEDVISION_DATA_DIR indica un'altra cartella: la usano i test, per non
+/// toccare le impostazioni vere.
+/// </summary>
 public sealed class AppSettings
 {
     public static string DataDirectory { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TrafficSpeedAnalyzer");
+        Environment.GetEnvironmentVariable("SPEEDVISION_DATA_DIR") is { Length: > 0 } custom
+            ? custom
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TrafficSpeedAnalyzer");
 
     private static string FilePath => Path.Combine(DataDirectory, "settings.json");
 

@@ -22,6 +22,7 @@
     <ProjectReference Include="..\TrafficSpeedAnalyzer.Core\TrafficSpeedAnalyzer.Core.csproj" />
     <ProjectReference Include="..\TrafficSpeedAnalyzer.Video\TrafficSpeedAnalyzer.Video.csproj" />
     <ProjectReference Include="..\TrafficSpeedAnalyzer.Detection\TrafficSpeedAnalyzer.Detection.csproj" />
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Presentation\TrafficSpeedAnalyzer.Presentation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

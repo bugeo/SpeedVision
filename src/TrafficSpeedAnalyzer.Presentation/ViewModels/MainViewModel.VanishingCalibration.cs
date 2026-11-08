@@ -67,7 +67,6 @@ public sealed partial class MainViewModel
         {
             IsDistanceKnownMode = false;
             EstimateDistanceFromVehicle = false;
-            IsMapMode = false;
             LineA = null;
             LineB = null;
             if (VanishingPoint is not null)

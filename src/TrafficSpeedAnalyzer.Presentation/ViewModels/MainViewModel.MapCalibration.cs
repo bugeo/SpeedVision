@@ -1,47 +1,31 @@
 using System.IO;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TrafficSpeedAnalyzer.App.Services;
 using TrafficSpeedAnalyzer.Core.Calibration;
 using TrafficSpeedAnalyzer.Core.Localization;
-using InfoBarSeverity = Wpf.Ui.Controls.InfoBarSeverity;
 
 namespace TrafficSpeedAnalyzer.App.ViewModels;
 
 /// <summary>
-/// Calibrazione «con due riferimenti trovati sulla mappa»: l'utente disegna le linee A e B su due punti
-/// riconoscibili, poi su una mappa (OpenStreetMap o satellite) clicca dove le due linee incontrano lo stesso
-/// bordo della strada. La distanza tra i due punti (ellissoide WGS84) diventa la distanza tra le linee.
+/// Distanza tra le linee rilevata sulla mappa: nel riquadro della distanza «Rileva su mappa» apre una mappa
+/// (OpenStreetMap o satellite) dove l'utente clicca i punti in cui le linee A e B incontrano lo stesso bordo della
+/// strada. La distanza tra i due punti (ellissoide WGS84) viene scritta nella casella della distanza, dove si può
+/// ancora correggere. Vale per i metodi con due riferimenti (sul campo e con il punto di fuga).
 /// </summary>
 public sealed partial class MainViewModel
 {
-    /// <summary>Metodo scelto: due riferimenti trovati sulla mappa.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasCalibrationMethod), nameof(IsMethodStepActive), nameof(ShowDistanceCard))]
-    private bool _isMapMode;
-
     private MapResult? _mapMeasurement;
 
     /// <summary>Le linee sono state spostate dopo la misura sulla mappa: la misura potrebbe non valere più.</summary>
     private bool _mapLinesChanged;
 
-    public bool ShowMapCard => IsMapMode && LineA is not null && LineB is not null;
-
     public bool HasMapMeasurement => _mapMeasurement is not null;
 
-    /// <summary>Guida: il riquadro della mappa è acceso finché manca la misura (o va rifatta).</summary>
-    public bool IsMapStepActive => ShowMapCard && (_mapMeasurement is null || _mapLinesChanged || DistanceMeters is not > 0);
-
-    public string MapButtonText => HasMapMeasurement ? Loc.T("Rimisura sulla mappa") : Loc.T("Apri la mappa");
-
-    public string MapHint => HasMapMeasurement
-        ? Loc.T("Distanza presa dalla mappa: puoi rimisurarla o correggerla.")
-        : Info?.Location is not null
-            ? Loc.T("Apri la mappa e clicca dove le linee A e B incontrano lo stesso bordo della strada.")
-            : Loc.T("Apri la mappa, cerca il luogo e clicca dove le linee A e B incontrano lo stesso bordo della strada.");
+    /// <summary>La distanza in uso è quella rilevata sulla mappa (linee non spostate, distanza non corretta a mano).</summary>
+    private bool IsDistanceFromMap =>
+        (IsDistanceKnownMode || IsVanishingMode) && _mapMeasurement is { } m && !_mapLinesChanged &&
+        DistanceMeters is { } d && Math.Abs(d - Math.Round(m.Meters, 2)) <= 0.005;
 
     public string MapResultText => _mapMeasurement is { } m
         ? Loc.S($"Sulla mappa: {m.Meters:0.00} m tra A e B (precisione dei clic circa ± {m.PrecisionMeters:0.00} m).")
@@ -54,30 +38,15 @@ public sealed partial class MainViewModel
             ? Loc.T("La distanza è stata modificata a mano dopo la misura sulla mappa.")
         : null;
 
-    /// <summary>Titolo e spiegazione del riquadro della distanza, secondo il metodo.</summary>
-    public string DistanceCardTitle => IsMapMode ? Loc.T("Distanza tra le linee") : Loc.T("Distanza misurata sul campo");
-
-    public string DistanceCardHint => IsMapMode
+    /// <summary>Nota sotto la casella della distanza: solo per una distanza presa dalla mappa.</summary>
+    public string? DistanceCardHint => IsDistanceFromMap
         ? Loc.T("Misurata sulla mappa: puoi correggerla.")
-        : Loc.T("Distanza reale tra le linee, lungo la strada. Da qui dipende la precisione.");
-
-    partial void OnIsMapModeChanged(bool value)
-    {
-        if (value)
-        {
-            IsDistanceKnownMode = false;
-            EstimateDistanceFromVehicle = false;
-            IsVanishingMode = false;
-        }
-
-        OnCalibrationMethodChanged();
-        RefreshMapState();
-    }
+        : null;
 
     /// <summary>Le linee sono cambiate: con una misura già fatta sulla mappa, va ricontrollata.</summary>
     private void OnLinesChangedForMap()
     {
-        if (IsMapMode && _mapMeasurement is not null)
+        if (_mapMeasurement is not null)
         {
             _mapLinesChanged = true;
         }
@@ -86,7 +55,7 @@ public sealed partial class MainViewModel
     }
 
     [RelayCommand]
-    private void OpenMap()
+    private async Task OpenMapAsync()
     {
         if (LineA is null || LineB is null)
         {
@@ -107,8 +76,7 @@ public sealed partial class MainViewModel
             SnapshotDataUrl: BuildCalibrationSnapshot(),
             Layer: _settings.MapLayer ?? "map");
 
-        var window = new MapCalibrationWindow(request) { Owner = Application.Current?.MainWindow };
-        window.ShowDialog();
+        MapOutcome window = await _platform.ShowMapAsync(request);
 
         if (window.LastView is { } view)
         {
@@ -121,7 +89,7 @@ public sealed partial class MainViewModel
 
         if (window.Error is { } error)
         {
-            ShowStatus(Loc.T("Mappa non disponibile"), error, InfoBarSeverity.Error);
+            ShowStatus(Loc.T("Mappa non disponibile"), error, StatusSeverity.Error);
             return;
         }
 
@@ -140,39 +108,15 @@ public sealed partial class MainViewModel
     /// <summary>Fotogramma corrente con le linee A e B, in piccolo, da tenere sotto gli occhi mentre si cerca sulla mappa.</summary>
     private string? BuildCalibrationSnapshot()
     {
-        if (CurrentFrame is not BitmapSource frame || VideoWidth <= 0)
+        if (_currentVideoFrame is not { } frame || VideoWidth <= 0)
         {
             return null;
         }
 
         try
         {
-            double scale = Math.Min(1, 720.0 / frame.PixelWidth);
-            int w = (int)Math.Round(frame.PixelWidth * scale), h = (int)Math.Round(frame.PixelHeight * scale);
-            double k = w / (double)VideoWidth;   // pixel dell'immagine per pixel del video
-            var visual = new DrawingVisual();
-            using (DrawingContext dc = visual.RenderOpen())
-            {
-                dc.DrawImage(frame, new Rect(0, 0, w, h));
-                foreach ((Core.Geometry.LineSegment? line, Color color) in new[] { (LineA, Color.FromRgb(0x4C, 0xC2, 0xFF)), (LineB, Color.FromRgb(0xFF, 0xB5, 0x47)) })
-                {
-                    if (line is { } l)
-                    {
-                        var p1 = new Point(l.Start.X * k, l.Start.Y * k);
-                        var p2 = new Point(l.End.X * k, l.End.Y * k);
-                        dc.DrawLine(new Pen(new SolidColorBrush(Color.FromArgb(150, 0, 0, 0)), 6), p1, p2);
-                        dc.DrawLine(new Pen(new SolidColorBrush(color), 3), p1, p2);
-                    }
-                }
-            }
-
-            var target = new RenderTargetBitmap(w, h, 96, 96, PixelFormats.Pbgra32);
-            target.Render(visual);
-            var encoder = new JpegBitmapEncoder { QualityLevel = 85 };
-            encoder.Frames.Add(BitmapFrame.Create(target));
-            using var ms = new MemoryStream();
-            encoder.Save(ms);
-            return "data:image/jpeg;base64," + Convert.ToBase64String(ms.ToArray());
+            byte[] jpeg = PassageImageRenderer.RenderSnapshotJpeg(frame, VideoWidth, LineA, LineB, maxWidth: 720, quality: 85);
+            return "data:image/jpeg;base64," + Convert.ToBase64String(jpeg);
         }
         catch (Exception e) when (e is InvalidOperationException or ArgumentException or NotSupportedException)
         {
@@ -184,7 +128,7 @@ public sealed partial class MainViewModel
     /// <summary>Righe di info.txt sulla misura fatta sulla mappa.</summary>
     private IEnumerable<string> MapInfoLines()
     {
-        if (!IsMapMode || _mapMeasurement is not { } m)
+        if (!(IsDistanceKnownMode || IsVanishingMode) || _mapMeasurement is not { } m)
         {
             yield break;
         }
@@ -200,7 +144,6 @@ public sealed partial class MainViewModel
 
     private void ResetMapForNewVideo()
     {
-        IsMapMode = false;
         _mapMeasurement = null;
         _mapLinesChanged = false;
         RefreshMapState();
@@ -208,14 +151,9 @@ public sealed partial class MainViewModel
 
     private void RefreshMapState()
     {
-        OnPropertyChanged(nameof(ShowMapCard));
         OnPropertyChanged(nameof(HasMapMeasurement));
-        OnPropertyChanged(nameof(IsMapStepActive));
-        OnPropertyChanged(nameof(MapButtonText));
-        OnPropertyChanged(nameof(MapHint));
         OnPropertyChanged(nameof(MapResultText));
         OnPropertyChanged(nameof(MapWarning));
-        OnPropertyChanged(nameof(DistanceCardTitle));
         OnPropertyChanged(nameof(DistanceCardHint));
         OnPropertyChanged(nameof(ShowDistanceCard));
     }
