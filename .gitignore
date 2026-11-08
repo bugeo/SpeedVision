@@ -31,3 +31,5 @@ wiki-log.txt
 
 # Zip di distribuzione creati da scripts\package-release.ps1
 out/
+# Registro di scripts\avvia-nuova-interfaccia.cmd
+avvia-log.txt
