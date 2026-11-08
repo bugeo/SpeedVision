@@ -46,7 +46,8 @@ jobs:
         run: dotnet test SpeedVision.sln -c Release --no-build --blame-hang-timeout 8m
 
   # Mac con chip Apple (macos-15, M1): FFmpeg compilato da noi, poi calcoli, video e rilevamento.
-  # L'interfaccia WPF non si compila su Mac: qui si provano solo le parti multipiattaforma.
+  # L'interfaccia WPF non si compila su Mac: qui si provano le parti multipiattaforma e l'interfaccia Avalonia
+  # (senza schermo, con le schermate di ogni passo tra i file della corsa).
   macos:
     runs-on: macos-15
     timeout-minutes: 60
@@ -85,10 +86,17 @@ jobs:
 
       - name: Test
         run: |
-          for t in Core Video Detection Presentation; do
+          for t in Core Video Detection Presentation Desktop; do
             dotnet test tests/TrafficSpeedAnalyzer.$t.Tests -c Release --blame-hang-timeout 8m \
               --logger "console;verbosity=normal" || exit 1
           done
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: schermate-macos
+          path: tests/TrafficSpeedAnalyzer.Desktop.Tests/bin/Release/net10.0/screenshots
+          if-no-files-found: ignore
 
       # FFmpeg pronto per il pacchetto Mac (fase 5): si scarica dalla pagina dell'esecuzione.
       - uses: actions/upload-artifact@v4

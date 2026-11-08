@@ -54,6 +54,8 @@ dotnet test SpeedVision.sln -c Release
 dotnet run --project src/TrafficSpeedAnalyzer.App -c Release
 ```
 
+La nuova interfaccia multipiattaforma (Avalonia), ancora in sviluppo: `dotnet run --project src/TrafficSpeedAnalyzer.Desktop -c Release`.
+
 Oppure `scripts\build-and-test.ps1`. Per creare lo zip da distribuire, uguale a quello delle release (eseguibile autonomo + FFmpeg
 scaricato da una versione fissa): `scripts\package-release.ps1`. `scripts\publish.ps1` crea un pacchetto
 simile usando l'FFmpeg installato su questo PC.
@@ -69,12 +71,14 @@ src/
   TrafficSpeedAnalyzer.Video   FFmpeg/FFprobe: metadati, indice dei fotogrammi, lettura esatta
   TrafficSpeedAnalyzer.Presentation  view model ed esportazioni, senza WPF (comuni a Windows, Mac e Linux)
   TrafficSpeedAnalyzer.App     interfaccia WPF (Fluent, tema scuro) per Windows
+  TrafficSpeedAnalyzer.Desktop interfaccia multipiattaforma (Avalonia) per Windows, Mac e Linux: in sviluppo
   TrafficSpeedAnalyzer.Detection  YOLOX con ONNX Runtime (DirectML / CoreML), gestione modelli, pipeline di analisi
 tests/
   TrafficSpeedAnalyzer.Core.Tests       traiettorie sintetiche a velocità nota, tracker
   TrafficSpeedAnalyzer.Video.Tests      parsing + video generati con contenuto noto
   TrafficSpeedAnalyzer.Detection.Tests  modello reale su video con auto vere a 50 e 72 km/h
   TrafficSpeedAnalyzer.Presentation.Tests  view model senza interfaccia, immagini esportate
+  TrafficSpeedAnalyzer.Desktop.Tests  finestra Avalonia senza schermo: guida, mouse, velocità attese, schermate
 ```
 
 ## Come viene calcolata la velocità

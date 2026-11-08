@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Interfaccia multipiattaforma di SpeedVision (Windows, Mac, Linux) con Avalonia.
+    Usa gli stessi view model dell'app WPF (progetto Presentation): qui ci sono solo finestre, stili,
+    riquadro del video e servizi di sistema (dialoghi, appunti, browser).
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(TsaTargetFramework)</TargetFramework>
+    <RootNamespace>TrafficSpeedAnalyzer.Desktop</RootNamespace>
+    <AssemblyName>SpeedVision</AssemblyName>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <!-- Binding per nome (come in WPF): lo XAML resta vicino a quello dell'app per Windows. -->
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.5" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.5" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.5" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.5" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Core\TrafficSpeedAnalyzer.Core.csproj" />
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Video\TrafficSpeedAnalyzer.Video.csproj" />
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Detection\TrafficSpeedAnalyzer.Detection.csproj" />
+    <ProjectReference Include="..\TrafficSpeedAnalyzer.Presentation\TrafficSpeedAnalyzer.Presentation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TrafficSpeedAnalyzer.Desktop.Tests" />
+  </ItemGroup>
+</Project>

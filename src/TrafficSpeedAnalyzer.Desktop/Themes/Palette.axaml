@@ -1,0 +1,52 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:conv="using:TrafficSpeedAnalyzer.Desktop.Converters">
+    <!-- Palette dell'applicazione (tema scuro), uguale all'app per Windows -->
+    <Color x:Key="LineAColor">#FF4CC2FF</Color>
+    <Color x:Key="LineBColor">#FFFFB547</Color>
+    <Color x:Key="PointColor">#FFFF5C8A</Color>
+    <Color x:Key="OkColor">#FF5EE09A</Color>
+    <Color x:Key="ErrorColor">#FFFF6B6B</Color>
+
+    <SolidColorBrush x:Key="LineABrush" Color="{StaticResource LineAColor}" />
+    <SolidColorBrush x:Key="LineBBrush" Color="{StaticResource LineBColor}" />
+    <SolidColorBrush x:Key="PointBrush" Color="{StaticResource PointColor}" />
+    <SolidColorBrush x:Key="OkBrush" Color="{StaticResource OkColor}" />
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}" />
+    <SolidColorBrush x:Key="WarnBrush" Color="{StaticResource LineBColor}" />
+
+    <SolidColorBrush x:Key="WindowBackground" Color="#FF1B1F26" />
+    <SolidColorBrush x:Key="RailBackground" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="PanelBackground" Color="#0DFFFFFF" />
+    <SolidColorBrush x:Key="CardBackground" Color="#12FFFFFF" />
+    <SolidColorBrush x:Key="CardBorder" Color="#1AFFFFFF" />
+    <SolidColorBrush x:Key="HoverBackground" Color="#12FFFFFF" />
+    <SolidColorBrush x:Key="SelectedBackground" Color="#22FFFFFF" />
+    <SolidColorBrush x:Key="TextPrimary" Color="#FFF3F5F8" />
+    <SolidColorBrush x:Key="TextSecondary" Color="#FFAAB2BF" />
+    <SolidColorBrush x:Key="TextTertiary" Color="#FF7D8593" />
+
+    <!-- Colore primario: verde (pulsanti principali, selezioni, indicatori) -->
+    <Color x:Key="AccentColor">#FF2FCB79</Color>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <!-- Accento del tema Fluent: verde al posto del colore di sistema -->
+    <Color x:Key="SystemAccentColor">#FF1FA85F</Color>
+    <Color x:Key="SystemAccentColorLight1">#FF2FCB79</Color>
+    <Color x:Key="SystemAccentColorLight2">#FF4DDB8F</Color>
+    <Color x:Key="SystemAccentColorLight3">#FF7BE8AE</Color>
+    <Color x:Key="SystemAccentColorDark1">#FF188A4E</Color>
+    <Color x:Key="SystemAccentColorDark2">#FF116B3C</Color>
+    <Color x:Key="SystemAccentColorDark3">#FF0B4D2B</Color>
+
+    <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace</FontFamily>
+
+    <!-- Convertitori -->
+    <conv:EnumEqualsConverter x:Key="EnumEquals" />
+    <conv:EnumInConverter x:Key="EnumIn" />
+    <conv:TruthyConverter x:Key="Truthy" />
+    <conv:FalsyConverter x:Key="Falsy" />
+    <conv:PickConverter x:Key="Pick" />
+    <conv:AllTrueConverter x:Key="AllTrue" />
+    <conv:LaneAppearanceConverter x:Key="LaneAppearance" />
+    <conv:FinesBrushConverter x:Key="FinesBrush" />
+</ResourceDictionary>

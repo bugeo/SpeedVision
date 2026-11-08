@@ -84,7 +84,11 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
 
     public bool IsReady => Tools is not null;
 
-    public string FfmpegInstallCommand => "winget install --id Gyan.FFmpeg -e";
+    /// <summary>Comando per installare FFmpeg con il gestore di pacchetti del sistema.</summary>
+    public string FfmpegInstallCommand =>
+        OperatingSystem.IsMacOS() ? "brew install ffmpeg"
+        : OperatingSystem.IsLinux() ? "sudo apt install ffmpeg"
+        : "winget install --id Gyan.FFmpeg -e";
 
     // ───────────── Video ─────────────
 
@@ -228,7 +232,9 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
         await LocateFfmpegAsync();
         if (Tools is null)
         {
-            ShowStatus(Loc.T("FFmpeg non utilizzabile"), Loc.T("Nella stessa cartella devono esserci ffmpeg.exe e ffprobe.exe funzionanti."), StatusSeverity.Error);
+            ShowStatus(Loc.T("FFmpeg non utilizzabile"), OperatingSystem.IsWindows()
+                ? Loc.T("Nella stessa cartella devono esserci ffmpeg.exe e ffprobe.exe funzionanti.")
+                : Loc.T("Nella stessa cartella devono esserci ffmpeg e ffprobe funzionanti."), StatusSeverity.Error);
         }
     }
 

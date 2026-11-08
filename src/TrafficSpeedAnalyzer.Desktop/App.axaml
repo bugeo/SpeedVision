@@ -1,0 +1,18 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="TrafficSpeedAnalyzer.Desktop.App"
+             RequestedThemeVariant="Dark"
+             Name="SpeedVision">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://SpeedVision/Themes/Icons.axaml" />
+                <ResourceInclude Source="avares://SpeedVision/Themes/Palette.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://SpeedVision/Themes/AppStyles.axaml" />
+    </Application.Styles>
+</Application>

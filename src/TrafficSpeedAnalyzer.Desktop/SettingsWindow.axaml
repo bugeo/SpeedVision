@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:TrafficSpeedAnalyzer.Desktop.Localization"
+        xmlns:c="using:TrafficSpeedAnalyzer.Desktop.Controls"
+        x:Class="TrafficSpeedAnalyzer.Desktop.SettingsWindow"
+        Title="{loc:Tr 'Impostazioni'}"
+        Icon="avares://SpeedVision/Assets/app.ico"
+        Width="440" SizeToContent="Height" CanResize="False" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+    <!-- Impostazioni: lingua dell'interfaccia (e dei file esportati) e registro degli errori. DataContext = MainViewModel. -->
+    <StackPanel Margin="24,20,24,24">
+        <TextBlock Classes="sectionTitle" Text="{loc:Tr 'Lingua'}" />
+        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" HorizontalAlignment="Stretch" />
+        <TextBlock Classes="caption" Margin="0,6,0,0" Text="{loc:Tr 'Vale anche per i file esportati: CSV, PDF e immagini.'}" />
+
+        <TextBlock Classes="sectionTitle" Text="{loc:Tr 'Registro'}" Margin="0,22,0,6" />
+        <c:UiButton Content="{loc:Tr 'Apri il registro'}" Icon="{StaticResource Icon.DocumentText24}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="12,8" Command="{Binding OpenLogFolderCommand}" />
+        <TextBlock Classes="caption" Margin="0,6,0,0" Text="{loc:Tr 'Allegalo quando segnali un problema.'}" />
+
+        <c:UiButton Content="{loc:Tr 'Chiudi'}" Appearance="Primary" HorizontalAlignment="Right" Margin="0,24,0,0" Padding="20,8"
+                    IsDefault="True" IsCancel="True" Click="OnCloseClick" />
+    </StackPanel>
+</Window>

@@ -621,5 +621,14 @@
  "Chiudi": "Close",
  "Supporta lo sviluppo di questa applicazione": "Support the development of this app",
  "{0:0.##} m tra le linee": "{0:0.##} m between the lines",
- "Chip Apple (CoreML)": "Apple chip (CoreML)"
+ "Chip Apple (CoreML)": "Apple chip (CoreML)",
+ "FFmpeg non è stato trovato. Installalo con questo comando nel terminale e premi «Riprova».": "FFmpeg was not found. Install it with this command in the terminal and press «Retry».",
+ "FFmpeg non è stato trovato. Scarica di nuovo SpeedVision completo, oppure installa FFmpeg con questo comando nel Terminale (serve Homebrew) e premi «Riprova».": "FFmpeg was not found. Download the complete SpeedVision again, or install FFmpeg with this command in Terminal (Homebrew required) and press «Retry».",
+ "Indica dove si trova ffmpeg…": "Locate ffmpeg…",
+ "La mappa non è ancora disponibile in questa versione.": "The map is not available in this version yet.",
+ "Nella stessa cartella devono esserci ffmpeg e ffprobe funzionanti.": "The same folder must contain working ffmpeg and ffprobe.",
+ "No": "No",
+ "Sì": "Yes",
+ "Questo FFmpeg non può stabilizzare. Installa la versione completa: {0}": "This FFmpeg cannot stabilise. Install the full version: {0}",
+ "Tasti: ← → fotogramma · Maiusc ±10 · Spazio riproduci · {0}Z annulla · Invio salva · rotellina zoom": "Keys: ← → frame · Shift ±10 · Space play · {0}Z undo · Enter save · wheel zoom"
 }

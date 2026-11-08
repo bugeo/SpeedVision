@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Test dell'interfaccia Avalonia senza schermo (Avalonia.Headless): la finestra vera, con i suoi stili e
+    binding, guidata come farebbe l'utente. Le schermate di ogni passo finiscono nella cartella «screenshots».
+  -->
+  <PropertyGroup>
+    <TargetFramework>$(TsaTargetFramework)</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0" />
+    <PackageReference Include="Avalonia.Headless.XUnit" Version="12.1.5" />
+    <PackageReference Include="Avalonia.Skia" Version="12.1.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TrafficSpeedAnalyzer.Desktop\TrafficSpeedAnalyzer.Desktop.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Lo stesso video a velocità note dei test di rilevamento (50 e 72 km/h). -->
+    <None Include="..\TrafficSpeedAnalyzer.Detection.Tests\Assets\known_speed.mp4" Link="Assets\known_speed.mp4" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
