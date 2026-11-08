@@ -75,8 +75,11 @@ fi
 echo "== vid.stab"
 if [ ! -f "$PREFIX/lib/libvidstab.a" ]; then
     # Senza OpenMP: su Mac il compilatore di Apple non lo ha, e così la build è uguale ovunque.
+    # CMAKE_POLICY_VERSION_MINIMUM: vid.stab dichiara una versione di CMake molto vecchia, che CMake 4
+    # (quello delle macchine Mac di GitHub) rifiuta senza questa indicazione.
     cmake -S "$WORK/src/vidstab" -B "$WORK/vidstab-build" -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_SHARED_LIBS=OFF -DUSE_OMP=OFF \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
     cmake --build "$WORK/vidstab-build" -j "$JOBS"
     cmake --install "$WORK/vidstab-build"
