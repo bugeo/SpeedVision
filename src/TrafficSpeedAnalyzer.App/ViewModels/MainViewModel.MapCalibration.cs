@@ -38,10 +38,10 @@ public sealed partial class MainViewModel
     public string MapButtonText => HasMapMeasurement ? Loc.T("Rimisura sulla mappa") : Loc.T("Apri la mappa");
 
     public string MapHint => HasMapMeasurement
-        ? Loc.T("La distanza tra le linee viene dalla mappa. Puoi rimisurarla o correggerla qui sotto.")
+        ? Loc.T("Distanza presa dalla mappa: puoi rimisurarla o correggerla.")
         : Info?.Location is not null
-            ? Loc.T("Apri la mappa (si apre sulla posizione registrata nel video) e clicca dove la linea A e la linea B incontrano lo stesso bordo della strada: la distanza tra i due punti diventa la distanza tra le linee.")
-            : Loc.T("Apri la mappa, cerca il luogo della ripresa e clicca dove la linea A e la linea B incontrano lo stesso bordo della strada: la distanza tra i due punti diventa la distanza tra le linee.");
+            ? Loc.T("Apri la mappa e clicca dove le linee A e B incontrano lo stesso bordo della strada.")
+            : Loc.T("Apri la mappa, cerca il luogo e clicca dove le linee A e B incontrano lo stesso bordo della strada.");
 
     public string MapResultText => _mapMeasurement is { } m
         ? Loc.S($"Sulla mappa: {m.Meters:0.00} m tra A e B (precisione dei clic circa ± {m.PrecisionMeters:0.00} m).")
@@ -49,7 +49,7 @@ public sealed partial class MainViewModel
 
     public string? MapWarning =>
         _mapLinesChanged
-            ? Loc.T("Hai spostato le linee dopo la misura sulla mappa: rimisura per essere sicuro che i punti corrispondano.")
+            ? Loc.T("Hai spostato le linee dopo la misura sulla mappa: rimisura.")
         : _mapMeasurement is { } m && DistanceMeters is { } d && Math.Abs(d - Math.Round(m.Meters, 2)) > 0.005
             ? Loc.T("La distanza è stata modificata a mano dopo la misura sulla mappa.")
         : null;
@@ -58,8 +58,8 @@ public sealed partial class MainViewModel
     public string DistanceCardTitle => IsMapMode ? Loc.T("Distanza tra le linee") : Loc.T("Distanza misurata sul campo");
 
     public string DistanceCardHint => IsMapMode
-        ? Loc.T("Misurata sulla mappa. Se conosci la distanza con più precisione puoi correggerla.")
-        : Loc.T("Distanza reale tra le due linee lungo la direzione di marcia. È il dato da cui dipende la precisione: misurala con cura.");
+        ? Loc.T("Misurata sulla mappa: puoi correggerla.")
+        : Loc.T("Distanza reale tra le linee, lungo la strada. Da qui dipende la precisione.");
 
     partial void OnIsMapModeChanged(bool value)
     {

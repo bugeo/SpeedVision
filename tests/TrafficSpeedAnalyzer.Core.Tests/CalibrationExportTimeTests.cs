@@ -37,12 +37,29 @@ public class CalibrationValidatorTests
     [Theory]
     [InlineData(0, "DIST_INVALID", IssueSeverity.Error)]
     [InlineData(-3, "DIST_INVALID", IssueSeverity.Error)]
-    [InlineData(8, "DIST_SHORT", IssueSeverity.Warning)]
+    [InlineData(1.5, "DIST_SHORT", IssueSeverity.Warning)]
     [InlineData(500, "DIST_LONG", IssueSeverity.Warning)]
     public void Distance_IsChecked(double meters, string code, IssueSeverity severity)
     {
         var issues = CalibrationValidator.Validate(A, B, meters);
         Assert.Contains(issues, i => i.Code == code && i.Severity == severity);
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(5)]
+    [InlineData(8)]
+    public void Distance_FromTwoMeters_HasNoCloseLinesWarning(double meters)
+    {
+        Assert.DoesNotContain(CalibrationValidator.Validate(A, B, meters), i => i.Code == "DIST_SHORT");
+    }
+
+    [Fact]
+    public void LinesCloseInTheImage_AreNotWarnedAbout()
+    {
+        // Linee a pochi pixel ma a più di 2 m: nessun avviso, conta solo la distanza in metri.
+        var near = new LineSegment(new Point2(A.Start.X + 10, A.Start.Y), new Point2(A.End.X + 10, A.End.Y));
+        Assert.Empty(CalibrationValidator.Validate(A, near, 5));
     }
 
     [Fact]

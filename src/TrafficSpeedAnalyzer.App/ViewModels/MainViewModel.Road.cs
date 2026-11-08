@@ -63,8 +63,8 @@ public sealed partial class MainViewModel
 
     public string RoadSummary => Road is { } r
         ? (r.Lanes == 1
-            ? Loc.T("1 corsia: l'analisi considera solo i veicoli sulla strada (o appena fuori).")
-            : Loc.S($"{r.Lanes} corsie: l'analisi considera solo i veicoli sulla strada (o appena fuori)."))
+            ? Loc.T("1 corsia.")
+            : Loc.S($"{r.Lanes} corsie."))
         : Loc.T("Strada non indicata: l'analisi considera tutta l'immagine.");
 
     partial void OnRoadChanged(RoadLayout? value)

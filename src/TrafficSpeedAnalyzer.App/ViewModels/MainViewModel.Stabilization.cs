@@ -81,7 +81,7 @@ public sealed partial class MainViewModel
         if (!IsStabilized && _sourceInfo is { } source && !IsStabilizing)
         {
             StabilizationSummary = !IsStabilizationUnsupported && VideoStabilizer.TryLoadCached(StabilizationCacheRoot, source) is not null
-                ? Loc.T("Esiste già una versione stabilizzata: premendo «Stabilizza video» viene riusata subito.")
+                ? Loc.T("Versione stabilizzata già pronta: verrà riusata subito.")
                 : string.Empty;
         }
     }
@@ -181,7 +181,7 @@ public sealed partial class MainViewModel
             else
             {
                 ShowStatus(Loc.T("Video stabilizzato"),
-                    Loc.T("Ogni fotogramma è allineato al primo e i tempi sono quelli originali. Controlla che le linee siano ancora sui riferimenti a terra."),
+                    Loc.T("Controlla che le linee siano ancora sui riferimenti a terra."),
                     InfoBarSeverity.Success);
             }
         }
@@ -267,7 +267,7 @@ public sealed partial class MainViewModel
             VideoSession original = await Task.Run(() => VideoSession.OpenAsync(tools, source.FilePath, 1920, 1080));
             await SwitchSessionAsync(original);
             IsStabilized = false;
-            StabilizationSummary = Loc.T("In uso il video originale. La versione stabilizzata resta pronta: premendo «Stabilizza video» viene riusata subito.");
+            StabilizationSummary = Loc.T("In uso il video originale. La versione stabilizzata resta pronta.");
             StabilizationWarning = string.Empty;
             IsStatusOpen = false;
         }
@@ -334,7 +334,7 @@ public sealed partial class MainViewModel
         {
             VideoStabilizer.ClearCache(StabilizationCacheRoot, inUse);
         }
-        if (!IsStabilized && StabilizationSummary.StartsWith(Loc.T("Esiste già una versione stabilizzata: premendo «Stabilizza video» viene riusata subito."), StringComparison.Ordinal))
+        if (!IsStabilized && StabilizationSummary.StartsWith(Loc.T("Versione stabilizzata già pronta: verrà riusata subito."), StringComparison.Ordinal))
         {
             StabilizationSummary = string.Empty;
         }

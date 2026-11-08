@@ -127,7 +127,7 @@ public sealed partial class MainViewModel
     {
         selectedId ??= SelectedPassage?.Id;
         Passages.Clear();
-        foreach (PassageRow row in _allRows.Where(PassesFilter))
+        foreach (PassageRow row in Sorted(_allRows.Where(PassesFilter)))
         {
             Passages.Add(row);
         }
@@ -223,7 +223,7 @@ public sealed partial class MainViewModel
         SelectedStep = WorkflowStep.Measurement;
         AnalyzeCurrentTrack();
         GoToFrame((int)row.Passage.Entry.FirstBeyond.FrameIndex);
-        ShowStatus(Loc.T("Modifica del veicolo ") + row.IdText, Loc.T("Correggi i punti e salva di nuovo. «Nuovo veicolo» annulla la modifica."), InfoBarSeverity.Informational);
+        ShowStatus(Loc.T("Modifica del veicolo ") + row.IdText, Loc.T("Correggi i punti e salva. «Nuovo veicolo» annulla."), InfoBarSeverity.Informational);
     }
 
     private bool CanExport() => HasPassages && !IsBusy && !IsAnalyzing && !IsDistanceProvisional;

@@ -111,7 +111,7 @@ public sealed partial class MainViewModel
 
     public string ModelStatusText => IsModelAvailable
         ? Loc.T("Modello presente sul PC.")
-        : Loc.S($"Da scaricare una sola volta ({SelectedModel.SizeText}, da GitHub). I video non vengono inviati.");
+        : Loc.S($"Si scarica una sola volta ({SelectedModel.SizeText}).");
 
     public string StartScoreText => StartScore.ToString("0.00", It);
 
@@ -422,7 +422,7 @@ public sealed partial class MainViewModel
             AppLog.Info("Analisi: " + stats);
             ShowStatus(summary.Cancelled ? Loc.T("Analisi interrotta") : Loc.T("Analisi completata"),
                 (summary.Cancelled ? Loc.T("I veicoli tracciati fino all'interruzione sono conservati. ") : string.Empty) + stats +
-                (summary.Passages > 0 ? Loc.T(" Ora premi «Procedi»: con la calibrazione si calcolano le velocità.") : string.Empty),
+                (summary.Passages > 0 ? Loc.T(" Premi «Procedi» per calibrare.") : string.Empty),
                 summary.Cancelled ? InfoBarSeverity.Warning : InfoBarSeverity.Success);
             AnalysisStatusText = summary.Cancelled ? Loc.T("Interrotta") : Loc.T("Completata");
             HasCompletedAnalysis = !summary.Cancelled || summary.Passages > 0;   // guida: si spengono i pulsanti di avvio, resta «Procedi»

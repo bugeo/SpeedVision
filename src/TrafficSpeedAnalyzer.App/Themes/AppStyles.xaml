@@ -204,6 +204,53 @@
     </Style>
 
     <!-- Voce della lista dei risultati -->
+    <!-- Icona della ruota (pneumatico, cerchio e mozzo): misura fatta sulla ruota anteriore -->
+    <ControlTemplate x:Key="WheelIcon" TargetType="ContentControl">
+        <Border Background="Transparent">
+        <Viewbox Width="15" Height="15" SnapsToDevicePixels="True">
+            <Canvas Width="16" Height="16">
+                <Ellipse Width="15" Height="15" Canvas.Left="0.5" Canvas.Top="0.5" Stroke="{StaticResource AccentBrush}" StrokeThickness="2.6" />
+                <Path Stroke="{StaticResource AccentBrush}" StrokeThickness="1.2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                      Data="M8,2.6 L8,13.4 M2.6,8 L13.4,8 M4.2,4.2 L11.8,11.8 M11.8,4.2 L4.2,11.8" />
+                <Ellipse Width="5" Height="5" Canvas.Left="5.5" Canvas.Top="5.5" Fill="{StaticResource AccentBrush}" />
+            </Canvas>
+        </Viewbox>
+        </Border>
+    </ControlTemplate>
+
+    <!-- Pulsanti a freccia per ordinare l'elenco dei risultati: quello scelto è evidenziato nel colore della linea A
+         (il verde resta riservato alla guida) -->
+    <Style x:Key="SortButton" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource TextTertiary}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="4,0,0,0" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Bg" CornerRadius="5" Padding="5,3" Background="Transparent"
+                            BorderBrush="{StaticResource CardBorder}" BorderThickness="1">
+                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource HoverBackground}" />
+                            <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource TextSecondary}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource SelectedBackground}" />
+                            <Setter TargetName="Bg" Property="BorderBrush" Value="{StaticResource LineABrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource LineABrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="ResultItem" TargetType="ListBoxItem">
         <Setter Property="Padding" Value="0" />
         <Setter Property="Margin" Value="0,0,0,6" />

@@ -204,13 +204,13 @@ public sealed partial class MainViewModel
         {
             if (IsIdentifyingSecond)
             {
-                return Loc.S($"Auto {_candidateIndex + 1} di {_referenceCandidates.Count}, passata nella corsia lontana. Non aggiunge altre linee: dalla sua grandezza capisco quanto inclinare le linee A e B verso il punto di fuga, così valgono per tutte le corsie. Scegli il modello o scrivi la lunghezza; altrimenti «Non lo so» o «Salta».");
+                return Loc.S($"Auto {_candidateIndex + 1} di {_referenceCandidates.Count}, corsia lontana: serve a orientare le linee A e B. Scegli il modello o scrivi la lunghezza.");
             }
 
             if (_reference is { } r && !_editingFirst)
             {
-                return Loc.S($"Le linee A e B hanno il perno sugli spigoli bassi della {r.Vehicle.DisplayName} ({r.Vehicle.LengthMeters:0.00} m) e attraversano tutta la strada. ") +
-                    RoadPerspective.Describe(r.Horizon) + Loc.T(" Se non coincidono con l'auto, trascinale.");
+                return Loc.S($"Linee A e B sulla {r.Vehicle.DisplayName} ({r.Vehicle.LengthMeters:0.00} m). ") +
+                    RoadPerspective.Describe(r.Horizon) + Loc.T(" Se non coincidono, trascinale.");
             }
 
             if (!HasTrackedVehicles)
@@ -219,8 +219,8 @@ public sealed partial class MainViewModel
             }
 
             return _referenceCandidates.Count == 0
-                ? Loc.T("Nessuna auto utilizzabile: serve un'auto ripresa per intero mentre passa al centro dell'immagine. Calibra con due riferimenti misurati sul campo.")
-                : Loc.S($"Auto {_candidateIndex + 1} di {_referenceCandidates.Count}{(HasLanes ? Loc.T(", passata nella corsia più vicina") : string.Empty)}. Se la riconosci scegli il modello, oppure scrivi la sua lunghezza: metto la linea A dietro e la B davanti, sugli spigoli bassi del riquadro. Altrimenti premi «Non lo so».");
+                ? Loc.T("Nessuna auto ripresa per intero al centro dell'immagine. Calibra con due riferimenti misurati sul campo.")
+                : Loc.S($"Auto {_candidateIndex + 1} di {_referenceCandidates.Count}{(HasLanes ? Loc.T(", passata nella corsia più vicina") : string.Empty)}. Se la riconosci scegli il modello o scrivi la lunghezza, altrimenti «Non lo so».");
         }
     }
 
@@ -264,7 +264,7 @@ public sealed partial class MainViewModel
                 w.AddRange(r.Measurement.Warnings);
                 if (r.Horizon is null)
                 {
-                    w.Add(Loc.T("Le auto passano su più corsie ma la prospettiva non si può stimare: le velocità sono affidabili solo sulla corsia dell'auto di riferimento. Riconosci un'auto sull'altra corsia con «Cambia auto», oppure misura sul campo."));
+                    w.Add(Loc.T("Prospettiva non stimabile: le velocità valgono solo nella corsia dell'auto di riferimento. Per tutte le corsie, calibra sul campo."));
                 }
             }
 
@@ -273,7 +273,7 @@ public sealed partial class MainViewModel
     }
 
     public string CalibrationEstimateText => EstimateDistanceFromVehicle && _reference is { } r
-        ? Loc.S($"Riferimento: {r.Vehicle.DisplayName}, lunga {r.Vehicle.LengthMeters:0.00} m. Le linee partono dai suoi paraurti: trascinale se non coincidono.")
+        ? Loc.S($"Riferimento: {r.Vehicle.DisplayName}, {r.Vehicle.LengthMeters:0.00} m.")
         : string.Empty;
 
     /// <summary>Distanza usata per i calcoli: misurata a mano oppure lunghezza del veicolo di riferimento.</summary>
@@ -458,7 +458,7 @@ public sealed partial class MainViewModel
             if (h is null)
             {
                 ShowStatus(Loc.T("Auto non utilizzabile"),
-                    Loc.T("Le due auto non permettono di ricavare la prospettiva (stessa corsia o misure incoerenti). Restano le linee di prima."),
+                    Loc.T("Con queste due auto la prospettiva non si ricava. Restano le linee di prima."),
                     InfoBarSeverity.Warning);
                 RefreshEstimateState();
                 return;
@@ -466,7 +466,7 @@ public sealed partial class MainViewModel
 
             ApplyReference(first with { Second = recognized, Horizon = h });
             ShowStatus(Loc.T("Linee orientate"),
-                Loc.S($"Con la {vehicle.DisplayName} nella corsia lontana le linee A e B ruotano sui loro perni verso il punto di fuga: la distanza tra le due linee è la stessa su tutte le corsie. Controlla le linee e premi «Procedi»."),
+                Loc.S($"Linee orientate con la {vehicle.DisplayName}: la distanza vale per tutte le corsie. Controllale e premi «Procedi»."),
                 InfoBarSeverity.Success);
             return;
         }
@@ -496,8 +496,8 @@ public sealed partial class MainViewModel
 
         string perspective = RoadPerspective.Describe(_statisticalHorizon);
         ShowStatus(_askingSecond ? Loc.T("Velocità calcolate — ancora una domanda") : Loc.T("Velocità calcolate"),
-            Loc.S($"Le linee A e B hanno il perno sugli spigoli bassi della {vehicle.DisplayName} ({vehicle.LengthMeters:0.00} m). {perspective}") +
-            (_askingSecond ? Loc.T(" Ora un'auto della corsia più lontana: serve a inclinare le stesse due linee verso il punto di fuga.") : Loc.T(" Controlla le linee e premi «Procedi».")) +
+            Loc.S($"Linee A e B sulla {vehicle.DisplayName} ({vehicle.LengthMeters:0.00} m). {perspective}") +
+            (_askingSecond ? Loc.T(" Ora un'auto della corsia più lontana, per orientare le linee.") : Loc.T(" Controlla le linee e premi «Procedi».")) +
             (m.Warnings.Count > 0 ? " " + string.Join(" ", m.Warnings) : string.Empty),
             m.Warnings.Count > 0 ? InfoBarSeverity.Warning : InfoBarSeverity.Success);
     }
@@ -543,7 +543,7 @@ public sealed partial class MainViewModel
         if (_candidateIndex == 0)
         {
             ShowStatus(Loc.T("Ricomincio dalla prima auto"),
-                Loc.T("Hai visto tutte le auto passate. Se non ne riconosci nessuna, misura la distanza tra due riferimenti a terra e scegli «Con due riferimenti misurati sul campo»."),
+                Loc.T("Hai visto tutte le auto. Se non ne riconosci nessuna, scegli «Con due riferimenti misurati sul campo»."),
                 InfoBarSeverity.Informational);
         }
     }

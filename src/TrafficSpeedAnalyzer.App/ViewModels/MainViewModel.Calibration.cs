@@ -107,9 +107,9 @@ public sealed partial class MainViewModel
 
     public string RecordingStartSourceText => Info?.RecordingStartSource switch
     {
-        null => Loc.T("Il video non contiene l'orario di registrazione: inseriscilo a mano se ti serve l'orario reale nel CSV."),
+        null => Loc.T("Orario non presente nel video: scrivilo se ti serve."),
         "com.apple.quicktime.creationdate" => Loc.T("Letto dai metadati del video (ora locale del telefono). Verificalo."),
-        _ => Loc.T("Letto dai metadati del video e convertito nell'ora locale. Alcuni telefoni salvano l'ora di fine registrazione: verificalo."),
+        _ => Loc.T("Letto dal video. Alcuni telefoni salvano l'ora di fine: verificalo."),
     };
 
     partial void OnRecordingStartTextChanged(string value) => RefreshPassageTimes();

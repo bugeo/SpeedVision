@@ -327,7 +327,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
             if (newSession.Index.Stats.IsVariable)
             {
                 ShowStatus(Loc.T("Frame rate variabile"),
-                    Loc.T("Il video ha un frame rate variabile: non è un problema, ogni misura usa il tempo reale di ciascun fotogramma."),
+                    Loc.T("Nessun problema: ogni misura usa il tempo reale di ciascun fotogramma."),
                     InfoBarSeverity.Informational);
             }
         }

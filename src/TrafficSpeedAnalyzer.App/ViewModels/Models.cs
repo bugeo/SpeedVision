@@ -136,6 +136,9 @@ public sealed class PassageRow : CommunityToolkit.Mvvm.ComponentModel.Observable
 
     public bool IsAutomatic => Saved.Source == PassageSource.Automatic;
 
+    /// <summary>Misura automatica fatta dove la ruota anteriore tocca l'asfalto: nei risultati compare l'icona della ruota.</summary>
+    public bool IsWheelReference => IsAutomatic && Saved.Reference == Core.Tracking.ReferencePoint.FrontWheel;
+
     /// <summary>Punto del veicolo usato dalla misura automatica.</summary>
     public string ReferenceText => Saved.Reference == Core.Tracking.ReferencePoint.FrontWheel ? Loc.T("ruota anteriore") : Loc.T("spigolo del riquadro");
 

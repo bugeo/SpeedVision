@@ -10,7 +10,8 @@ using TrafficSpeedAnalyzer.Core.Localization;
 namespace TrafficSpeedAnalyzer.App.ViewModels;
 
 /// <summary>
-/// Filtro dei risultati: velocità minima, tipo di veicolo, verso e corsia. I tipi sono quelli che il modello
+/// Filtro dei risultati: velocità minima, tipo di veicolo, verso, corsia e punto di misura (ruota anteriore o
+/// spigolo del riquadro; vale solo per le misure automatiche). I tipi sono quelli che il modello
 /// riconosce (classi COCO auto, moto, autobus, camion); le misure manuali non hanno un tipo.
 /// L'esportazione comprende solo i passaggi mostrati.
 /// </summary>
@@ -38,6 +39,14 @@ public sealed partial class MainViewModel
     [ObservableProperty]
     private bool _showAToB = true;
 
+    /// <summary>Misure automatiche fatte sulla ruota anteriore.</summary>
+    [ObservableProperty]
+    private bool _showWheelReference = true;
+
+    /// <summary>Misure automatiche fatte sullo spigolo del riquadro (ruota non trovata con sicurezza).</summary>
+    [ObservableProperty]
+    private bool _showBoxReference = true;
+
     [ObservableProperty]
     private bool _showBToA = true;
 
@@ -54,6 +63,7 @@ public sealed partial class MainViewModel
 
     public bool IsFilterActive =>
         MinSpeedFilter is not null || !ShowCars || !ShowMotorcycles || !ShowBuses || !ShowTrucks || !ShowManual || !ShowAToB || !ShowBToA
+        || !ShowWheelReference || !ShowBoxReference
         || LaneFilters.Any(l => !l.IsShown);
 
     /// <summary>Velocità minima in km/h (vuoto = nessun limite).</summary>
@@ -119,6 +129,15 @@ public sealed partial class MainViewModel
                 parts.Add(Loc.T("nessun verso"));
             }
 
+            if (ShowWheelReference != ShowBoxReference)
+            {
+                parts.Add(ShowWheelReference ? Loc.T("misure automatiche solo sulla ruota anteriore") : Loc.T("misure automatiche solo sullo spigolo del riquadro"));
+            }
+            else if (!ShowWheelReference)
+            {
+                parts.Add(Loc.T("nessuna misura automatica"));
+            }
+
             if (LaneFilters.Any(l => !l.IsShown))
             {
                 string[] shown = LaneFilters.Where(l => l.IsShown).Select(l => (l.Lane + 1).ToString(It)).ToArray();
@@ -152,6 +171,11 @@ public sealed partial class MainViewModel
             return ShowManual;
         }
 
+        if (!(row.IsWheelReference ? ShowWheelReference : ShowBoxReference))
+        {
+            return false;
+        }
+
         return row.Saved.Class switch
         {
             VehicleClass.Car => ShowCars,
@@ -178,12 +202,17 @@ public sealed partial class MainViewModel
 
     partial void OnShowBToAChanged(bool value) => ApplyPassageFilter();
 
+    partial void OnShowWheelReferenceChanged(bool value) => ApplyPassageFilter();
+
+    partial void OnShowBoxReferenceChanged(bool value) => ApplyPassageFilter();
+
     [RelayCommand]
     private void ResetFilter()
     {
         MinSpeedFilterText = string.Empty;
         ShowCars = ShowMotorcycles = ShowBuses = ShowTrucks = ShowManual = true;
         ShowAToB = ShowBToA = true;
+        ShowWheelReference = ShowBoxReference = true;
         foreach (LaneFilterOption l in LaneFilters)
         {
             l.IsShown = true;

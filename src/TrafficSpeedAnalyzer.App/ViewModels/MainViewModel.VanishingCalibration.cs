@@ -54,12 +54,12 @@ public sealed partial class MainViewModel
     /// <summary>Cosa fare adesso, sotto il titolo del riquadro.</summary>
     public string VanishingHint =>
         RefPointA is null
-            ? Loc.T("Clicca sul video il riferimento A: un segno a terra (per esempio l'inizio di una striscia o un tombino) vicino alla strada.")
+            ? Loc.T("Clicca il riferimento A: un segno a terra, come l'inizio di una striscia.")
         : RefPointB is null
-            ? Loc.T("Clicca il riferimento B: un altro segno a terra lungo la strada, di cui hai misurato la distanza da A.")
+            ? Loc.T("Clicca il riferimento B: un altro segno a terra, a distanza nota da A.")
         : VanishingPoint is null
-            ? Loc.T("Ora il punto di fuga: muovi il mouse finché le due rette seguono le linee trasversali della strada (strisce pedonali, giunti, bordi dei marciapiedi) e clicca. Può stare anche sopra l'immagine.")
-        : Loc.T("Le linee A e B passano per i riferimenti e puntano al punto di fuga. Inserisci qui sotto la distanza misurata tra A e B.");
+            ? Loc.T("Muovi il mouse finché le rette seguono le linee trasversali della strada (strisce, giunti) e clicca.")
+        : Loc.T("Scrivi qui sotto la distanza misurata tra A e B.");
 
     partial void OnIsVanishingModeChanged(bool value)
     {

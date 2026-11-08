@@ -209,7 +209,7 @@
                     <!-- Video di prova su GitHub, per chi vuole provare il programma -->
                     <ui:Button Content="{loc:Tr 'Scarica video di esempio'}" Icon="{ui:SymbolIcon ArrowDownload24}"
                                Command="{Binding OpenSamplesCommand}" Padding="16,8" Margin="0,0,8,0" VerticalAlignment="Top"
-                               ToolTip="{loc:Tr 'Apre nel browser la cartella con i video di prova del progetto su GitHub'}" />
+                               ToolTip="{loc:Tr 'Apre i video di prova su GitHub'}" />
                     <ui:Button Content="{loc:Tr 'Apri video'}" Icon="{ui:SymbolIcon FolderOpen24}"
                                Command="{Binding OpenVideoCommand}" IsEnabled="{Binding IsReady}" Padding="16,8" VerticalAlignment="Top">
                         <ui:Button.Style>
@@ -268,7 +268,7 @@
                                 <TextBlock Text="{loc:Tr 'Trascina qui un video di traffico'}" FontSize="20" FontWeight="SemiBold" Margin="0,16,0,6"
                                            HorizontalAlignment="Center" Foreground="{StaticResource TextPrimary}" />
                                 <TextBlock Style="{StaticResource Caption}" TextAlignment="Center" FontSize="13"
-                                           Text="{loc:Tr 'MP4, MOV, MKV, AVI… anche HEVC degli iPhone e frame rate variabile. Il video resta sul tuo PC: nessun dato viene inviato in rete.'}" />
+                                           Text="{loc:Tr 'MP4, MOV, MKV, AVI… Il video resta sul tuo PC.'}" />
                                 <ui:Button Content="{loc:Tr 'Scegli un file…'}" Appearance="Secondary" Icon="{ui:SymbolIcon FolderOpen24}"
                                            Command="{Binding OpenVideoCommand}" HorizontalAlignment="Center" Margin="0,20,0,0" Padding="18,9" />
                             </StackPanel>
@@ -284,7 +284,7 @@
                                                    Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" />
                                     </StackPanel>
                                     <TextBlock Style="{StaticResource Body}" Margin="0,0,0,14"
-                                               Text="{loc:Tr 'L\'applicazione usa FFmpeg (gratuito) per leggere i video. Di solito è nella cartella «ffmpeg» accanto a SpeedVision.exe: se manca, estrai di nuovo lo zip completo, oppure installalo con questo comando in PowerShell, poi premi «Riprova».'}" />
+                                               Text="{loc:Tr 'Manca la cartella «ffmpeg» accanto a SpeedVision.exe. Estrai di nuovo lo zip completo, oppure installa FFmpeg con questo comando in PowerShell e premi «Riprova».'}" />
                                     <Border Background="#22000000" CornerRadius="6" Padding="12,8" Margin="0,0,0,14">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -361,7 +361,7 @@
                         <!-- Passo 1: video -->
                         <StackPanel Visibility="{Binding SelectedStep, Converter={StaticResource EnumToVisibility}, ConverterParameter=Video}">
                             <TextBlock Text="{loc:Tr 'Video'}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,14" Foreground="{StaticResource TextPrimary}" />
-                            <TextBlock Style="{StaticResource Caption}" Margin="0,-6,0,14" Text="{loc:Tr 'Apri il video da analizzare: trascinalo sul riquadro a destra oppure premi «Apri video».'}"
+                            <TextBlock Style="{StaticResource Caption}" Margin="0,-6,0,14" Text="{loc:Tr 'Trascina il video a destra o premi «Apri video».'}"
                                        Visibility="{Binding HasVideo, Converter={StaticResource TruthyToVisibility}, ConverterParameter=Invert}" />
 
                             <!-- Stabilizzazione: primo passo dopo l'apertura -->
@@ -370,11 +370,11 @@
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Stabilizzazione'}" />
                                     <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,10"
-                                               Text="{loc:Tr 'Se il treppiede vibra (vento, mezzi pesanti) l\'immagine si sposta e le linee non restano sui riferimenti a terra. La stabilizzazione allinea ogni fotogramma al primo, senza cambiare i tempi.'}" />
+                                               Text="{loc:Tr 'Serve se l\'immagine trema (vento, mezzi pesanti): le linee restano sui riferimenti a terra.'}" />
 
                                     <TextBlock Style="{StaticResource Caption}" Foreground="{StaticResource ErrorBrush}" Margin="0,0,0,10"
                                                Visibility="{Binding IsStabilizationUnsupported, Converter={StaticResource BoolToVisibility}}"
-                                               Text="{loc:Tr 'L\'FFmpeg installato non include ciò che serve a questo metodo (filtro perspective o vidstab, codificatore H.264). Scegli un altro metodo oppure installa la versione completa con: winget install --id Gyan.FFmpeg -e'}" />
+                                               Text="{loc:Tr 'Questo FFmpeg non può stabilizzare. Installa la versione completa: winget install --id Gyan.FFmpeg -e'}" />
 
                                     <TextBlock Style="{StaticResource Body}" Text="{loc:Tr 'Vuoi stabilizzare il video?'}" FontWeight="SemiBold" Margin="0,0,0,8"
                                                Visibility="{Binding IsStabilizationStepActive, Converter={StaticResource BoolToVisibility}}" />
@@ -465,7 +465,7 @@
                                                Text="{Binding RecordingStartError}" Visibility="{Binding RecordingStartError, Converter={StaticResource TruthyToVisibility}}" />
                                     <TextBlock Style="{StaticResource Caption}" Margin="0,8,0,0" Text="{Binding RecordingStartSourceText}" />
                                     <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0"
-                                               Text="{loc:Tr 'Serve per gli orari reali nel CSV e nelle immagini. Senza data vengono usati i tempi del video.'}" />
+                                               Text="{loc:Tr 'Serve per gli orari reali nelle esportazioni.'}" />
                                     <!-- Sempre visibili: tornando a questo passo si può cambiare la data e salvarla -->
                                     <Grid Margin="0,10,0,0">
                                         <Grid.ColumnDefinitions>
@@ -641,7 +641,7 @@
                                         </Grid>
                                         <!-- Lunghezza inserita a mano, se il modello non è nell'elenco -->
                                         <TextBlock Style="{StaticResource Caption}" Margin="0,10,0,4"
-                                                   Text="{loc:Tr 'Non trovi il modello ma conosci la lunghezza dell\'auto? Scrivila qui.'}" />
+                                                   Text="{loc:Tr 'Oppure scrivi la lunghezza dell\'auto:'}" />
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="96" />
@@ -722,7 +722,7 @@
                                         <ui:Button Grid.Column="2" Content="{loc:Tr 'Disegna'}" Icon="{ui:SymbolIcon Edit24}" Command="{Binding DrawLineBCommand}" />
                                     </Grid>
                                     <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,10"
-                                               Text="{loc:Tr 'Trascina gli estremi o la linea per correggerla. Rotellina per ingrandire, tasto destro per spostare la vista.'}" />
+                                               Text="{loc:Tr 'Trascina gli estremi per correggere. Rotellina: zoom · tasto destro: sposta la vista.'}" />
                                     <StackPanel Orientation="Horizontal">
                                         <ui:Button Content="{loc:Tr 'Scambia A e B'}" Icon="{ui:SymbolIcon ArrowSwap24}" Command="{Binding SwapLinesCommand}" Margin="0,0,8,0" />
                                         <ui:Button Content="{loc:Tr 'Ricomincia'}" Icon="{ui:SymbolIcon Delete24}" Command="{Binding ClearLinesCommand}" />
@@ -823,7 +823,7 @@
                         <StackPanel Visibility="{Binding SelectedStep, Converter={StaticResource EnumToVisibility}, ConverterParameter=Road}">
                             <TextBlock Text="{loc:Tr 'Strada'}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,6" Foreground="{StaticResource TextPrimary}" />
                             <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,14"
-                                       Text="{loc:Tr 'Indica dove passano i veicoli: l\'analisi considererà solo la strada e saprà in che corsia passa ogni veicolo.'}" />
+                                       Text="{loc:Tr 'L\'analisi considera solo i veicoli sulla strada e ne riconosce la corsia.'}" />
 
                             <!-- 1. Bordi della strada -->
                             <Border Style="{StaticResource GuideCard}" Tag="{Binding IsRoadAreaStepActive}"
@@ -831,7 +831,7 @@
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Bordi della strada'}" />
                                     <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,10"
-                                               Text="{loc:Tr 'Trascina i quattro pallini agli angoli della zona verde finché i suoi lati coincidono con i bordi della carreggiata (i cordoli): il bordo in alto è quello lontano, in basso quello vicino. Dopo indicherai quante corsie ha la strada.'}" />
+                                               Text="{loc:Tr 'Porta i quattro pallini sugli angoli della carreggiata.'}" />
                                     <ui:Button Content="{loc:Tr 'I bordi sono a posto'}" Icon="{ui:SymbolIcon Checkmark24}" HorizontalAlignment="Stretch" Padding="12,9"
                                                Command="{Binding ConfirmRoadEdgesCommand}"
                                                Visibility="{Binding IsRoadAreaStepActive, Converter={StaticResource BoolToVisibility}}">
@@ -937,7 +937,7 @@
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Linee tra le corsie'}" />
                                     <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,10"
-                                               Text="{loc:Tr 'Porta la linea tratteggiata bianca sulla mezzeria: trascina i pallini alle sue estremità per seguire la prospettiva, o il pallino centrale per spostarla intera. Con più corsie c\'è una linea per ogni separazione; la corsia 1 è la più vicina. Puoi ancora ritoccare gli angoli della strada.'}" />
+                                               Text="{loc:Tr 'Porta ogni linea tratteggiata sulla separazione tra le corsie. Il pallino centrale sposta la linea intera.'}" />
                                     <ui:Button Content="{loc:Tr 'Le linee sono a posto'}" Icon="{ui:SymbolIcon Checkmark24}" HorizontalAlignment="Stretch" Padding="12,9"
                                                Command="{Binding ConfirmRoadDividersCommand}"
                                                Visibility="{Binding IsRoadDividersStepActive, Converter={StaticResource BoolToVisibility}}">
@@ -959,7 +959,7 @@
                         <StackPanel Visibility="{Binding SelectedStep, Converter={StaticResource EnumToVisibility}, ConverterParameter=Analysis}">
                             <TextBlock Text="{loc:Tr 'Analisi veicoli'}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,6" Foreground="{StaticResource TextPrimary}" />
                             <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,14"
-                                       Text="{loc:Tr 'Premi «Analizza tutto»: l\'app trova e segue tutti i veicoli del video. Le velocità si calcolano dopo, nella calibrazione.'}" />
+                                       Text="{loc:Tr 'Trova e segue i veicoli nel video. Le velocità arrivano con la calibrazione.'}" />
 
                             <!-- Impostazioni chiuse: servono solo a chi vuole configurare -->
                             <ui:CardExpander Header="{loc:Tr 'Modello'}" Icon="{ui:SymbolIcon BrainCircuit24}" IsExpanded="False" Margin="0,0,0,8"
@@ -990,7 +990,7 @@
                                         <TextBlock HorizontalAlignment="Right" Text="{Binding StartScoreText}" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" />
                                     </Grid>
                                     <Slider Minimum="0.25" Maximum="0.8" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding StartScore}" Margin="0,6,0,0" />
-                                    <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="{loc:Tr 'Più alta: meno falsi veicoli ma qualche veicolo perso. Valore consigliato 0,50.'}" />
+                                    <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="{loc:Tr 'Più alta: meno falsi veicoli, più veicoli persi. Consigliato 0,50.'}" />
                                 </StackPanel>
                             </ui:CardExpander>
 
@@ -1077,7 +1077,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <ui:SymbolIcon Symbol="Info24" FontSize="16" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Top" />
                                     <TextBlock Style="{StaticResource Caption}" Margin="8,0,0,0" MaxWidth="300" Foreground="{StaticResource TextPrimary}"
-                                               Text="{loc:Tr 'Qui indichi tu la posizione del veicolo, fotogramma per fotogramma. Serve per verificare o correggere i passaggi automatici e per i veicoli che il modello non ha riconosciuto. I calcoli sono gli stessi dell\'analisi velocità.'}" />
+                                               Text="{loc:Tr 'Indica tu la posizione del veicolo, fotogramma per fotogramma: per correggere un passaggio o misurare un veicolo non riconosciuto.'}" />
                                 </StackPanel>
                             </Border>
 
@@ -1156,9 +1156,8 @@
                             <Border Style="{StaticResource Card}">
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Come misurare'}" />
-                                    <TextBlock Style="{StaticResource Body}" Margin="0,0,0,6" Text="{loc:Tr '1. Scegli un punto riconoscibile del veicolo, per esempio dove la ruota anteriore tocca l\'asfalto.'}" />
-                                    <TextBlock Style="{StaticResource Body}" Margin="0,0,0,6" Text="{loc:Tr '2. Cliccalo in 2–3 fotogrammi prima e dopo ciascuna linea, sempre sullo stesso punto.'}" />
-                                    <TextBlock Style="{StaticResource Body}" Margin="0,0,0,10" Text="{loc:Tr '3. L\'istante esatto di attraversamento viene calcolato tra i fotogrammi: non serve centrare il fotogramma giusto.'}" />
+                                    <TextBlock Style="{StaticResource Body}" Margin="0,0,0,6" Text="{loc:Tr '1. Scegli un punto del veicolo, per esempio dove la ruota anteriore tocca l\'asfalto.'}" />
+                                    <TextBlock Style="{StaticResource Body}" Margin="0,0,0,6" Text="{loc:Tr '2. Cliccalo in 2–3 fotogrammi prima e dopo ogni linea.'}" />
                                     <TextBlock Style="{StaticResource Caption}" Text="{loc:Tr 'Tasti: ← → fotogramma · Maiusc ±10 · Spazio riproduci · Ctrl+Z annulla · Invio salva · rotellina zoom'}" />
                                 </StackPanel>
                             </Border>
@@ -1208,6 +1207,19 @@
                                         <CheckBox Content="A → B" IsChecked="{Binding ShowAToB}" Margin="0,0,14,4" MinWidth="0" />
                                         <CheckBox Content="B → A" IsChecked="{Binding ShowBToA}" Margin="0,0,14,4" MinWidth="0" />
                                     </WrapPanel>
+                                    <!-- Punto di misura delle misure automatiche: ruota anteriore (icona della ruota nell'elenco) o spigolo del riquadro -->
+                                    <WrapPanel Margin="0,6,0,0">
+                                        <TextBlock Style="{StaticResource Label}" Text="{loc:Tr 'Punto di misura'}" Margin="0,0,12,4" />
+                                        <CheckBox IsChecked="{Binding ShowWheelReference}" Margin="0,0,14,4" MinWidth="0"
+                                                  ToolTip="{loc:Tr 'Misure automatiche fatte dove la ruota anteriore tocca l\'asfalto'}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <ContentControl Template="{StaticResource WheelIcon}" Margin="0,0,6,0" />
+                                                <TextBlock Text="{loc:Tr 'Ruota anteriore'}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </CheckBox>
+                                        <CheckBox Content="{loc:Tr 'Spigolo del riquadro'}" IsChecked="{Binding ShowBoxReference}" Margin="0,0,14,4" MinWidth="0"
+                                                  ToolTip="{loc:Tr 'Misure automatiche fatte sullo spigolo del riquadro, quando la ruota non è stata trovata con sicurezza'}" />
+                                    </WrapPanel>
                                     <DockPanel Margin="0,6,0,0" Visibility="{Binding ShowLaneFilter, Converter={StaticResource BoolToVisibility}}">
                                         <TextBlock DockPanel.Dock="Left" Style="{StaticResource Label}" Text="{loc:Tr 'Corsia'}" Margin="0,0,12,4" VerticalAlignment="Top" />
                                         <ItemsControl ItemsSource="{Binding LaneFilters}">
@@ -1224,7 +1236,7 @@
                                         </ItemsControl>
                                     </DockPanel>
                                     <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0"
-                                               Text="{loc:Tr 'Statistiche ed esportazione comprendono solo i passaggi mostrati.'}" />
+                                               Text="{loc:Tr 'Statistiche ed esportazione usano solo i passaggi mostrati.'}" />
                                 </StackPanel>
                             </ui:CardExpander>
 
@@ -1244,8 +1256,6 @@
                                     </Grid>
                                     <TextBlock Style="{StaticResource Caption}" Foreground="{StaticResource ErrorBrush}" Margin="0,4,0,0"
                                                Text="{Binding SpeedLimitError}" Visibility="{Binding SpeedLimitError, Converter={StaticResource TruthyToVisibility}}" />
-                                    <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0"
-                                               Text="{loc:Tr 'I veicoli più veloci del limite sono in rosso nel grafico e nell\'elenco.'}" />
                                 </StackPanel>
                             </Border>
 
@@ -1352,9 +1362,44 @@
                             <ui:Button Content="{loc:Tr 'Apri la cartella esportata'}" Icon="{ui:SymbolIcon Folder24}"
                                        HorizontalAlignment="Stretch" Command="{Binding OpenExportFolderCommand}" />
                             <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,16"
-                                       Text="{loc:Tr 'Per ogni veicolo: immagine di ingresso e di uscita con l\'orario sovrimpresso, in due cartelle: «immagini» (in chiaro) e «immagini_anonimizzate» (veicoli pixellati). Più passaggi.csv e due rapporti PDF con una pagina per veicolo: rapporto.pdf (in chiaro) e rapporto_anonimizzato.pdf (veicoli pixellati). Misure non omologate.'}" />
+                                       Text="{loc:Tr 'Tabella CSV, due rapporti PDF (in chiaro e con i veicoli pixellati) e le immagini di ogni veicolo. Misure non omologate.'}" />
 
-                            <TextBlock Text="{Binding PassageCountText}" Style="{StaticResource Label}" Margin="2,0,0,8" />
+                            <DockPanel Margin="2,0,0,8">
+                                <!-- Ordine dell'elenco: orologio = orario, tachimetro = velocità; la freccia in giù indica valori che crescono
+                                     scendendo nell'elenco (primo → ultimo, velocità crescente), quella in su il contrario -->
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"
+                                            Visibility="{Binding HasPassages, Converter={StaticResource BoolToVisibility}}">
+                                    <RadioButton GroupName="PassageSort" Style="{StaticResource SortButton}" IsChecked="{Binding IsSortFirstToLast}"
+                                                 ToolTip="{loc:Tr 'Dal primo all\'ultimo'}" AutomationProperties.Name="{loc:Tr 'Dal primo all\'ultimo'}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="Clock20" FontSize="14" />
+                                            <ui:SymbolIcon Symbol="ArrowDown20" FontSize="12" Margin="1,0,0,0" />
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton GroupName="PassageSort" Style="{StaticResource SortButton}" IsChecked="{Binding IsSortLastToFirst}"
+                                                 ToolTip="{loc:Tr 'Dall\'ultimo al primo'}" AutomationProperties.Name="{loc:Tr 'Dall\'ultimo al primo'}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="Clock20" FontSize="14" />
+                                            <ui:SymbolIcon Symbol="ArrowUp20" FontSize="12" Margin="1,0,0,0" />
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton GroupName="PassageSort" Style="{StaticResource SortButton}" IsChecked="{Binding IsSortSpeedAscending}" Margin="10,0,0,0"
+                                                 ToolTip="{loc:Tr 'Velocità crescente'}" AutomationProperties.Name="{loc:Tr 'Velocità crescente'}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="TopSpeed20" FontSize="14" />
+                                            <ui:SymbolIcon Symbol="ArrowDown20" FontSize="12" Margin="1,0,0,0" />
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton GroupName="PassageSort" Style="{StaticResource SortButton}" IsChecked="{Binding IsSortSpeedDescending}"
+                                                 ToolTip="{loc:Tr 'Velocità decrescente'}" AutomationProperties.Name="{loc:Tr 'Velocità decrescente'}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="TopSpeed20" FontSize="14" />
+                                            <ui:SymbolIcon Symbol="ArrowUp20" FontSize="12" Margin="1,0,0,0" />
+                                        </StackPanel>
+                                    </RadioButton>
+                                </StackPanel>
+                                <TextBlock Text="{Binding PassageCountText}" Style="{StaticResource Label}" VerticalAlignment="Center" />
+                            </DockPanel>
                             <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,10"
                                        Visibility="{Binding HasAnyPassage, Converter={StaticResource TruthyToVisibility}, ConverterParameter=Invert}"
                                        Text="{loc:Tr 'Nessun veicolo attraversa le linee A e B. Esegui l\'analisi e la calibrazione, oppure misura un veicolo a mano.'}" />
@@ -1374,12 +1419,18 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel>
-                                                <TextBlock FontSize="13" Foreground="{StaticResource TextPrimary}">
-                                                    <Run Text="{Binding IdText, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" FontWeight="SemiBold" />
-                                                    <Run Text="  " />
-                                                    <Run Text="{Binding DirectionText, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" />
-                                                    <Run Text="{Binding LaneText, Mode=OneWay}" Foreground="{StaticResource AccentBrush}" />
-                                                </TextBlock>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock FontSize="13" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center">
+                                                        <Run Text="{Binding IdText, Mode=OneWay}" FontFamily="{StaticResource MonoFont}" FontWeight="SemiBold" />
+                                                        <Run Text="  " />
+                                                        <Run Text="{Binding DirectionText, Mode=OneWay}" Foreground="{StaticResource TextSecondary}" />
+                                                        <Run Text="{Binding LaneText, Mode=OneWay}" Foreground="{StaticResource AccentBrush}" />
+                                                    </TextBlock>
+                                                    <!-- Velocità misurata sulla ruota anteriore -->
+                                                    <ContentControl Template="{StaticResource WheelIcon}" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                                    ToolTip="{loc:Tr 'Velocità misurata dove la ruota anteriore tocca l\'asfalto'}"
+                                                                    Visibility="{Binding IsWheelReference, Converter={StaticResource BoolToVisibility}}" />
+                                                </StackPanel>
                                                 <TextBlock FontSize="12" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextSecondary}" Margin="0,3,0,0">
                                                     <Run Text="{Binding EntryText, Mode=OneWay}" />
                                                     <Run Text="→" />

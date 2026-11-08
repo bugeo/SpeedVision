@@ -18,8 +18,8 @@ public sealed record CalibrationIssue(IssueSeverity Severity, string Code, strin
 public static class CalibrationValidator
 {
     public const double MinLineLengthPixels = 10;
-    public const double MinSeparationPixels = 30;
-    public const double RecommendedMinDistanceMeters = 15;
+    /// <summary>Sotto questa distanza tra le linee si avvisa che sono troppo vicine (l'errore relativo cresce molto).</summary>
+    public const double MinDistanceMeters = 2;
     public const double MaxReasonableDistanceMeters = 300;
 
     public static IReadOnlyList<CalibrationIssue> Validate(LineSegment? lineA, LineSegment? lineB, double? distanceMeters)
@@ -52,10 +52,10 @@ public static class CalibrationValidator
         {
             issues.Add(new(IssueSeverity.Error, "DIST_INVALID", Loc.T("La distanza deve essere maggiore di zero.")));
         }
-        else if (distanceMeters.Value < RecommendedMinDistanceMeters)
+        else if (distanceMeters.Value < MinDistanceMeters)
         {
             issues.Add(new(IssueSeverity.Warning, "DIST_SHORT",
-                Loc.S($"Distanza breve: l'errore relativo aumenta. Sono consigliati almeno {RecommendedMinDistanceMeters:0} m.")));
+                Loc.S($"Le linee sono troppo vicine: meno di {MinDistanceMeters:0} m. La misura sarà poco precisa; se puoi, allontanale.")));
         }
         else if (distanceMeters.Value > MaxReasonableDistanceMeters)
         {
@@ -75,16 +75,9 @@ public static class CalibrationValidator
                 issues.Add(new(IssueSeverity.Error, "LINES_CROSS",
                     Loc.T("Le linee A e B si incrociano: devono attraversare la strada separatamente.")));
             }
-            else
-            {
-                double sep = Math.Min(Math.Abs(lb.SignedDistance(la.Midpoint)), Math.Abs(la.SignedDistance(lb.Midpoint)));
-                if (sep < MinSeparationPixels)
-                {
-                    issues.Add(new(IssueSeverity.Warning, "LINES_CLOSE",
-                        Loc.T("Le linee sono molto vicine nell'immagine: la misura sarà poco precisa.")));
-                }
-            }
 
+            // L'avviso «linee troppo vicine» dipende solo dalla distanza in metri (DIST_SHORT, sotto 2 m),
+            // non dalla distanza in pixel nell'immagine.
             // Nessun controllo sul parallelismo: in prospettiva due linee perpendicolari alla strada
             // convergono verso il punto di fuga, quindi nell'immagine è normale che non siano parallele.
         }

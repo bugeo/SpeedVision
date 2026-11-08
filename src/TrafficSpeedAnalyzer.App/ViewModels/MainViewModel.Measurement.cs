@@ -173,7 +173,7 @@ public sealed partial class MainViewModel
         RebuildPassages();
         AnalyzeCurrentTrack();
         ShowStatus(Loc.T("Passaggio salvato"),
-            Loc.S($"Veicolo {id:0000} salvato nei risultati. Puoi misurare il prossimo veicolo."),
+            Loc.S($"Veicolo {id:0000} salvato nei risultati."),
             InfoBarSeverity.Success);
     }
 
@@ -225,22 +225,22 @@ public sealed partial class MainViewModel
 
         if (count == 0)
         {
-            return Loc.T("Porta il video poco prima che il veicolo raggiunga la prima linea e clicca il punto di riferimento.");
+            return Loc.T("Porta il video poco prima della prima linea e clicca il punto del veicolo.");
         }
 
         if (CanSavePassage)
         {
-            return Loc.T("Misura completa. Aggiungi qualche punto in più vicino alle linee per ridurre l'incertezza, poi salva.");
+            return Loc.T("Misura completa: salva, o aggiungi punti vicino alle linee per più precisione.");
         }
 
         bool a = CrossingAOk;
         bool b = CrossingBOk;
         if (!a && !b)
         {
-            return Loc.T("Avanza e clicca lo stesso punto del veicolo finché non supera la prima linea.");
+            return Loc.T("Avanza e clicca lo stesso punto finché supera la prima linea.");
         }
 
-        return Loc.T("Bene. Prosegui fino a superare anche l'altra linea, cliccando sempre lo stesso punto del veicolo.");
+        return Loc.T("Bene. Continua fino a superare l'altra linea.");
     }
 
     private string DescribeCrossing(CrossingResult? r, out bool ok)
