@@ -28,6 +28,7 @@ desktop.ini
 wiki/
 git-log.txt
 wiki-log.txt
+release-log.txt
 
 # Zip di distribuzione creati da scripts\package-release.ps1
 out/
