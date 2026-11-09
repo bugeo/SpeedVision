@@ -1,6 +1,6 @@
 # Compila e prova SpeedVision a ogni invio su GitHub.
-# Quando si crea un'etichetta di versione (es. v0.2.0) prepara anche lo zip per Windows
-# e lo pubblica nella pagina Releases.
+# Quando si crea un'etichetta di versione (es. v0.2.0) prepara anche lo zip per Windows e il .dmg per Mac
+# e li pubblica nella pagina Releases.
 name: Build
 
 on:
@@ -98,15 +98,22 @@ jobs:
           path: tests/TrafficSpeedAnalyzer.Desktop.Tests/bin/Release/net10.0/screenshots
           if-no-files-found: ignore
 
-      # FFmpeg pronto per il pacchetto Mac (fase 5): si scarica dalla pagina dell'esecuzione.
+      # SpeedVision.app con .NET e FFmpeg in un .dmg, a ogni invio: si scarica dalla pagina dell'esecuzione
+      # per provarlo; con un'etichetta di versione va anche nella release (job «release»).
+      - name: Prepara il .dmg per Mac
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then version="${GITHUB_REF_NAME#v}"; else version="0.0.0"; fi
+          bash scripts/package-macos.sh "$version" out/ffmpeg-macos out
+
       - uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg-macos-arm64
-          path: out/ffmpeg-macos
+          name: SpeedVision-mac-arm64
+          path: out/SpeedVision-*-mac-arm64.dmg
+          if-no-files-found: error
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: [build, macos]
     runs-on: windows-latest
     permissions:
       contents: write
@@ -125,7 +132,15 @@ jobs:
           $version = '${{ github.ref_name }}'.TrimStart('v')
           ./scripts/package-release.ps1 -Version $version -OutDir out
 
+      # Il .dmg per Mac preparato dal job «macos».
+      - uses: actions/download-artifact@v4
+        with:
+          name: SpeedVision-mac-arm64
+          path: out
+
       - uses: softprops/action-gh-release@v2
         with:
-          files: out/SpeedVision-*-win-x64.zip
+          files: |
+            out/SpeedVision-*-win-x64.zip
+            out/SpeedVision-*-mac-arm64.dmg
           generate_release_notes: true
