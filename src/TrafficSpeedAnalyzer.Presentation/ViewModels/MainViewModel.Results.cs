@@ -65,6 +65,32 @@ public sealed partial class MainViewModel
 
     private int? _lastShownPassageId;
 
+    /// <summary>Veicoli misurati ma nascosti perché la ruota anteriore non è stata seguita bene vicino alle linee.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HiddenPassagesText), nameof(ShowWheelFilter))]
+    private int _hiddenPassageCount;
+
+    /// <summary>«Nessun veicolo attraversa le linee»: solo se non ci sono nemmeno veicoli nascosti dal filtro sulle ruote.</summary>
+    public bool ShowNoPassageHint => !HasAnyPassage && HiddenPassageCount == 0;
+
+    /// <summary>Riquadro con l'interruttore «solo ruota seguita bene»: quando nasconde qualcosa o è spento.</summary>
+    public bool ShowWheelFilter => HiddenPassageCount > 0 || (!OnlyWellTrackedWheels && _savedTracks.Any(t => t.Source == PassageSource.Automatic));
+
+    public string HiddenPassagesText => HiddenPassageCount == 1
+        ? Loc.T("1 veicolo non è mostrato: la ruota anteriore non è stata seguita bene vicino alle linee A e B.")
+        : Loc.S($"{HiddenPassageCount} veicoli non sono mostrati: la ruota anteriore non è stata seguita bene vicino alle linee A e B.");
+
+    /// <summary>Misura automatica fatta sulla ruota anteriore, seguita con regolarità attorno a entrambe le linee.</summary>
+    private bool WheelTrackedWell(SavedTrack saved, VehiclePassage passage)
+    {
+        if (saved.Reference != Core.Tracking.ReferencePoint.FrontWheel)
+        {
+            return false;
+        }
+
+        return Core.Tracking.WheelCrossingCheck.Check(saved.Track.Observations, passage, saved.Points, WheelFramesPerSide) is null;
+    }
+
     partial void OnSelectedPassageChanged(PassageRow? value)
     {
         RefreshOverlay();
@@ -85,6 +111,7 @@ public sealed partial class MainViewModel
         int? selectedId = SelectedPassage?.Id;
         _allRows.Clear();
         int invalid = 0;
+        int hidden = 0;
         if (Calibration is { } cal)
         {
             foreach (SavedTrack saved in _savedTracks)
@@ -94,7 +121,11 @@ public sealed partial class MainViewModel
                     ? Core.Tracking.TrackPassageOptions.Default.Passage
                     : PassageOptions.Default;
                 PassageResult r = PassageAnalyzer.Analyze(saved.Id, saved.Track.Observations, cal, options);
-                if (r.Passage is { } p)
+                if (r.Passage is { } measured && OnlyWellTrackedWheels && saved.Source == PassageSource.Automatic && !WheelTrackedWell(saved, measured))
+                {
+                    hidden++;
+                }
+                else if (r.Passage is { } p)
                 {
                     int lane = TrackLane(saved);
                     _allRows.Add(new PassageRow(p, saved, FormatTime)
@@ -116,6 +147,7 @@ public sealed partial class MainViewModel
         }
 
         InvalidPassageCount = invalid;
+        HiddenPassageCount = hidden;
         _hasUnexportedChanges = true;
         ApplyPassageFilter(selectedId);
     }
@@ -133,6 +165,8 @@ public sealed partial class MainViewModel
         SelectedPassage = Passages.FirstOrDefault(p => p.Id == selectedId);
         OnPropertyChanged(nameof(HasPassages));
         OnPropertyChanged(nameof(HasAnyPassage));
+        OnPropertyChanged(nameof(ShowWheelFilter));
+        OnPropertyChanged(nameof(ShowNoPassageHint));
         OnPropertyChanged(nameof(HasTrackedVehicles));
         OnPropertyChanged(nameof(ShowAnalysisProceed));
         OnPropertyChanged(nameof(ShowGoToAnalysis));

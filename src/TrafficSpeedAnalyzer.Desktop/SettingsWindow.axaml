@@ -13,6 +13,14 @@
         <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" HorizontalAlignment="Stretch" />
         <TextBlock Classes="caption" Margin="0,6,0,0" Text="{loc:Tr 'Vale anche per i file esportati: CSV, PDF e immagini.'}" />
 
+        <TextBlock Classes="sectionTitle" Text="{loc:Tr 'Misura con la ruota'}" Margin="0,22,0,6" />
+        <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="body" Text="{loc:Tr 'Fotogrammi minimi con la ruota per lato'}" VerticalAlignment="Center" TextWrapping="Wrap" />
+            <NumericUpDown Grid.Column="1" Name="WheelFramesBox" Value="{Binding WheelFramesPerSide}" Minimum="1" Maximum="{Binding WheelFramesPerSideMax}"
+                           Increment="1" FormatString="0" Width="110" Margin="12,0,0,0" ParsingNumberStyle="Integer" />
+        </Grid>
+        <TextBlock Classes="caption" Margin="0,6,0,0" TextWrapping="Wrap" Text="{loc:Tr 'Prima e dopo ciascuna linea A e B. Con meno fotogrammi si mostrano più veicoli, ma la misura è meno sicura.'}" />
+
         <TextBlock Classes="sectionTitle" Text="{loc:Tr 'Registro'}" Margin="0,22,0,6" />
         <c:UiButton Content="{loc:Tr 'Apri il registro'}" Icon="{StaticResource Icon.DocumentText24}"
                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="12,8" Command="{Binding OpenLogFolderCommand}" />

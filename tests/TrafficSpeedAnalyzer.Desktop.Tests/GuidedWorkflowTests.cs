@@ -162,10 +162,20 @@ public class GuidedWorkflowTests
         ScreenshotTests.Save(w, "08-calibrazione-pronta");
         Assert.Equal("Procedi >>", Text(Assert.Single(PrimaryButtons(w))));
         w.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
-        await ScreenshotTests.WaitUntil(() => vm.Passages.Count >= 2, "velocità calcolate", 30);
+        await ScreenshotTests.WaitUntil(() => vm.Passages.Count + vm.HiddenPassageCount >= 2, "velocità calcolate", 30);
 
-        // Passo 5: risultati. Due auto, da B verso A, a 50 e 72 km/h (±4 %).
+        // Passo 5: risultati. Ripresa dall'alto: le ruote non si vedono, quindi con l'interruttore «solo veicoli con
+        // la ruota seguita bene» (acceso all'inizio) le due auto non sono mostrate e un avviso lo dice. Spento
+        // l'interruttore, compaiono le misure sullo spigolo del riquadro.
         Assert.Equal(WorkflowStep.Results, vm.SelectedStep);
+        Assert.True(vm.OnlyWellTrackedWheels);
+        Assert.Equal(2, vm.HiddenPassageCount);
+        Assert.Empty(vm.Passages);
+        Assert.True(vm.ShowWheelFilter);
+        ScreenshotTests.Save(w, "09-risultati-solo-ruote");
+        vm.OnlyWellTrackedWheels = false;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(0, vm.HiddenPassageCount);
         ScreenshotTests.Save(w, "09-risultati");
         double[] speeds = [.. vm.Passages.Select(p => p.Passage.Speed.SpeedKmh).Order()];
         Assert.Equal(2, speeds.Length);

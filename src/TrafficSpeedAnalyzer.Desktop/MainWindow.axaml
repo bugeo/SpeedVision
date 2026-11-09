@@ -569,7 +569,39 @@
                                     <TextBlock Classes="sectionTitle" Text="{Binding AnalysisStatusText}" Margin="0" />
                                     <ProgressBar Margin="0,10,0,10" Height="6" Maximum="100" Value="{Binding AnalysisProgressValue}" />
                                     <TextBlock Classes="body" Text="{Binding AnalysisSpeedText}" FontFamily="{StaticResource MonoFont}" FontSize="12.5" />
-                                    <TextBlock Classes="caption" Margin="0,6,0,0" Text="{Binding AnalysisCountsText}" />
+                                    <!-- Contatori: veicoli tracciati, tracce scartate, fotogrammi fermi saltati -->
+                                    <UniformGrid Columns="3" Margin="0,10,0,4" IsVisible="{Binding HasAnalysisCounts}">
+                                        <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,0,4,0"
+                                                ToolTip.Tip="{loc:Tr 'Veicoli tracciati fin qui: diventeranno passaggi misurati'}">
+                                            <StackPanel Spacing="2">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <PathIcon Data="{StaticResource Icon.VehicleCar24}" Width="16" Height="16" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding AnalysisVehiclesText}" FontSize="18" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                                <TextBlock Classes="label" Text="{Binding AnalysisVehiclesLabel}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="2,0"
+                                                ToolTip.Tip="{loc:Tr 'Tracce troppo brevi o poco affidabili, non usate per la misura'}">
+                                            <StackPanel Spacing="2">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <PathIcon Data="{StaticResource Icon.DismissCircle24}" Width="16" Height="16" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding AnalysisRejectedText}" FontSize="18" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                                <TextBlock Classes="label" Text="{Binding AnalysisRejectedLabel}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="4,0,0,0"
+                                                ToolTip.Tip="{loc:Tr 'Fotogrammi senza movimento: non serve cercarvi veicoli, si saltano per fare prima'}">
+                                            <StackPanel Spacing="2">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <PathIcon Data="{StaticResource Icon.Next24}" Width="16" Height="16" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding AnalysisSkippedText}" FontSize="18" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                                <TextBlock Classes="label" Text="{loc:Tr 'fotogrammi fermi saltati'}" TextWrapping="Wrap" />
+                                            </StackPanel>
+                                        </Border>
+                                    </UniformGrid>
                                     <TextBlock Classes="caption" Margin="0,6,0,0" Text="{Binding ExecutionProviderText}" />
                                 </StackPanel>
                             </Border>
@@ -903,6 +935,15 @@
                         <StackPanel IsVisible="{Binding SelectedStep, Converter={StaticResource EnumIn}, ConverterParameter=Results}">
                             <TextBlock Classes="stepTitle" Text="{loc:Tr 'Risultati'}" Margin="0,0,0,14" />
 
+                            <!-- Solo i veicoli con la ruota anteriore seguita bene vicino alle linee -->
+                            <Border Classes="notice info" Margin="0,0,0,12" IsVisible="{Binding ShowWheelFilter}">
+                                <StackPanel>
+                                    <ToggleSwitch IsChecked="{Binding OnlyWellTrackedWheels}"
+                                                  OnContent="{loc:Tr 'Solo veicoli con la ruota seguita bene'}" OffContent="{loc:Tr 'Solo veicoli con la ruota seguita bene'}" />
+                                    <TextBlock Classes="body" Margin="0,4,0,0" Text="{Binding HiddenPassagesText}" IsVisible="{Binding HiddenPassageCount, Converter={StaticResource Truthy}}" />
+                                    <TextBlock Classes="caption" Margin="0,4,0,0" Text="{loc:Tr 'Spento: si mostrano anche i veicoli misurati sullo spigolo del riquadro o con la ruota persa vicino alle linee, meno precisi.'}" />
+                                </StackPanel>
+                            </Border>
                             <Border Classes="notice warning" IsVisible="{Binding InvalidPassageCount, Converter={StaticResource Truthy}}">
                                 <StackPanel>
                                     <TextBlock Classes="body" Text="{Binding InvalidPassagesText}" />
@@ -1098,7 +1139,7 @@
                                 </StackPanel>
                                 <TextBlock Text="{Binding PassageCountText}" Classes="label" VerticalAlignment="Center" />
                             </DockPanel>
-                            <TextBlock Classes="caption" Margin="0,0,0,10" IsVisible="{Binding !HasAnyPassage}"
+                            <TextBlock Classes="caption" Margin="0,0,0,10" IsVisible="{Binding ShowNoPassageHint}"
                                        Text="{loc:Tr 'Nessun veicolo attraversa le linee A e B. Esegui l\'analisi e la calibrazione, oppure misura un veicolo a mano.'}" />
 
                             <ListBox Classes="results" ItemsSource="{Binding Passages}" SelectedItem="{Binding SelectedPassage}"

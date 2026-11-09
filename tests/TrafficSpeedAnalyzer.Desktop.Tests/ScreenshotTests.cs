@@ -65,6 +65,16 @@ public class ScreenshotTests
         Dispatcher.UIThread.RunJobs();
         Save(settings, "10-impostazioni");
 
+        // Fotogrammi minimi con la ruota per lato: 2 di partenza, modificabili dalla casella.
+        NumericUpDown frames = settings.GetVisualDescendants().OfType<NumericUpDown>().Single(n => n.Name == "WheelFramesBox");
+        Assert.Equal(2, w.ViewModel.WheelFramesPerSide);
+        Assert.Equal(2m, frames.Value);
+        frames.Value = 3;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(3, w.ViewModel.WheelFramesPerSide);
+        frames.Value = 2;
+        Dispatcher.UIThread.RunJobs();
+
         // Inglese: i testi cambiano subito, senza riaprire le finestre.
         w.ViewModel.SelectedLanguage = w.ViewModel.Languages.Single(l => l.Code == "en");
         Dispatcher.UIThread.RunJobs();

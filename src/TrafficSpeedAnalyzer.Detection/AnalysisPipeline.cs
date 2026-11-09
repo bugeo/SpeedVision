@@ -217,11 +217,10 @@ public static class AnalysisPipeline
                             truncated.Add(cut);
 
                             // Ruote: solo nei veicoli interi, cercate sul fotogramma analizzato e riportate al video.
-                            // Sono candidate: la ruota anteriore si sceglie sull'intera traccia.
                             IReadOnlyList<WheelCandidate>? wheels = null;
                             if (options.LocateWheels && !cut)
                             {
-                                wheels = WheelLocator.LocateCandidates(frame.Pixels, frame.Width, frame.Height, frame.Stride, d.Box)
+                                wheels = WheelLocator.Locate(frame.Pixels, frame.Width, frame.Height, frame.Stride, d.Box)
                                     .Select(w => w.Scale(1 / toAnalysisX, 1 / toAnalysisY))
                                     .ToList();
                             }

@@ -23,6 +23,18 @@
             <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0"
                        Text="{loc:Tr 'Vale anche per i file esportati: CSV, PDF e immagini.'}" />
 
+            <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Misura con la ruota'}" Margin="0,22,0,6" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Body}" Text="{loc:Tr 'Fotogrammi minimi con la ruota per lato'}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <ui:NumberBox Grid.Column="1" Value="{Binding WheelFramesPerSide, UpdateSourceTrigger=PropertyChanged}" Minimum="1" Maximum="{Binding WheelFramesPerSideMax}"
+                              SmallChange="1" MaxDecimalPlaces="0" ClearButtonEnabled="False" Width="120" Margin="12,0,0,0" />
+            </Grid>
+            <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" TextWrapping="Wrap" Text="{loc:Tr 'Prima e dopo ciascuna linea A e B. Con meno fotogrammi si mostrano più veicoli, ma la misura è meno sicura.'}" />
+
             <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Registro'}" Margin="0,22,0,6" />
             <ui:Button Content="{loc:Tr 'Apri il registro'}" Icon="{ui:SymbolIcon DocumentText24}" Appearance="Secondary"
                        HorizontalAlignment="Stretch" Padding="12,8" Command="{Binding OpenLogFolderCommand}" />

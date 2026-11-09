@@ -47,6 +47,35 @@ public sealed partial class MainViewModel
     [ObservableProperty]
     private bool _skipStaticFrames = true;
 
+    /// <summary>
+    /// Nei risultati solo i veicoli misurati sulla ruota anteriore, seguita con regolarità attorno alle linee A e B
+    /// (<see cref="Core.Tracking.WheelCrossingCheck"/>). Gli altri (spigolo del riquadro, ruota persa o confusa)
+    /// restano tra i veicoli tracciati ma non danno una velocità.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowWheelFilter))]
+    private bool _onlyWellTrackedWheels = true;
+
+    partial void OnOnlyWellTrackedWheelsChanged(bool value) => RebuildPassages();
+
+    /// <summary>Fotogrammi minimi con la ruota prima e dopo ciascuna linea perché il veicolo sia mostrato (impostazioni).</summary>
+    [ObservableProperty]
+    private int _wheelFramesPerSide = Core.Tracking.WheelCrossingCheck.DefaultMinPointsPerSide;
+
+    public int WheelFramesPerSideMax => Core.Tracking.WheelCrossingCheck.PointsPerSide;
+
+    partial void OnWheelFramesPerSideChanged(int value)
+    {
+        int clamped = Math.Clamp(value, 1, WheelFramesPerSideMax);
+        if (clamped != value)
+        {
+            WheelFramesPerSide = clamped;
+            return;
+        }
+
+        RebuildPassages();
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StartScoreText))]
     private double _startScore = 0.5;
@@ -77,8 +106,23 @@ public sealed partial class MainViewModel
     [ObservableProperty]
     private string _analysisSpeedText = string.Empty;
 
+    /// <summary>Contatori dell'analisi in corso (riquadri sotto la barra di avanzamento); null prima di partire.</summary>
     [ObservableProperty]
-    private string _analysisCountsText = string.Empty;
+    [NotifyPropertyChangedFor(nameof(HasAnalysisCounts), nameof(AnalysisVehiclesText), nameof(AnalysisVehiclesLabel),
+        nameof(AnalysisRejectedText), nameof(AnalysisRejectedLabel), nameof(AnalysisSkippedText))]
+    private AnalysisCounts? _analysisCounts;
+
+    public bool HasAnalysisCounts => AnalysisCounts is not null;
+
+    public string AnalysisVehiclesText => AnalysisCounts?.Vehicles.ToString("N0", Loc.Culture) ?? string.Empty;
+
+    public string AnalysisVehiclesLabel => AnalysisCounts?.Vehicles == 1 ? Loc.T("veicolo tracciato") : Loc.T("veicoli tracciati");
+
+    public string AnalysisRejectedText => AnalysisCounts?.Rejected.ToString("N0", Loc.Culture) ?? string.Empty;
+
+    public string AnalysisRejectedLabel => AnalysisCounts?.Rejected == 1 ? Loc.T("traccia scartata") : Loc.T("tracce scartate");
+
+    public string AnalysisSkippedText => AnalysisCounts?.SkippedFrames.ToString("N0", Loc.Culture) ?? string.Empty;
 
     [ObservableProperty]
     private string _executionProviderText = string.Empty;
@@ -121,6 +165,8 @@ public sealed partial class MainViewModel
         _accelerationIndex = _settings.CpuOnly ? 1 : 0;
         _regionAroundLines = _settings.RegionAroundLines;
         _skipStaticFrames = _settings.SkipStaticFrames;
+        _onlyWellTrackedWheels = _settings.OnlyWellTrackedWheels;
+        _wheelFramesPerSide = Math.Clamp(_settings.WheelFramesPerSide, 1, Core.Tracking.WheelCrossingCheck.PointsPerSide);
         _startScore = Math.Clamp(_settings.StartScore, 0.25, 0.8);
     }
 
@@ -130,6 +176,8 @@ public sealed partial class MainViewModel
         _settings.CpuOnly = AccelerationIndex == 1;
         _settings.RegionAroundLines = RegionAroundLines;
         _settings.SkipStaticFrames = SkipStaticFrames;
+        _settings.OnlyWellTrackedWheels = OnlyWellTrackedWheels;
+        _settings.WheelFramesPerSide = WheelFramesPerSide;
         _settings.StartScore = StartScore;
     }
 
@@ -310,7 +358,7 @@ public sealed partial class MainViewModel
         IsStatusOpen = false;
         AnalysisProgressValue = 0;
         AnalysisSpeedText = string.Empty;
-        AnalysisCountsText = string.Empty;
+        AnalysisCounts = null;
         var tcs = new TaskCompletionSource();
         _analysisTask = tcs.Task;
         try
@@ -334,7 +382,7 @@ public sealed partial class MainViewModel
                 AnalysisStatusText = Loc.S($"Fotogramma {p.FrameIndex + 1:N0} di {FrameCount:N0}");
                 AnalysisSpeedText = string.Create(It, $"{p.FramesPerSecond:0.#} fotogrammi/s") +
                     (p.Remaining is { } r ? " · rimangono " + TimeFormatting.FormatVideoTime(r.TotalSeconds) : string.Empty);
-                AnalysisCountsText = Loc.S($"{VehiclesText(p.Passages)} · {p.RejectedTracks} tracce scartate · {p.FramesSkipped:N0} fotogrammi senza movimento saltati");
+                AnalysisCounts = new AnalysisCounts(p.Passages, p.RejectedTracks, p.FramesSkipped);
             });
 
             // Prima posizione di ogni veicolo: dal suo spostamento si sa quale vertice basso è sul davanti.
@@ -487,3 +535,6 @@ public sealed partial class MainViewModel
         _suppressSliderSeek = false;
     }
 }
+
+/// <summary>Veicoli tracciati, tracce scartate e fotogrammi senza movimento saltati durante l'analisi.</summary>
+public sealed record AnalysisCounts(int Vehicles, int Rejected, int SkippedFrames);

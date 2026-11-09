@@ -3,9 +3,7 @@ using TrafficSpeedAnalyzer.Core.Geometry;
 namespace TrafficSpeedAnalyzer.Core.Detection;
 
 /// <summary>Ruota trovata nel riquadro di un veicolo (coordinate dell'immagine).</summary>
-/// <param name="Score">Sicurezza: più alto = più sicuro. Con <see cref="WheelLocator.Locate"/> è il contrasto tra pneumatico
-/// scuro, cerchio e dintorni (livelli di grigio); con <see cref="WheelLocator.LocateCandidates"/> è riportato a una scala
-/// comune alle due ricerche, in cui circa 1 è una ruota netta.</param>
+/// <param name="Score">Contrasto tra pneumatico scuro, cerchio e dintorni (livelli di grigio, 0–255): più alto = più sicuro.</param>
 public sealed record WheelCandidate(Point2 Center, double Radius, double Score)
 {
     /// <summary>Punto in cui la ruota tocca l'asfalto: sta sul piano della strada, come le linee A e B.</summary>
@@ -39,32 +37,6 @@ public static class WheelLocator
     private const int Angles = 32;
     private static readonly double[] Cos = Enumerable.Range(0, Angles).Select(i => Math.Cos(2 * Math.PI * i / Angles)).ToArray();
     private static readonly double[] Sin = Enumerable.Range(0, Angles).Select(i => Math.Sin(2 * Math.PI * i / Angles)).ToArray();
-
-    /// <summary>Contrasto (livelli di grigio) che nella scala comune di <see cref="LocateCandidates"/> vale 1.</summary>
-    public const double DarkScoreUnit = 40;
-
-    /// <summary>
-    /// Possibili ruote nel riquadro, dalle due ricerche: quella sui grigi (<see cref="Locate"/>: pneumatico scuro,
-    /// cerchio chiaro) e quella sui contorni (<see cref="WheelOutlineFinder"/>: bordo dello pneumatico
-    /// sull'asfalto, anche con pneumatico, passaruota e cerchio tutti scuri). Sono candidate, non ruote certe:
-    /// quale sia la ruota anteriore lo decide la traccia intera (<see cref="Tracking.WheelTrajectory"/>), perché
-    /// una ruota vera si muove con il veicolo da un fotogramma all'altro, un riflesso o un'ombra no.
-    /// </summary>
-    public static IReadOnlyList<WheelCandidate> LocateCandidates(byte[] bgr, int width, int height, int stride, BoundingBox box)
-    {
-        if (box.Height < MinBoxHeight)
-        {
-            return [];
-        }
-
-        return
-        [
-            .. Locate(bgr, width, height, stride, box)
-                .Select(w => w with { Score = w.Score / DarkScoreUnit })
-                .Concat(WheelOutlineFinder.Find(bgr, width, height, stride, box))
-                .OrderByDescending(w => w.Score),
-        ];
-    }
 
     /// <summary>
     /// Ruote nel riquadro (al massimo due, la più sicura per prima), con il centro raffinato a meno di un pixel.

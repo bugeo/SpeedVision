@@ -289,7 +289,7 @@ public sealed partial class MainViewModel
         ResetFilter();
         AnalysisStatusText = string.Empty;
         AnalysisSpeedText = string.Empty;
-        AnalysisCountsText = string.Empty;
+        AnalysisCounts = null;
         AnalysisProgressValue = 0;
         BenchmarkText = string.Empty;
     }

@@ -40,6 +40,12 @@ public sealed class AppSettings
 
     public bool SkipStaticFrames { get; set; } = true;
 
+    /// <summary>Risultati solo dai veicoli con la ruota anteriore seguita bene vicino alle linee.</summary>
+    public bool OnlyWellTrackedWheels { get; set; } = true;
+
+    /// <summary>Fotogrammi minimi con la ruota prima e dopo ciascuna linea.</summary>
+    public int WheelFramesPerSide { get; set; } = 2;
+
     public double StartScore { get; set; } = 0.5;
 
     /// <summary>Ultima vista della mappa (calibrazione sulla mappa) e livello scelto ("map" o "satellite").</summary>
