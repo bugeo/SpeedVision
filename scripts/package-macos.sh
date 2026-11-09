@@ -84,12 +84,13 @@ plutil -lint "$APP/Contents/Info.plist"
 
 echo "== Firma ad hoc (senza certificato)"
 # Prima ogni eseguibile e libreria, poi il pacchetto intero.
-# Solo i file Mach-O (programma, ffmpeg, librerie native): le .dll di .NET non si firmano.
+# Ogni file in Contents/MacOS va firmato, anche le .dll di .NET e i file della mappa: macOS li considera parti
+# del programma e rifiuta un pacchetto con parti non firmate (per i file che non sono codice la firma va negli
+# attributi del file). Il programma principale per ultimo, poi il pacchetto intero.
 while IFS= read -r -d '' f; do
-    case "$(file -b "$f")" in
-        *Mach-O*) codesign --force --sign - --timestamp=none "$f" ;;
-    esac
+    [ "$f" = "$APP/Contents/MacOS/$NAME" ] || codesign --force --sign - --timestamp=none "$f"
 done < <(find "$APP/Contents/MacOS" -type f -print0)
+codesign --force --sign - --timestamp=none "$APP/Contents/MacOS/$NAME"
 codesign --force --sign - --timestamp=none "$APP"
 codesign --verify --deep --strict --verbose=2 "$APP"
 
