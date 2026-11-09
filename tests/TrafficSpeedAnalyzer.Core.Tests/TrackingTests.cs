@@ -364,6 +364,75 @@ public class TrackPassageExtractorTests
     }
 
     [Fact]
+    public void FrontWheel_IsFollowedAmongDecoys_EvenWhenOftenMissing()
+    {
+        // Come nei video veri: in ogni fotogramma più candidati (ruote, riflessi, ombre, strisce), spesso più
+        // sicuri della ruota vera; la ruota anteriore manca in un fotogramma su tre e la sua posizione trovata
+        // trema di qualche pixel. La ruota si riconosce perché si muove con il veicolo.
+        for (int seed = 0; seed < 10; seed++)
+        {
+            var rng = new Random(seed);
+            FinishedTrack track = TrackWithWheels(60, noseNoisePx: 6, seed: seed);
+            var points = track.Points.Select(p =>
+            {
+                var wheels = new List<WheelCandidate>();
+                WheelCandidate front = p.Wheels![0], rear = p.Wheels[1];
+                if (rng.NextDouble() > 0.33)
+                {
+                    wheels.Add(front with { Center = new Point2(front.Center.X + (Gaussian(rng) * 0.8), front.Center.Y), Score = 0.6 + rng.NextDouble() });
+                }
+
+                wheels.Add(rear with { Score = 0.6 + rng.NextDouble() });
+                for (int k = 0; k < 3; k++)
+                {
+                    // Distrattori: in punti a caso del riquadro, anche davanti, a volte più sicuri della ruota.
+                    double x = p.Box.X + (rng.NextDouble() * p.Box.Width);
+                    wheels.Add(new WheelCandidate(new Point2(x, 440), 8 + (rng.NextDouble() * 4), 0.5 + (1.2 * rng.NextDouble())));
+                }
+
+                return p with { Wheels = [.. wheels.OrderByDescending(w => w.Score)] };
+            }).ToList();
+
+            TrackPassageCandidate c = TrackPassageExtractor.Extract(new FinishedTrack(1, points), TestCalibration);
+            Assert.True(c.IsPassage, c.RejectionReason);
+            Assert.Equal(ReferencePoint.FrontWheel, c.Reference);
+            Assert.InRange(c.Observations.Count, (int)(0.5 * points.Count), points.Count);
+            // Solo la ruota anteriore: nessun punto lontano dalla sua posizione vera.
+            foreach (TrackObservation o in c.Observations)
+            {
+                double truth = 100 + (KmhToPxPerS(60) * o.TimeSeconds);
+                Assert.InRange(o.Position.X, truth - 3, truth + 3);
+            }
+
+            Assert.Equal(60, c.Result!.Passage!.Speed.SpeedKmh, 1.0);
+        }
+    }
+
+    [Fact]
+    public void WheelSeenInPerspective_IsFollowedWhileItsImageSpeedChanges()
+    {
+        // Veicolo che si avvicina: nell'immagine la ruota accelera (x = (a t + b)/(c t + 1)) e cresce. Con i
+        // distrattori fermi sull'asfalto (una striscia) la traiettoria scelta è comunque quella della ruota.
+        var points = new List<TrackPoint>();
+        for (int i = 0; i < 60; i++)
+        {
+            double t = i / 30.0;
+            double x = ((900 * t) + 100) / ((-0.2 * t) + 1);
+            double r = 10 / ((-0.2 * t) + 1);
+            var box = new BoundingBox(x - (6 * r), 440 - (5 * r), 7.2 * r, 5 * r);
+            WheelCandidate front = new(new Point2(x, 440 - r), r, 1.0);
+            WheelCandidate rear = new(new Point2(x - (5 * r), 440 - r), r, 1.0);
+            WheelCandidate stripe = new(new Point2(600, 440 - r), r, 1.5);   // fermo: non si muove con il veicolo
+            points.Add(new TrackPoint(i, t, box, VehicleClass.Car, 0.9f, false, i % 3 == 1 ? [stripe, rear] : [stripe, front, rear]));
+        }
+
+        List<TrackObservation>? obs = TrackPassageExtractor.FrontWheelObservations(points);
+        Assert.NotNull(obs);
+        Assert.Equal(40, obs.Count);
+        Assert.All(obs, o => Assert.Equal(((900 * o.TimeSeconds) + 100) / ((-0.2 * o.TimeSeconds) + 1), o.Position.X, 6));
+    }
+
+    [Fact]
     public void NoisyBoxes_GiveSpeedWithinUncertainty()
     {
         int within = 0;
