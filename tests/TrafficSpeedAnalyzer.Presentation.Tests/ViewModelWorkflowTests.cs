@@ -154,6 +154,21 @@ public sealed class ViewModelWorkflowTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task RoadEdges_CanBeConfirmedOnlyAfterMovingACorner()
+    {
+        (MainViewModel vm, _) = await OpenAsync();
+        vm.SelectedStep = WorkflowStep.Road;
+        Assert.NotNull(vm.Road);
+        Assert.False(vm.ConfirmRoadEdgesCommand.CanExecute(null));
+
+        // Si sposta un solo vertice di 20 pixel: ora si può confermare.
+        Point2[] corners = [.. vm.Road!.Corners];
+        corners[0] += new Point2(-20, -20);
+        vm.RoadEditedCommand.Execute(vm.Road.WithCorners(corners, vm.VideoWidth, vm.VideoHeight));
+        Assert.True(vm.ConfirmRoadEdgesCommand.CanExecute(null));
+    }
+
+    [Fact]
     public async Task OpenSamples_GoesThroughThePlatformBrowser()
     {
         var platform = new FakePlatform();

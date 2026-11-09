@@ -1,11 +1,18 @@
 // Calibrazione «sulla mappa»: l'utente trova il luogo della ripresa, clicca dove la linea A e la linea B
 // incontrano lo stesso bordo della strada e la distanza tra i due punti diventa la distanza tra le linee.
-// Comunica con il programma (MapCalibrationWindow) tramite i messaggi di WebView2.
+// Comunica con il programma (MapCalibrationWindow in WPF, MapWindow in Avalonia) tramite i messaggi della WebView.
 (function () {
   'use strict';
 
+  // Due programmi ospitano questa pagina: l'app WPF (WebView2: chrome.webview) e l'interfaccia multipiattaforma
+  // (WebView di Avalonia: invokeCSharpAction, iniettata dal controllo). Si preferisce la seconda se c'è.
   const host = window.chrome && window.chrome.webview;
-  const post = m => { if (host) host.postMessage(m); window.__tsaLastMessage = m; };
+  const post = m => {
+    window.__tsaLastMessage = m;
+    const invoke = window.invokeCSharpAction || (window.external && window.external.invokeCSharpAction);
+    if (typeof invoke === 'function') invoke(JSON.stringify(m));
+    else if (host) host.postMessage(m);
+  };
 
   /** Sotto questo ingrandimento un clic avvicina la mappa invece di mettere il punto. */
   const MIN_PICK_ZOOM = 18;
@@ -35,6 +42,7 @@
   // ───────────── Avvio (dati dal programma) ─────────────
 
   function init(data) {
+    if (map) return;                    // già avviata (il programma può mandare i dati due volte)
     S = data.strings || {};
     language = data.language || 'it';
     numberFormat = new Intl.NumberFormat(language, { minimumFractionDigits: 2, maximumFractionDigits: 2 });

@@ -627,7 +627,6 @@
  "FFmpeg non è stato trovato. Installalo con questo comando nel terminale e premi «Riprova».": "FFmpeg wurde nicht gefunden. Installiere es mit diesem Befehl im Terminal und drücke «Erneut versuchen».",
  "FFmpeg non è stato trovato. Scarica di nuovo SpeedVision completo, oppure installa FFmpeg con questo comando nel Terminale (serve Homebrew) e premi «Riprova».": "FFmpeg wurde nicht gefunden. Lade SpeedVision erneut vollständig herunter oder installiere FFmpeg mit diesem Befehl im Terminal (Homebrew erforderlich) und drücke «Erneut versuchen».",
  "Indica dove si trova ffmpeg…": "ffmpeg suchen…",
- "La mappa non è ancora disponibile in questa versione.": "Die Karte ist in dieser Version noch nicht verfügbar.",
  "Nella stessa cartella devono esserci ffmpeg e ffprobe funzionanti.": "Im selben Ordner müssen funktionierende ffmpeg und ffprobe liegen.",
  "No": "Nein",
  "Sì": "Ja",

@@ -160,9 +160,17 @@ public sealed class AvaloniaPlatformServices : IPlatformServices
         return bmp;
     }
 
-    public Task<MapOutcome> ShowMapAsync(MapRequest request) =>
-        // La mappa arriva nella fase 4 (WebView di Avalonia); per ora lo si dice chiaramente.
-        Task.FromResult(new MapOutcome(null, null, Loc.T("La mappa non è ancora disponibile in questa versione.")));
+    public async Task<MapOutcome> ShowMapAsync(MapRequest request)
+    {
+        if (ActiveOwner is not { } owner)
+        {
+            return new MapOutcome(null, null, null);
+        }
+
+        var window = new MapWindow(request);
+        await window.ShowDialog(owner);
+        return new MapOutcome(window.Result, window.LastView, window.Error);
+    }
 
     /// <summary>Apertura con il programma predefinito del sistema: Esplora file/browser, «open» su Mac, «xdg-open» su Linux.</summary>
     private static ProcessStartInfo ShellOpen(string target)

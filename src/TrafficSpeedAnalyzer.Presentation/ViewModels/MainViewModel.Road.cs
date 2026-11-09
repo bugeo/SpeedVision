@@ -59,6 +59,14 @@ public sealed partial class MainViewModel
 
     public bool IsRoadDividersStepActive => ShowRoadDividersCard && !RoadDividersConfirmed;
 
+    /// <summary>
+    /// Almeno un vertice è stato spostato dalla posizione proposta: solo allora «I bordi sono a posto» si accende,
+    /// così la zona verde non viene confermata senza essere stata portata sulla strada.
+    /// </summary>
+    public bool RoadEdgesMoved =>
+        Road is { } r && VideoWidth > 0 && VideoHeight > 0 &&
+        r.Corners.Zip(RoadLayout.CreateCentered(1, VideoWidth, VideoHeight).Corners).Any(c => Point2.Distance(c.First, c.Second) > 0.5);
+
     public bool ShowRoadProceed => Road is not null && RoadEdgesConfirmed && RoadLanesChosen && (!HasLaneDividers || RoadDividersConfirmed);
 
     public string RoadSummary => Road is { } r
@@ -76,6 +84,8 @@ public sealed partial class MainViewModel
         OnPropertyChanged(nameof(ShowRoadDividersCard));
         OnPropertyChanged(nameof(IsRoadDividersStepActive));
         OnPropertyChanged(nameof(ShowRoadProceed));
+        OnPropertyChanged(nameof(RoadEdgesMoved));
+        ConfirmRoadEdgesCommand.NotifyCanExecuteChanged();
         UpdateAnalysisRegion();
         OnLanesChanged();
     }
@@ -108,7 +118,7 @@ public sealed partial class MainViewModel
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(RoadEdgesMoved))]
     private void ConfirmRoadEdges() => RoadEdgesConfirmed = true;
 
     /// <summary>«Le linee sono a posto»: la strada è completa, si passa subito all'analisi.</summary>

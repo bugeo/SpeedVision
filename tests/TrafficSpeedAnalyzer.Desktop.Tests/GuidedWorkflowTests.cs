@@ -106,6 +106,9 @@ public class GuidedWorkflowTests
         // pallini negli angoli, con il mouse sul visore.
         ScreenshotTests.Save(w, "04-strada");
         VideoViewport viewport = w.GetVisualDescendants().OfType<VideoViewport>().Single();
+        // Finché la zona verde è dove l'ha proposta il programma, «I bordi sono a posto» resta spento.
+        Assert.Empty(PrimaryButtons(w));
+        Assert.False(vm.ConfirmRoadEdgesCommand.CanExecute(null));
         Point2[] targets = [new(4, 4), new(764, 4), new(764, 428), new(4, 428)];
         for (int i = 0; i < 4; i++)
         {

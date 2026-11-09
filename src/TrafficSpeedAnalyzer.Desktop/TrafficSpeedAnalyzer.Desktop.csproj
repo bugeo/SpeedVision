@@ -21,6 +21,8 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.5" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.5" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <!-- Mappa per «Rileva su mappa»: WebView del sistema (WebView2 su Windows, WebKit su Mac e Linux). Licenza MIT. -->
+    <PackageReference Include="Avalonia.Controls.WebView" Version="12.1.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +34,12 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Pagina della mappa (Leaflet): gli stessi file dell'app WPF, copiati accanto al programma. -->
+    <None Include="..\TrafficSpeedAnalyzer.App\Map\**\*" Link="Map\%(RecursiveDir)%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

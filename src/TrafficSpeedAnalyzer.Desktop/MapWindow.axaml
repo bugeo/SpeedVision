@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:TrafficSpeedAnalyzer.Desktop.Localization"
+        x:Class="TrafficSpeedAnalyzer.Desktop.MapWindow"
+        Title="{loc:Tr 'Distanza dalla mappa'}"
+        Icon="avares://SpeedVision/Assets/app.ico"
+        Width="1240" Height="820" MinWidth="900" MinHeight="600"
+        WindowStartupLocation="CenterOwner">
+    <!-- Mappa: pagina Map/map.html con Leaflet, caricata come testo; i tasselli della mappa arrivano da internet. -->
+    <Panel Background="#FF202329">
+        <NativeWebView Name="Web" />
+        <StackPanel Name="LoadingPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Arc Classes="spinner" Width="40" Height="40" HorizontalAlignment="Center">
+                <Arc.RenderTransform>
+                    <RotateTransform />
+                </Arc.RenderTransform>
+            </Arc>
+            <TextBlock Text="{loc:Tr 'Caricamento della mappa…'}" Margin="0,12,0,0" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" />
+        </StackPanel>
+    </Panel>
+</Window>

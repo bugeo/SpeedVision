@@ -7,7 +7,7 @@ SpeedVision è distribuito con licenza MIT (vedi `LICENSE`). Usa questi componen
 | [YOLOX](https://github.com/Megvii-BaseDetection/YOLOX) (Megvii) | Modelli di rilevamento dei veicoli, scaricati al primo uso | Apache-2.0 |
 | [ONNX Runtime](https://github.com/microsoft/onnxruntime) | Esecuzione dei modelli (DirectML su Windows, CoreML su Mac) | MIT |
 | [WPF-UI](https://github.com/lepoco/wpfui) | Interfaccia per Windows (WPF) | MIT |
-| [Avalonia](https://github.com/AvaloniaUI/Avalonia) | Interfaccia multipiattaforma (Windows, Mac, Linux) | MIT |
+| [Avalonia](https://github.com/AvaloniaUI/Avalonia) e Avalonia.Controls.WebView | Interfaccia multipiattaforma (Windows, Mac, Linux) e pagina della mappa nella WebView del sistema (WebView2, WebKit) | MIT |
 | [Fluent System Icons](https://github.com/microsoft/fluentui-system-icons) (Microsoft) | Icone dell'interfaccia multipiattaforma, ricavate dal font ufficiale (`Themes/Icons.axaml`) | MIT |
 | [Inter](https://github.com/rsms/inter) | Carattere dell'interfaccia multipiattaforma | SIL Open Font License 1.1 |
 | [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) | Struttura dell'interfaccia | MIT |

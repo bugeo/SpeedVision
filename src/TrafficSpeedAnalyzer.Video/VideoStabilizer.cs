@@ -450,17 +450,27 @@ public static class VideoStabilizer
         }
     }
 
+    /// <summary>
+    /// Cancella la cartella. Su Windows un processo ffmpeg appena chiuso può tenere aperto un file ancora per
+    /// qualche istante: si riprova per circa due secondi prima di rinunciare.
+    /// </summary>
     private static void DeleteFolderQuietly(string path)
     {
-        try
+        for (int attempt = 0; attempt < 20; attempt++)
         {
-            if (Directory.Exists(path))
+            try
             {
-                Directory.Delete(path, recursive: true);
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path, recursive: true);
+                }
+
+                return;
             }
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-        {
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+            {
+                Thread.Sleep(100);
+            }
         }
     }
 }
