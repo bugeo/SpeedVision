@@ -65,6 +65,11 @@ public class ScreenshotTests
         Dispatcher.UIThread.RunJobs();
         Save(settings, "10-impostazioni");
 
+        // Modello e opzioni dell'analisi sono nelle impostazioni; il modello di partenza è YOLOX-S.
+        ComboBox model = settings.GetVisualDescendants().OfType<ComboBox>().Single(c => c.Name == "ModelBox");
+        Assert.Equal("yolox_s", w.ViewModel.SelectedModel.Id);
+        Assert.Same(w.ViewModel.SelectedModel, model.SelectedItem);
+
         // Fotogrammi minimi con la ruota per lato: 2 di partenza, modificabili dalla casella.
         NumericUpDown frames = settings.GetVisualDescendants().OfType<NumericUpDown>().Single(n => n.Name == "WheelFramesBox");
         Assert.Equal(2, w.ViewModel.WheelFramesPerSide);

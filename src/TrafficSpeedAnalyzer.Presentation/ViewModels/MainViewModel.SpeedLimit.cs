@@ -53,7 +53,7 @@ public sealed partial class MainViewModel
     /// <summary>Aggiorna righe, grafico e riquadro «Multe» dopo un cambio di passaggi, filtro o limite.</summary>
     private void RefreshSpeedLimitMarks()
     {
-        foreach (PassageRow r in _allRows)
+        foreach (PassageRow r in _allRows.Concat(_reviewRows))
         {
             r.IsOverLimit = IsOverLimit(r);
         }

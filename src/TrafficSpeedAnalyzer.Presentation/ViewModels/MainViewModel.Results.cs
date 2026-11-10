@@ -27,11 +27,63 @@ public sealed partial class MainViewModel
     /// <summary>Passaggi mostrati ed esportati (dopo il filtro).</summary>
     public ObservableCollection<PassageRow> Passages { get; } = [];
 
-    /// <summary>Tutti i passaggi validi con la calibrazione attuale, prima del filtro.</summary>
+    /// <summary>Tutti i passaggi corretti con la calibrazione attuale, prima del filtro.</summary>
     private readonly List<PassageRow> _allRows = [];
 
+    /// <summary>
+    /// Passaggi da correggere (dopo il filtro): misurati, ma con la ruota anteriore non seguita bene vicino alle
+    /// linee, oppure spostati qui dall'utente. Non entrano in statistiche, grafico, esportazione e PDF.
+    /// </summary>
+    public ObservableCollection<PassageRow> ReviewPassages { get; } = [];
+
+    /// <summary>Tutti i passaggi da correggere, prima del filtro.</summary>
+    private readonly List<PassageRow> _reviewRows = [];
+
+    /// <summary>Linguetta scelta nei risultati: falso = passaggi corretti, vero = passaggi da correggere.</summary>
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(DeletePassageCommand), nameof(ShowEntryFrameCommand), nameof(ShowExitFrameCommand))]
+    [NotifyPropertyChangedFor(nameof(ShownPassages), nameof(IsValidTab), nameof(PassageCountText), nameof(ShowNoPassageHint), nameof(ShowSortButtons), nameof(DeleteTooltip))]
+    private bool _isReviewTab;
+
+    public bool IsValidTab
+    {
+        get => !IsReviewTab;
+        set => IsReviewTab = !value;
+    }
+
+    /// <summary>L'elenco della linguetta scelta.</summary>
+    public ObservableCollection<PassageRow> ShownPassages => IsReviewTab ? ReviewPassages : Passages;
+
+    public bool ShowSortButtons => ShownPassages.Count > 0;
+
+    public string ValidTabText => Passages.Count == 1 ? Loc.T("1 passaggio corretto") : Loc.S($"{Passages.Count} passaggi corretti");
+
+    public string ReviewTabText => ReviewPassages.Count == 1 ? Loc.T("1 non valido") : Loc.S($"{ReviewPassages.Count} non validi");
+
+    [RelayCommand]
+    private void ShowValidTab() => IsReviewTab = false;
+
+    [RelayCommand]
+    private void ShowReviewTab() => IsReviewTab = true;
+
+    /// <summary>Che cosa fa «Elimina» nella linguetta scelta.</summary>
+    public string DeleteTooltip => IsReviewTab
+        ? Loc.T("Cancella il passaggio")
+        : Loc.T("Sposta il passaggio tra i non validi: non entra nell'esportazione");
+
+    partial void OnIsReviewTabChanged(bool value)
+    {
+        if (IsEditingPassage)
+        {
+            EndEdit();
+        }
+
+        SelectedPassage = null;
+        DeletePassageCommand.NotifyCanExecuteChanged();
+        MoveToValidCommand.NotifyCanExecuteChanged();
+    }
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(DeletePassageCommand), nameof(ShowEntryFrameCommand), nameof(ShowExitFrameCommand), nameof(MoveToValidCommand))]
     private PassageRow? _selectedPassage;
 
     [ObservableProperty]
@@ -48,12 +100,20 @@ public sealed partial class MainViewModel
         ? Loc.S($"Esporta i {Passages.Count} passaggi filtrati…")
         : Loc.T("Esporta CSV, PDF e immagini…");
 
-    public string PassageCountText => (Passages.Count switch
+    /// <summary>Sopra l'elenco: quanti passaggi della linguetta il filtro lascia vedere.</summary>
+    public string PassageCountText
     {
-        0 => Loc.T("Nessun passaggio"),
-        1 => "1 passaggio",
-        int n => string.Create(It, $"{n} passaggi"),
-    }) + (Passages.Count != _allRows.Count ? Loc.S($" su {_allRows.Count} (filtro attivo)") : string.Empty);
+        get
+        {
+            int shown = ShownPassages.Count, all = IsReviewTab ? _reviewRows.Count : _allRows.Count;
+            if (shown == all)
+            {
+                return shown == 0 ? Loc.T("Nessun passaggio") : string.Empty;
+            }
+
+            return Loc.S($"{shown} su {all} (filtro attivo)");
+        }
+    }
 
     public string MeanSpeedText => Passages.Count == 0 || IsDistanceProvisional ? "–" : Passages.Average(p => p.Passage.Speed.SpeedKmh).ToString("0.0", It);
 
@@ -65,20 +125,8 @@ public sealed partial class MainViewModel
 
     private int? _lastShownPassageId;
 
-    /// <summary>Veicoli misurati ma nascosti perché la ruota anteriore non è stata seguita bene vicino alle linee.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HiddenPassagesText), nameof(ShowWheelFilter))]
-    private int _hiddenPassageCount;
-
-    /// <summary>«Nessun veicolo attraversa le linee»: solo se non ci sono nemmeno veicoli nascosti dal filtro sulle ruote.</summary>
-    public bool ShowNoPassageHint => !HasAnyPassage && HiddenPassageCount == 0;
-
-    /// <summary>Riquadro con l'interruttore «solo ruota seguita bene»: quando nasconde qualcosa o è spento.</summary>
-    public bool ShowWheelFilter => HiddenPassageCount > 0 || (!OnlyWellTrackedWheels && _savedTracks.Any(t => t.Source == PassageSource.Automatic));
-
-    public string HiddenPassagesText => HiddenPassageCount == 1
-        ? Loc.T("1 veicolo non è mostrato: la ruota anteriore non è stata seguita bene vicino alle linee A e B.")
-        : Loc.S($"{HiddenPassageCount} veicoli non sono mostrati: la ruota anteriore non è stata seguita bene vicino alle linee A e B.");
+    /// <summary>«Nessun veicolo attraversa le linee»: solo se non ci sono passaggi in nessuna delle due linguette.</summary>
+    public bool ShowNoPassageHint => _allRows.Count == 0 && _reviewRows.Count == 0;
 
     /// <summary>Misura automatica fatta sulla ruota anteriore, seguita con regolarità attorno a entrambe le linee.</summary>
     private bool WheelTrackedWell(SavedTrack saved, VehiclePassage passage)
@@ -93,6 +141,12 @@ public sealed partial class MainViewModel
 
     partial void OnSelectedPassageChanged(PassageRow? value)
     {
+        // Scegliere un altro passaggio annulla la modifica in corso.
+        if (IsEditingPassage && value?.Id != EditingId)
+        {
+            EndEdit();
+        }
+
         RefreshOverlay();
 
         // Cliccando un risultato il video va all'ingresso del veicolo. Solo quando cambia veicolo:
@@ -110,8 +164,8 @@ public sealed partial class MainViewModel
     {
         int? selectedId = SelectedPassage?.Id;
         _allRows.Clear();
+        _reviewRows.Clear();
         int invalid = 0;
-        int hidden = 0;
         if (Calibration is { } cal)
         {
             foreach (SavedTrack saved in _savedTracks)
@@ -121,14 +175,12 @@ public sealed partial class MainViewModel
                     ? Core.Tracking.TrackPassageOptions.Default.Passage
                     : PassageOptions.Default;
                 PassageResult r = PassageAnalyzer.Analyze(saved.Id, saved.Track.Observations, cal, options);
-                if (r.Passage is { } measured && OnlyWellTrackedWheels && saved.Source == PassageSource.Automatic && !WheelTrackedWell(saved, measured))
-                {
-                    hidden++;
-                }
-                else if (r.Passage is { } p)
+                if (r.Passage is { } p)
                 {
                     int lane = TrackLane(saved);
-                    _allRows.Add(new PassageRow(p, saved, FormatTime)
+                    // Da correggere: per scelta dell'utente, oppure (misure automatiche) se la ruota non è stata seguita bene.
+                    bool toReview = saved.ToReview ?? (saved.Source == PassageSource.Automatic && !WheelTrackedWell(saved, p));
+                    (toReview ? _reviewRows : _allRows).Add(new PassageRow(p, saved, FormatTime)
                     {
                         HideSpeed = IsDistanceProvisional,
                         LaneText = Road is { Lanes: > 1 } && lane >= 0 ? string.Create(It, $"corsia {lane + 1}") : string.Empty,
@@ -147,7 +199,6 @@ public sealed partial class MainViewModel
         }
 
         InvalidPassageCount = invalid;
-        HiddenPassageCount = hidden;
         _hasUnexportedChanges = true;
         ApplyPassageFilter(selectedId);
     }
@@ -162,11 +213,19 @@ public sealed partial class MainViewModel
             Passages.Add(row);
         }
 
-        SelectedPassage = Passages.FirstOrDefault(p => p.Id == selectedId);
+        ReviewPassages.Clear();
+        foreach (PassageRow row in Sorted(_reviewRows.Where(PassesFilter)))
+        {
+            ReviewPassages.Add(row);
+        }
+
+        SelectedPassage = ShownPassages.FirstOrDefault(p => p.Id == selectedId);
         OnPropertyChanged(nameof(HasPassages));
         OnPropertyChanged(nameof(HasAnyPassage));
-        OnPropertyChanged(nameof(ShowWheelFilter));
         OnPropertyChanged(nameof(ShowNoPassageHint));
+        OnPropertyChanged(nameof(ValidTabText));
+        OnPropertyChanged(nameof(ReviewTabText));
+        OnPropertyChanged(nameof(ShowSortButtons));
         OnPropertyChanged(nameof(HasTrackedVehicles));
         OnPropertyChanged(nameof(ShowAnalysisProceed));
         OnPropertyChanged(nameof(ShowGoToAnalysis));
@@ -193,6 +252,10 @@ public sealed partial class MainViewModel
 
     private bool HasSelection() => SelectedPassage is not null;
 
+    /// <summary>
+    /// «Non valido» (passaggi corretti): il passaggio non si cancella, si sposta tra i non validi (resta recuperabile);
+    /// «Elimina» (non validi): il passaggio si cancella davvero.
+    /// </summary>
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void DeletePassage()
     {
@@ -201,14 +264,49 @@ public sealed partial class MainViewModel
             return;
         }
 
+        if (_allRows.Contains(row))
+        {
+            SetToReview(row.Id, true);
+            ShowStatus(Loc.T("Passaggio spostato"),
+                Loc.S($"Il veicolo {row.IdText} è ora tra i non validi: non entra nell'esportazione."), StatusSeverity.Informational);
+            return;
+        }
+
         _savedTracks.RemoveAll(t => t.Id == row.Id);
+        RebuildPassages();
+    }
+
+    private bool CanMoveToValid() => SelectedPassage is { } row && _reviewRows.Contains(row);
+
+    /// <summary>Riporta un passaggio da correggere tra quelli corretti (entra nell'esportazione).</summary>
+    [RelayCommand(CanExecute = nameof(CanMoveToValid))]
+    private void MoveToValid()
+    {
+        if (SelectedPassage is not { } row)
+        {
+            return;
+        }
+
+        SetToReview(row.Id, false);
+        ShowStatus(Loc.T("Passaggio spostato"),
+            Loc.S($"Il veicolo {row.IdText} è ora tra i passaggi corretti."), StatusSeverity.Success);
+    }
+
+    private void SetToReview(int id, bool toReview)
+    {
+        int i = _savedTracks.FindIndex(t => t.Id == id);
+        if (i >= 0)
+        {
+            _savedTracks[i] = _savedTracks[i] with { ToReview = toReview };
+        }
+
         RebuildPassages();
     }
 
     [RelayCommand]
     private void DeleteInvalidPassages()
     {
-        var validIds = _allRows.Select(p => p.Id).ToHashSet();
+        var validIds = _allRows.Concat(_reviewRows).Select(p => p.Id).ToHashSet();
         _savedTracks.RemoveAll(t => !validIds.Contains(t.Id));
         RebuildPassages();
     }
@@ -231,7 +329,12 @@ public sealed partial class MainViewModel
         }
     }
 
-    /// <summary>Riapre un passaggio salvato nella misura manuale per correggerlo.</summary>
+    /// <summary>
+    /// «Modifica»: il passaggio si corregge restando nei risultati. L'elenco resta visibile; sul passaggio scelto
+    /// compaiono «Annulla modifica» e «Salva modifica» al posto delle altre azioni, e un clic sul video mette (o
+    /// sposta) il punto del veicolo nel fotogramma mostrato. Il passaggio resta nella sua linguetta: tra i passaggi
+    /// corretti lo sposta solo l'utente, con «Sposta in passaggi validi».
+    /// </summary>
     [RelayCommand]
     private void EditPassage(PassageRow? row)
     {
@@ -241,24 +344,84 @@ public sealed partial class MainViewModel
             return;
         }
 
+        if (IsEditingPassage)
+        {
+            CancelEdit();
+        }
+
         if (_currentTrack.Count > 0)
         {
             ShowStatus(Loc.T("Misura in corso"), Loc.T("Salva o annulla il veicolo che stai misurando prima di modificarne un altro."), StatusSeverity.Warning);
             return;
         }
 
-        _savedTracks.RemoveAll(t => t.Id == row.Id);
         _editBackup = row.Saved;
+        _editWasToReview = _reviewRows.Any(r => r.Id == row.Id);
         _currentTrack = row.Track.Clone();
         EditingId = row.Id;
-        RebuildPassages();
-        SelectedStep = WorkflowStep.Measurement;
+        ViewportMode = ViewportMode.PlacePoint;
         AnalyzeCurrentTrack();
         GoToFrame((int)row.Passage.Entry.FirstBeyond.FrameIndex);
-        ShowStatus(Loc.T("Modifica del veicolo ") + row.IdText, Loc.T("Correggi i punti e salva. «Nuovo veicolo» annulla."), StatusSeverity.Informational);
+        NotifyEditCommands();
     }
 
-    private bool CanExport() => HasPassages && !IsBusy && !IsAnalyzing && !IsDistanceProvisional;
+    /// <summary>Linguetta in cui era il passaggio quando è iniziata la modifica (ci resta anche dopo).</summary>
+    private bool _editWasToReview;
+
+    private bool CanSaveEdit() => IsEditingPassage && CanSavePassage && SelectedStep == WorkflowStep.Results;
+
+    /// <summary>«Salva modifica»: i punti corretti sostituiscono quelli del passaggio, che resta nella sua linguetta.</summary>
+    [RelayCommand(CanExecute = nameof(CanSaveEdit))]
+    private void SaveEdit()
+    {
+        if (EditingId is not { } id || _currentAnalysis?.Passage is null)
+        {
+            return;
+        }
+
+        int i = _savedTracks.FindIndex(t => t.Id == id);
+        if (i >= 0)
+        {
+            _savedTracks[i] = _savedTracks[i] with { Track = _currentTrack.Clone(), ToReview = _editWasToReview };
+        }
+
+        EndEdit();
+        ShowStatus(Loc.T("Modifica salvata"), Loc.S($"Veicolo {id:0000} aggiornato."), StatusSeverity.Success);
+    }
+
+    /// <summary>«Annulla modifica»: il passaggio resta com'era.</summary>
+    [RelayCommand]
+    private void CancelEdit() => EndEdit();
+
+    private void EndEdit()
+    {
+        EditingId = null;
+        _editBackup = null;
+        _currentTrack = new ManualTrack();
+        if (SelectedStep == WorkflowStep.Results)
+        {
+            ViewportMode = ViewportMode.None;
+        }
+
+        RebuildPassages();
+        AnalyzeCurrentTrack();
+        NotifyEditCommands();
+    }
+
+    private void NotifyEditCommands()
+    {
+        SaveEditCommand.NotifyCanExecuteChanged();
+        ExportResultsCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(EditHintText));
+    }
+
+    /// <summary>Sotto «Annulla/Salva modifica»: cosa fare e com'è la misura con i punti attuali.</summary>
+    public string EditHintText => !IsEditingPassage
+        ? string.Empty
+        : Loc.T("Clic sul video: mette o sposta il punto del veicolo nel fotogramma mostrato.") +
+          (string.IsNullOrEmpty(CurrentResultText) ? string.Empty : "\n" + CurrentSpeedText + " km/h · " + CurrentResultText);
+
+    private bool CanExport() => HasPassages && !IsBusy && !IsAnalyzing && !IsDistanceProvisional && !IsEditingPassage;
 
     [RelayCommand(CanExecute = nameof(CanExport))]
     private async Task ExportResultsAsync()
@@ -475,6 +638,11 @@ public sealed partial class MainViewModel
         if (FilterDescription is { } filter)
         {
             sb.AppendLine(Loc.S($"Filtro applicato: {filter} ({rows.Count} passaggi esportati su {_allRows.Count})."));
+        }
+
+        if (_reviewRows.Count > 0)
+        {
+            sb.AppendLine(Loc.S($"Passaggi non validi, non esportati: {_reviewRows.Count}."));
         }
         sb.AppendLine();
         int auto = rows.Count(r => r.IsAutomatic);

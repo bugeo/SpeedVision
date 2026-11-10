@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SpeedVision</title>
-<meta name="description" content="SpeedVision misura la velocità dei veicoli in un video di traffico, direttamente sul tuo PC. Software libero per Windows.">
+<meta name="description" content="SpeedVision misura la velocità dei veicoli in un video di traffico, direttamente sul tuo computer. Software libero per Windows e Mac.">
 <meta property="og:title" content="SpeedVision">
-<meta property="og:description" content="Misura la velocità dei veicoli in un video di traffico, direttamente sul tuo PC.">
+<meta property="og:description" content="Misura la velocità dei veicoli in un video di traffico, direttamente sul tuo computer. Per Windows e Mac.">
 <meta property="og:image" content="img/logo.jpg">
 <link rel="icon" type="image/png" sizes="64x64" href="img/favicon-sv.png">
 <link rel="icon" href="img/favicon-sv.ico" sizes="any">
@@ -56,6 +56,8 @@ html[data-l="it"] [lang="en"], html[data-l="en"] [lang="it"] { display: none !im
 h1 { font: italic 800 clamp(2.4rem, 5.4vw, 4.1rem)/1.02 var(--display); font-stretch: 112%; letter-spacing: -.01em; color: #fff; margin: 0 0 20px; }
 .lead { font-size: 1.25rem; color: #b8c6da; max-width: 34ch; margin: 0 0 32px; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.actions-more { margin-top: 12px; }
+.actions .btn-main { padding: 13px 18px; gap: 8px; }
 .btn { display: inline-flex; align-items: center; gap: 10px; font: 600 1.05rem var(--text); text-decoration: none; padding: 13px 22px; border-radius: 10px; }
 .btn-main { background: var(--cyan); color: var(--night); }
 .btn-main:hover { background: #4cc6fa; }
@@ -127,6 +129,7 @@ code, pre { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; fon
 pre { background: #e6ebf2; border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 8px 0 16px; }
 .install > div, .results > *, .hero-grid > * { min-width: 0; }
 .install ul { padding-left: 1.1em; margin: 0 0 12px; color: var(--muted); }
+.install h3 { margin-top: 26px; }
 .install-steps { padding-left: 1.3em; margin: 4px 0 16px; }
 .install-steps li { padding-left: 4px; margin-bottom: 4px; }
 
@@ -182,14 +185,20 @@ footer a { color: #c7d3e4; }
     <div>
       <h1><span lang="it">Quanto vanno veloci sulla tua strada?</span><span lang="en">How fast are they going on your street?</span></h1>
       <p class="lead">
-        <span lang="it">SpeedVision misura la velocità dei veicoli in un video ripreso da una telecamera ferma. Il video resta sul tuo PC.</span>
-        <span lang="en">SpeedVision measures vehicle speeds in a video shot from a fixed camera. The video stays on your PC.</span>
+        <span lang="it">SpeedVision misura la velocità dei veicoli in un video ripreso da una telecamera ferma. Il video resta sul tuo computer, Windows o Mac.</span>
+        <span lang="en">SpeedVision measures vehicle speeds in a video shot from a fixed camera. The video stays on your computer, Windows or Mac.</span>
       </p>
       <div class="actions">
         <a class="btn btn-main" href="https://github.com/bugeo/SpeedVision/releases">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 19h16"/></svg>
           <span lang="it">Scarica per Windows</span><span lang="en">Download for Windows</span>
         </a>
+        <a class="btn btn-main" href="https://github.com/bugeo/SpeedVision/releases">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 19h16"/></svg>
+          <span lang="it">Scarica per Mac</span><span lang="en">Download for Mac</span>
+        </a>
+      </div>
+      <div class="actions actions-more">
         <a class="btn btn-ghost" href="https://github.com/bugeo/SpeedVision">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 00-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 015.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.08 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0012 .5z"/></svg>
           <span lang="it">Codice sorgente</span><span lang="en">Source code</span>
@@ -338,6 +347,9 @@ footer a { color: #c7d3e4; }
   <div class="wrap">
     <h2><span lang="it">Novità</span><span lang="en">What's new</span></h2>
     <ul class="news-list">
+      <li><h3 lang="it">Ora anche su Mac</h3><h3 lang="en">Now on Mac too</h3>
+        <p lang="it">SpeedVision funziona sui Mac con chip Apple: si scarica il file .dmg, con FFmpeg già dentro, e si trascina l'app in Applicazioni.</p>
+        <p lang="en">SpeedVision runs on Macs with Apple silicon: download the .dmg, FFmpeg included, and drag the app to Applications.</p></li>
       <li><h3 lang="it">Misura dalla ruota anteriore</h3><h3 lang="en">Measured from the front wheel</h3>
         <p lang="it">La velocità si calcola dal punto in cui la ruota anteriore tocca l'asfalto, non più dal bordo del riquadro: niente errori di prospettiva, anche con la telecamera un po' storta.</p>
         <p lang="en">Speed is computed from where the front wheel touches the road instead of the box edge: no perspective errors, even with a slightly tilted camera.</p></li>
@@ -347,9 +359,6 @@ footer a { color: #c7d3e4; }
       <li><h3 lang="it">Rapporti in chiaro e anonimizzati</h3><h3 lang="en">Unblurred and anonymised reports</h3>
         <p lang="it">Due PDF a ogni esportazione; la pixellatura copre targhe e volti ma lascia riconoscibile il veicolo.</p>
         <p lang="en">Two PDFs with every export; pixelation hides plates and faces but keeps the vehicle recognisable.</p></li>
-      <li><h3 lang="it">Più guidato</h3><h3 lang="en">More guided</h3>
-        <p lang="it">Data e ora in una casella guidata, passaggio automatico al passo successivo e video di esempio da scaricare con un clic.</p>
-        <p lang="en">Date and time in a guided field, automatic move to the next step and sample videos one click away.</p></li>
     </ul>
     <p class="news-more"><a href="https://github.com/bugeo/SpeedVision/wiki/Novita"><span lang="it">Tutte le novità nel wiki</span><span lang="en">All changes in the wiki (Italian)</span></a></p>
   </div>
@@ -357,7 +366,7 @@ footer a { color: #c7d3e4; }
 
 <section class="honest">
   <div class="wrap">
-    <h2><span lang="it">Il video non lascia il PC</span><span lang="en">The video never leaves your PC</span></h2>
+    <h2><span lang="it">Il video non lascia il tuo computer</span><span lang="en">The video never leaves your computer</span></h2>
     <p class="intro">
       <span lang="it">Analisi, riconoscimento e calcolo avvengono sul tuo computer. Solo la mappa, se la usi per calibrare, si collega a internet.</span>
       <span lang="en">Analysis, detection and calculation all run on your computer. Only the map, if you use it to calibrate, goes online.</span>
@@ -377,8 +386,11 @@ footer a { color: #c7d3e4; }
   <div class="wrap install">
     <div>
       <h2><span lang="it">Installazione</span><span lang="en">Install</span></h2>
-      <p lang="it">Non serve installare nulla. Serve Windows 10 o 11 a 64 bit.</p>
-      <p lang="en">Nothing to install. You need Windows 10 or 11, 64-bit.</p>
+      <p lang="it">Scarica il file per il tuo computer dalla pagina <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a>: lo zip per Windows o il .dmg per Mac. Contengono già tutto, anche FFmpeg per leggere i video.</p>
+      <p lang="en">Download the file for your computer from the <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a> page: the zip for Windows or the .dmg for Mac. Both already contain everything, FFmpeg included.</p>
+      <h3>Windows</h3>
+      <p lang="it">Windows 10 o 11 a 64 bit.</p>
+      <p lang="en">Windows 10 or 11, 64-bit.</p>
       <ol class="install-steps">
         <li lang="it">Scarica lo zip dell'ultima versione dalla pagina <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a>.</li>
         <li lang="en">Download the latest zip from the <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a> page.</li>
@@ -387,8 +399,21 @@ footer a { color: #c7d3e4; }
         <li lang="it">Avvia <code>SpeedVision.exe</code> dalla cartella estratta.</li>
         <li lang="en">Run <code>SpeedVision.exe</code> from the extracted folder.</li>
       </ol>
-      <p lang="it">Lo zip contiene già tutto, anche FFmpeg per leggere i video. Se Windows mostra «Windows ha protetto il PC», premi «Ulteriori informazioni» e poi «Esegui comunque»: succede ai programmi nuovi non ancora firmati.</p>
-      <p lang="en">The zip already contains everything, FFmpeg included. If Windows shows «Windows protected your PC», click «More info» and then «Run anyway»: it happens with new programs that are not yet signed.</p>
+      <p lang="it">Se Windows mostra «Windows ha protetto il PC», premi «Ulteriori informazioni» e poi «Esegui comunque»: succede ai programmi nuovi non ancora firmati.</p>
+      <p lang="en">If Windows shows «Windows protected your PC», click «More info» and then «Run anyway»: it happens with new programs that are not yet signed.</p>
+      <h3>Mac</h3>
+      <p lang="it">Mac con chip Apple (M1 o successivi) e macOS 12 o più recente. I Mac con processore Intel non sono supportati.</p>
+      <p lang="en">Mac with Apple silicon (M1 or later) and macOS 12 or newer. Macs with an Intel processor are not supported.</p>
+      <ol class="install-steps">
+        <li lang="it">Scarica il file <code>.dmg</code> dell'ultima versione dalla pagina <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a> e aprilo.</li>
+        <li lang="en">Download the latest <code>.dmg</code> from the <a href="https://github.com/bugeo/SpeedVision/releases">Releases</a> page and open it.</li>
+        <li lang="it">Trascina SpeedVision nella cartella Applicazioni.</li>
+        <li lang="en">Drag SpeedVision to the Applications folder.</li>
+        <li lang="it">Avvia SpeedVision dalle Applicazioni.</li>
+        <li lang="en">Launch SpeedVision from Applications.</li>
+      </ol>
+      <p lang="it">Al primo avvio macOS avvisa che lo sviluppatore non è verificato: apri Impostazioni di sistema → Privacy e sicurezza e premi «Apri comunque». Succede ai programmi non ancora firmati con un certificato Apple; dopo la prima volta si apre normalmente.</p>
+      <p lang="en">On first launch macOS warns that the developer cannot be verified: open System Settings → Privacy &amp; Security and click «Open Anyway». It happens with apps not yet signed with an Apple certificate; after the first time it opens normally.</p>
       <p lang="it">Per provarlo subito, scarica un video dalla <a href="https://github.com/bugeo/SpeedVision/tree/main/samples">cartella dei video di esempio</a> e aprilo con «Apri video». Lo stesso link è nel programma, nel pulsante «Scarica video di esempio».</p>
       <p lang="en">To try it right away, download a video from the <a href="https://github.com/bugeo/SpeedVision/tree/main/samples">sample videos folder</a> and open it with «Apri video» (Open video). The same link is in the program, on the «Download sample videos» button.</p>
       <p lang="it">Al primo uso del riconoscimento automatico il programma scarica il modello YOLOX una sola volta.</p>

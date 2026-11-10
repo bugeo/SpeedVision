@@ -10,18 +10,46 @@
                  ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="Mica"
                  WindowCornerPreference="Round">
-    <!-- Impostazioni: lingua dell'interfaccia (e dei file esportati) e registro degli errori. DataContext = MainViewModel. -->
+    <!-- Impostazioni: lingua (anche dei file esportati), modello e opzioni dell'analisi, misura con la ruota, registro. DataContext = MainViewModel. -->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <ui:TitleBar Grid.Row="0" Title="{loc:Tr 'Impostazioni'}" ShowMinimize="False" ShowMaximize="False" />
-        <StackPanel Grid.Row="1" Margin="24,8,24,24">
+        <ScrollViewer Grid.Row="1" MaxHeight="820" VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,8,24,24">
             <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Lingua'}" />
             <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" HorizontalAlignment="Stretch" />
             <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0"
                        Text="{loc:Tr 'Vale anche per i file esportati: CSV, PDF e immagini.'}" />
+
+            <!-- Riconoscimento dei veicoli: modello, accelerazione e opzioni dell'analisi (bloccati durante l'analisi) -->
+            <StackPanel IsEnabled="{Binding IsNotAnalyzing}">
+                <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Modello'}" Margin="0,22,0,6" />
+                <ComboBox ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedModel}" DisplayMemberPath="DisplayName" HorizontalAlignment="Stretch" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" TextWrapping="Wrap" Text="{Binding ModelDescription}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap" Text="{Binding ModelStatusText}" />
+                <ui:Button Content="{loc:Tr 'Scarica il modello'}" Icon="{ui:SymbolIcon ArrowDownload24}" Margin="0,10,0,0"
+                           Command="{Binding DownloadModelCommand}"
+                           Visibility="{Binding IsModelAvailable, Converter={StaticResource TruthyToVisibility}, ConverterParameter=Invert}" />
+                <ProgressBar Margin="0,10,0,0" Height="4" Maximum="100" Value="{Binding DownloadProgress}"
+                             Visibility="{Binding IsDownloadingModel, Converter={StaticResource BoolToVisibility}}" />
+                <TextBlock Style="{StaticResource Label}" Margin="0,12,0,4" Text="{loc:Tr 'Accelerazione'}" />
+                <ComboBox ItemsSource="{Binding AccelerationOptions}" DisplayMemberPath="Value" SelectedIndex="{Binding AccelerationIndex}" HorizontalAlignment="Stretch" />
+                <ui:Button Content="{loc:Tr 'Prova velocità'}" Icon="{ui:SymbolIcon Gauge24}" Appearance="Secondary" Margin="0,10,0,0" HorizontalAlignment="Stretch"
+                           Command="{Binding RunBenchmarkCommand}" ToolTip="{loc:Tr 'Misura quanto è veloce l\'analisi su questo PC'}" />
+
+                <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Opzioni dell\'analisi'}" Margin="0,22,0,6" />
+                <ui:ToggleSwitch IsChecked="{Binding SkipStaticFrames}" Content="{loc:Tr 'Salta i tratti senza movimento'}" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap" Text="{loc:Tr 'Il modello non viene eseguito mentre la strada è vuota.'}" />
+                <Grid Margin="0,14,0,0">
+                    <TextBlock Style="{StaticResource Label}" Text="{loc:Tr 'Confidenza minima per seguire un veicolo'}" />
+                    <TextBlock HorizontalAlignment="Right" Text="{Binding StartScoreText}" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" />
+                </Grid>
+                <Slider Minimum="0.25" Maximum="0.8" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding StartScore}" Margin="0,6,0,0" />
+                <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" TextWrapping="Wrap" Text="{loc:Tr 'Più alta: meno falsi veicoli, più veicoli persi. Consigliato 0,50.'}" />
+            </StackPanel>
 
             <TextBlock Style="{StaticResource SectionTitle}" Text="{loc:Tr 'Misura con la ruota'}" Margin="0,22,0,6" />
             <Grid>
@@ -44,5 +72,6 @@
             <ui:Button Content="{loc:Tr 'Chiudi'}" Appearance="Primary" HorizontalAlignment="Right" Margin="0,24,0,0" Padding="20,8"
                        IsDefault="True" IsCancel="True" Click="OnCloseClick" />
         </StackPanel>
+        </ScrollViewer>
     </Grid>
 </ui:FluentWindow>

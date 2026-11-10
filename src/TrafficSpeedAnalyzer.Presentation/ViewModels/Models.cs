@@ -99,7 +99,8 @@ public sealed record SavedTrack(
     IReadOnlyList<Core.Tracking.TrackPoint>? Points = null,
     bool AwaitingCalibration = false,
     int Lane = 0,
-    Core.Tracking.ReferencePoint Reference = Core.Tracking.ReferencePoint.BoxCorner);
+    Core.Tracking.ReferencePoint Reference = Core.Tracking.ReferencePoint.BoxCorner,
+    bool? ToReview = null);
 
 /// <summary>Riquadro di un veicolo da disegnare sopra il video (coordinate del video).</summary>
 /// <param name="Heading">Punto da segnare: +1 vertice basso destro (verso destra), −1 sinistro, 2 entrambi (perni delle linee), 0 centro del lato inferiore (verso non ancora noto).</param>

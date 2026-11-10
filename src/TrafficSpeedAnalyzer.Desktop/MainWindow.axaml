@@ -33,8 +33,7 @@
                                 <PathIcon Data="{StaticResource Icon.Video24}" Width="15" Height="15" Foreground="{StaticResource TextPrimary}" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{loc:Tr 'Video'}" FontWeight="SemiBold" FontSize="14" />
-                                <TextBlock Text="{loc:Tr 'Importa e controlla'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
+                                <TextBlock Text="{loc:Tr 'Video'}" FontWeight="SemiBold" FontSize="16" />
                             </StackPanel>
                         </StackPanel>
                     </RadioButton>
@@ -45,8 +44,7 @@
                                 <PathIcon Data="{StaticResource Icon.Map24}" Width="15" Height="15" Foreground="{StaticResource TextPrimary}" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{loc:Tr 'Strada'}" FontWeight="SemiBold" FontSize="14" />
-                                <TextBlock Text="{loc:Tr 'Bordi e corsie'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
+                                <TextBlock Text="{loc:Tr 'Strada'}" FontWeight="SemiBold" FontSize="16" />
                             </StackPanel>
                         </StackPanel>
                     </RadioButton>
@@ -57,8 +55,7 @@
                                 <PathIcon Data="{StaticResource Icon.VehicleCar24}" Width="15" Height="15" Foreground="{StaticResource TextPrimary}" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{loc:Tr 'Analisi veicoli'}" FontWeight="SemiBold" FontSize="14" />
-                                <TextBlock Text="{loc:Tr 'Traccia le auto'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
+                                <TextBlock Text="{loc:Tr 'Analisi veicoli'}" FontWeight="SemiBold" FontSize="16" />
                             </StackPanel>
                         </StackPanel>
                     </RadioButton>
@@ -69,8 +66,7 @@
                                 <PathIcon Data="{StaticResource Icon.Ruler24}" Width="15" Height="15" Foreground="{StaticResource TextPrimary}" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{loc:Tr 'Calibrazione'}" FontWeight="SemiBold" FontSize="14" />
-                                <TextBlock Text="{loc:Tr 'Linee A/B e velocità'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
+                                <TextBlock Text="{loc:Tr 'Calibrazione'}" FontWeight="SemiBold" FontSize="16" />
                             </StackPanel>
                         </StackPanel>
                     </RadioButton>
@@ -81,11 +77,10 @@
                                 <PathIcon Data="{StaticResource Icon.Table24}" Width="15" Height="15" Foreground="{StaticResource TextPrimary}" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock FontWeight="SemiBold" FontSize="14">
+                                <TextBlock FontWeight="SemiBold" FontSize="16">
                                     <Run Text="{loc:Tr 'Risultati'}" />
                                     <Run Text="{Binding Passages.Count, Mode=OneWay, StringFormat=' ({0})'}" Foreground="{StaticResource TextSecondary}" FontWeight="Normal" />
                                 </TextBlock>
-                                <TextBlock Text="{loc:Tr 'CSV, PDF e immagini'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
                             </StackPanel>
                         </StackPanel>
                     </RadioButton>
@@ -489,60 +484,6 @@
                             <TextBlock Classes="caption" Margin="0,0,0,14"
                                        Text="{loc:Tr 'Trova e segue i veicoli nel video. Le velocità arrivano con la calibrazione.'}" />
 
-                            <!-- Impostazioni chiuse: servono solo a chi vuole configurare -->
-                            <Expander Classes="card" IsExpanded="False" Margin="0,0,0,8" IsEnabled="{Binding IsNotAnalyzing}">
-                                <Expander.Header>
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <PathIcon Data="{StaticResource Icon.BrainCircuit24}" Width="16" Height="16" />
-                                        <TextBlock Text="{loc:Tr 'Modello'}" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </Expander.Header>
-                                <StackPanel>
-                                    <ComboBox ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedModel}" HorizontalAlignment="Stretch">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding DisplayName}" />
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-                                    <TextBlock Classes="caption" Margin="0,8,0,0" Text="{Binding ModelDescription}" />
-                                    <TextBlock Classes="caption" Margin="0,6,0,0" Text="{Binding ModelStatusText}" />
-                                    <c:UiButton Content="{loc:Tr 'Scarica il modello'}" Icon="{StaticResource Icon.ArrowDownload24}" Margin="0,10,0,0"
-                                                Command="{Binding DownloadModelCommand}" IsVisible="{Binding !IsModelAvailable}" />
-                                    <ProgressBar Margin="0,10,0,0" Height="4" Maximum="100" Value="{Binding DownloadProgress}" IsVisible="{Binding IsDownloadingModel}" />
-                                    <TextBlock Classes="caption" Margin="0,10,0,4" Text="{loc:Tr 'Accelerazione'}" />
-                                    <ComboBox ItemsSource="{Binding AccelerationOptions}" SelectedIndex="{Binding AccelerationIndex}" HorizontalAlignment="Stretch">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Value}" />
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-                                    <c:UiButton Content="{loc:Tr 'Prova velocità'}" Icon="{StaticResource Icon.Gauge24}" Margin="0,10,0,0" HorizontalAlignment="Stretch"
-                                                Command="{Binding RunBenchmarkCommand}" ToolTip.Tip="{loc:Tr 'Misura quanto è veloce l\'analisi su questo PC'}" />
-                                </StackPanel>
-                            </Expander>
-
-                            <Expander Classes="card" IsExpanded="False" Margin="0,0,0,12" IsEnabled="{Binding IsNotAnalyzing}">
-                                <Expander.Header>
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <PathIcon Data="{StaticResource Icon.Options24}" Width="16" Height="16" />
-                                        <TextBlock Text="{loc:Tr 'Opzioni'}" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </Expander.Header>
-                                <StackPanel>
-                                    <ToggleSwitch IsChecked="{Binding SkipStaticFrames}"
-                                                  OnContent="{loc:Tr 'Salta i tratti senza movimento'}" OffContent="{loc:Tr 'Salta i tratti senza movimento'}" />
-                                    <TextBlock Classes="caption" Margin="0,4,0,10" Text="{loc:Tr 'Il modello non viene eseguito mentre la strada è vuota.'}" />
-                                    <Grid Margin="0,14,0,0">
-                                        <TextBlock Classes="label" Text="{loc:Tr 'Confidenza minima per seguire un veicolo'}" />
-                                        <TextBlock HorizontalAlignment="Right" Text="{Binding StartScoreText}" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" />
-                                    </Grid>
-                                    <Slider Minimum="0.25" Maximum="0.8" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding StartScore}" Margin="0,6,0,0" />
-                                    <TextBlock Classes="caption" Margin="0,4,0,0" Text="{loc:Tr 'Più alta: meno falsi veicoli, più veicoli persi. Consigliato 0,50.'}" />
-                                </StackPanel>
-                            </Expander>
-
                             <!-- Avvio: verde finché l'analisi non è stata completata, poi l'azione principale è «Procedi» -->
                             <Grid Margin="0,0,0,12" ColumnDefinitions="Auto,*" IsVisible="{Binding !IsAnalyzing}">
                                 <c:UiButton Content="{loc:Tr 'Analizza tutto'}" Icon="{StaticResource Icon.Play24}" HorizontalAlignment="Stretch" Padding="12,10" Margin="0,0,4,0"
@@ -935,15 +876,6 @@
                         <StackPanel IsVisible="{Binding SelectedStep, Converter={StaticResource EnumIn}, ConverterParameter=Results}">
                             <TextBlock Classes="stepTitle" Text="{loc:Tr 'Risultati'}" Margin="0,0,0,14" />
 
-                            <!-- Solo i veicoli con la ruota anteriore seguita bene vicino alle linee -->
-                            <Border Classes="notice info" Margin="0,0,0,12" IsVisible="{Binding ShowWheelFilter}">
-                                <StackPanel>
-                                    <ToggleSwitch IsChecked="{Binding OnlyWellTrackedWheels}"
-                                                  OnContent="{loc:Tr 'Solo veicoli con la ruota seguita bene'}" OffContent="{loc:Tr 'Solo veicoli con la ruota seguita bene'}" />
-                                    <TextBlock Classes="body" Margin="0,4,0,0" Text="{Binding HiddenPassagesText}" IsVisible="{Binding HiddenPassageCount, Converter={StaticResource Truthy}}" />
-                                    <TextBlock Classes="caption" Margin="0,4,0,0" Text="{loc:Tr 'Spento: si mostrano anche i veicoli misurati sullo spigolo del riquadro o con la ruota persa vicino alle linee, meno precisi.'}" />
-                                </StackPanel>
-                            </Border>
                             <Border Classes="notice warning" IsVisible="{Binding InvalidPassageCount, Converter={StaticResource Truthy}}">
                                 <StackPanel>
                                     <TextBlock Classes="body" Text="{Binding InvalidPassagesText}" />
@@ -1105,13 +1037,33 @@
                                         Command="{Binding ExportResultsCommand}" />
                             <c:UiButton Content="{loc:Tr 'Apri la cartella esportata'}" Icon="{StaticResource Icon.Folder24}"
                                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding OpenExportFolderCommand}" />
-                            <TextBlock Classes="caption" Margin="0,12,0,16"
-                                       Text="{loc:Tr 'Tabella CSV, due rapporti PDF (in chiaro e con i veicoli pixellati) e le immagini di ogni veicolo. Misure non omologate.'}" />
 
+                            <!-- Due linguette: passaggi corretti (statistiche, grafico, esportazione e PDF) e passaggi da correggere
+                                 (ruota anteriore non seguita bene vicino alle linee, o spostati qui con «Elimina») -->
+                            <Grid ColumnDefinitions="*,*" Margin="0,14,0,10" IsVisible="{Binding HasAnyPassage}">
+                                <c:UiButton Name="ValidTabButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="8,8" Margin="0,0,3,0"
+                                            Command="{Binding ShowValidTabCommand}"
+                                            Appearance="{Binding IsValidTab, Converter={StaticResource Pick}, ConverterParameter=Secondary|Transparent}">
+                                    <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Center">
+                                        <PathIcon Data="{StaticResource Icon.CheckmarkCircle24}" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding ValidTabText}" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+                                </c:UiButton>
+                                <c:UiButton Name="ReviewTabButton" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="8,8" Margin="3,0,0,0"
+                                            Command="{Binding ShowReviewTabCommand}"
+                                            Appearance="{Binding IsReviewTab, Converter={StaticResource Pick}, ConverterParameter=Secondary|Transparent}">
+                                    <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Center">
+                                        <PathIcon Data="{StaticResource Icon.Warning24}" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding ReviewTabText}" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+                                </c:UiButton>
+                            </Grid>
+                            <TextBlock Classes="caption" Margin="2,0,0,10" TextWrapping="Wrap" IsVisible="{Binding IsReviewTab}"
+                                       Text="{loc:Tr 'Passaggi in cui la ruota anteriore non è stata seguita bene vicino alle linee A e B, o tolti dai passaggi corretti. Non entrano nell\'esportazione: correggili con «Modifica» o riportali con «Sposta in passaggi validi».'}" />
                             <DockPanel Margin="2,0,0,8">
                                 <!-- Ordine dell'elenco: orologio = orario, tachimetro = velocità; la freccia in giù indica valori che crescono
                                      scendendo nell'elenco (primo → ultimo, velocità crescente), quella in su il contrario -->
-                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" IsVisible="{Binding HasPassages}">
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" IsVisible="{Binding ShowSortButtons}">
                                     <RadioButton Classes="sort" IsChecked="{Binding IsSortFirstToLast}" ToolTip.Tip="{loc:Tr 'Dal primo all\'ultimo'}">
                                         <StackPanel Orientation="Horizontal">
                                             <PathIcon Data="{StaticResource Icon.Clock20}" Width="14" Height="14" />
@@ -1142,7 +1094,7 @@
                             <TextBlock Classes="caption" Margin="0,0,0,10" IsVisible="{Binding ShowNoPassageHint}"
                                        Text="{loc:Tr 'Nessun veicolo attraversa le linee A e B. Esegui l\'analisi e la calibrazione, oppure misura un veicolo a mano.'}" />
 
-                            <ListBox Classes="results" ItemsSource="{Binding Passages}" SelectedItem="{Binding SelectedPassage}"
+                            <ListBox Classes="results" ItemsSource="{Binding ShownPassages}" SelectedItem="{Binding SelectedPassage}"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="0,0,0,14">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
@@ -1181,13 +1133,41 @@
                                                 </StackPanel>
 
                                                 <!-- Azioni: solo sull'auto selezionata -->
-                                                <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,0" Classes="rowActions"
-                                                           IsVisible="{Binding $parent[ListBoxItem].IsSelected}">
-                                                    <c:UiButton Content="{loc:Tr 'Vai all\'ingresso'}" Command="{Binding $parent[Window].DataContext.ShowEntryFrameCommand}" ToolTip.Tip="{loc:Tr 'Mostra il fotogramma di ingresso'}" />
-                                                    <c:UiButton Content="{loc:Tr 'Vai all\'uscita'}" Command="{Binding $parent[Window].DataContext.ShowExitFrameCommand}" ToolTip.Tip="{loc:Tr 'Mostra il fotogramma di uscita'}" />
+                                                <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,0" Classes="rowActions">
+                                                    <WrapPanel.IsVisible>
+                                                        <MultiBinding Converter="{StaticResource AllTrue}" ConverterParameter="_|!">
+                                                            <Binding Path="$parent[ListBoxItem].IsSelected" />
+                                                            <Binding Path="$parent[Window].DataContext.IsEditingPassage" />
+                                                        </MultiBinding>
+                                                    </WrapPanel.IsVisible>
+                                                    <c:UiButton Content="{loc:Tr 'Ingresso'}" Command="{Binding $parent[Window].DataContext.ShowEntryFrameCommand}" ToolTip.Tip="{loc:Tr 'Mostra il fotogramma di ingresso'}" />
+                                                    <c:UiButton Content="{loc:Tr 'Uscita'}" Command="{Binding $parent[Window].DataContext.ShowExitFrameCommand}" ToolTip.Tip="{loc:Tr 'Mostra il fotogramma di uscita'}" />
                                                     <c:UiButton Content="{loc:Tr 'Modifica'}" Icon="{StaticResource Icon.Edit24}" Command="{Binding $parent[Window].DataContext.EditPassageCommand}" />
-                                                    <c:UiButton Content="{loc:Tr 'Elimina'}" Icon="{StaticResource Icon.Delete24}" Command="{Binding $parent[Window].DataContext.DeletePassageCommand}" />
+                                                    <c:UiButton Content="{loc:Tr 'Sposta in passaggi validi'}" Icon="{StaticResource Icon.CheckmarkCircle24}"
+                                                                Command="{Binding $parent[Window].DataContext.MoveToValidCommand}"
+                                                                IsVisible="{Binding $parent[Window].DataContext.IsReviewTab}" />
+                                                    <!-- Nei passaggi corretti «Non valido» sposta tra i non validi; nei non validi «Elimina» cancella -->
+                                                    <c:UiButton Content="{loc:Tr 'Non valido'}" Icon="{StaticResource Icon.DismissCircle24}" Command="{Binding $parent[Window].DataContext.DeletePassageCommand}"
+                                                                ToolTip.Tip="{Binding $parent[Window].DataContext.DeleteTooltip}" IsVisible="{Binding $parent[Window].DataContext.IsValidTab}" />
+                                                    <c:UiButton Content="{loc:Tr 'Elimina'}" Icon="{StaticResource Icon.Delete24}" Command="{Binding $parent[Window].DataContext.DeletePassageCommand}"
+                                                                ToolTip.Tip="{Binding $parent[Window].DataContext.DeleteTooltip}" IsVisible="{Binding $parent[Window].DataContext.IsReviewTab}" />
                                                 </WrapPanel>
+                                                <!-- In modifica: al posto delle azioni, «Annulla modifica» e «Salva modifica» -->
+                                                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,0">
+                                                    <StackPanel.IsVisible>
+                                                        <MultiBinding Converter="{StaticResource AllTrue}" ConverterParameter="_|_">
+                                                            <Binding Path="$parent[ListBoxItem].IsSelected" />
+                                                            <Binding Path="$parent[Window].DataContext.IsEditingPassage" />
+                                                        </MultiBinding>
+                                                    </StackPanel.IsVisible>
+                                                    <TextBlock Classes="caption" TextWrapping="Wrap" Margin="0,0,0,8" Text="{Binding $parent[Window].DataContext.EditHintText}" />
+                                                    <WrapPanel Classes="rowActions">
+                                                        <c:UiButton Content="{loc:Tr 'Annulla modifica'}" Icon="{StaticResource Icon.ArrowUndo24}"
+                                                                    Command="{Binding $parent[Window].DataContext.CancelEditCommand}" />
+                                                        <c:UiButton Content="{loc:Tr 'Salva modifica'}" Icon="{StaticResource Icon.Save24}" Appearance="Primary"
+                                                                    Command="{Binding $parent[Window].DataContext.SaveEditCommand}" />
+                                                    </WrapPanel>
+                                                </StackPanel>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>

@@ -642,6 +642,12 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
 
     partial void OnSelectedStepChanged(WorkflowStep value)
     {
+        // La modifica di un passaggio avviene nei risultati: cambiando passo si annulla.
+        if (IsEditingPassage && value != WorkflowStep.Results)
+        {
+            EndEdit();
+        }
+
         RefreshVanishingState();   // punti di riferimento visibili solo nella calibrazione
         EnsureRoadForEditing();    // passo «Strada»: la zona verde compare subito, da portare sui bordi
 

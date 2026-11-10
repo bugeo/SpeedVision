@@ -47,17 +47,6 @@ public sealed partial class MainViewModel
     [ObservableProperty]
     private bool _skipStaticFrames = true;
 
-    /// <summary>
-    /// Nei risultati solo i veicoli misurati sulla ruota anteriore, seguita con regolarità attorno alle linee A e B
-    /// (<see cref="Core.Tracking.WheelCrossingCheck"/>). Gli altri (spigolo del riquadro, ruota persa o confusa)
-    /// restano tra i veicoli tracciati ma non danno una velocità.
-    /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowWheelFilter))]
-    private bool _onlyWellTrackedWheels = true;
-
-    partial void OnOnlyWellTrackedWheelsChanged(bool value) => RebuildPassages();
-
     /// <summary>Fotogrammi minimi con la ruota prima e dopo ciascuna linea perché il veicolo sia mostrato (impostazioni).</summary>
     [ObservableProperty]
     private int _wheelFramesPerSide = Core.Tracking.WheelCrossingCheck.DefaultMinPointsPerSide;
@@ -165,7 +154,6 @@ public sealed partial class MainViewModel
         _accelerationIndex = _settings.CpuOnly ? 1 : 0;
         _regionAroundLines = _settings.RegionAroundLines;
         _skipStaticFrames = _settings.SkipStaticFrames;
-        _onlyWellTrackedWheels = _settings.OnlyWellTrackedWheels;
         _wheelFramesPerSide = Math.Clamp(_settings.WheelFramesPerSide, 1, Core.Tracking.WheelCrossingCheck.PointsPerSide);
         _startScore = Math.Clamp(_settings.StartScore, 0.25, 0.8);
     }
@@ -176,7 +164,6 @@ public sealed partial class MainViewModel
         _settings.CpuOnly = AccelerationIndex == 1;
         _settings.RegionAroundLines = RegionAroundLines;
         _settings.SkipStaticFrames = SkipStaticFrames;
-        _settings.OnlyWellTrackedWheels = OnlyWellTrackedWheels;
         _settings.WheelFramesPerSide = WheelFramesPerSide;
         _settings.StartScore = StartScore;
     }

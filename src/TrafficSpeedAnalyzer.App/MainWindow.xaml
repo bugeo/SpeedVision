@@ -69,8 +69,7 @@
                                     <ui:SymbolIcon Symbol="Video24" FontSize="15" Foreground="{StaticResource TextPrimary}" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{loc:Tr 'Video'}" FontWeight="SemiBold" FontSize="14" />
-                                    <TextBlock Text="{loc:Tr 'Importa e controlla'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
+                                    <TextBlock Text="{loc:Tr 'Video'}" FontWeight="SemiBold" FontSize="16" />
                                 </StackPanel>
                             </StackPanel>
                         </RadioButton>
@@ -82,8 +81,7 @@
                                     <ui:SymbolIcon Symbol="Map24" FontSize="15" Foreground="{StaticResource TextPrimary}" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{loc:Tr 'Strada'}" FontWeight="SemiBold" FontSize="14" />
-                                    <TextBlock Text="{loc:Tr 'Bordi e corsie'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
+                                    <TextBlock Text="{loc:Tr 'Strada'}" FontWeight="SemiBold" FontSize="16" />
                                 </StackPanel>
                             </StackPanel>
                         </RadioButton>
@@ -95,8 +93,7 @@
                                     <ui:SymbolIcon Symbol="VehicleCar24" FontSize="15" Foreground="{StaticResource TextPrimary}" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{loc:Tr 'Analisi veicoli'}" FontWeight="SemiBold" FontSize="14" />
-                                    <TextBlock Text="{loc:Tr 'Traccia le auto'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
+                                    <TextBlock Text="{loc:Tr 'Analisi veicoli'}" FontWeight="SemiBold" FontSize="16" />
                                 </StackPanel>
                             </StackPanel>
                         </RadioButton>
@@ -108,8 +105,7 @@
                                     <ui:SymbolIcon Symbol="Ruler24" FontSize="15" Foreground="{StaticResource TextPrimary}" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{loc:Tr 'Calibrazione'}" FontWeight="SemiBold" FontSize="14" />
-                                    <TextBlock Text="{loc:Tr 'Linee A/B e velocità'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
+                                    <TextBlock Text="{loc:Tr 'Calibrazione'}" FontWeight="SemiBold" FontSize="16" />
                                 </StackPanel>
                             </StackPanel>
                         </RadioButton>
@@ -121,11 +117,10 @@
                                     <ui:SymbolIcon Symbol="Table24" FontSize="15" Foreground="{StaticResource TextPrimary}" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock FontWeight="SemiBold" FontSize="14">
+                                    <TextBlock FontWeight="SemiBold" FontSize="16">
                                         <Run Text="{loc:Tr 'Risultati'}" />
                                         <Run Text="{Binding Passages.Count, Mode=OneWay, StringFormat=' ({0})'}" Foreground="{StaticResource TextSecondary}" FontWeight="Normal" />
                                     </TextBlock>
-                                    <TextBlock Text="{loc:Tr 'CSV, PDF e immagini'}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" />
                                 </StackPanel>
                             </StackPanel>
                         </RadioButton>
@@ -945,39 +940,6 @@
                             <TextBlock Style="{StaticResource Caption}" Margin="0,0,0,14"
                                        Text="{loc:Tr 'Trova e segue i veicoli nel video. Le velocità arrivano con la calibrazione.'}" />
 
-                            <!-- Impostazioni chiuse: servono solo a chi vuole configurare -->
-                            <ui:CardExpander Header="{loc:Tr 'Modello'}" Icon="{ui:SymbolIcon BrainCircuit24}" IsExpanded="False" Margin="0,0,0,8"
-                                             IsEnabled="{Binding IsNotAnalyzing}">
-                                <StackPanel>
-                                    <ComboBox ItemsSource="{Binding Models}" SelectedItem="{Binding SelectedModel}" DisplayMemberPath="DisplayName" HorizontalAlignment="Stretch" />
-                                    <TextBlock Style="{StaticResource Caption}" Margin="0,8,0,0" Text="{Binding ModelDescription}" />
-                                    <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0" Text="{Binding ModelStatusText}" />
-                                    <ui:Button Content="{loc:Tr 'Scarica il modello'}" Icon="{ui:SymbolIcon ArrowDownload24}" Margin="0,10,0,0"
-                                               Command="{Binding DownloadModelCommand}"
-                                               Visibility="{Binding IsModelAvailable, Converter={StaticResource TruthyToVisibility}, ConverterParameter=Invert}" />
-                                    <ProgressBar Margin="0,10,0,0" Height="4" Maximum="100" Value="{Binding DownloadProgress}"
-                                                 Visibility="{Binding IsDownloadingModel, Converter={StaticResource BoolToVisibility}}" />
-                                    <TextBlock Style="{StaticResource Caption}" Margin="0,10,0,4" Text="{loc:Tr 'Accelerazione'}" />
-                                    <ComboBox ItemsSource="{Binding AccelerationOptions}" DisplayMemberPath="Value" SelectedIndex="{Binding AccelerationIndex}" HorizontalAlignment="Stretch" />
-                                    <ui:Button Content="{loc:Tr 'Prova velocità'}" Icon="{ui:SymbolIcon Gauge24}" Margin="0,10,0,0" HorizontalAlignment="Stretch"
-                                               Command="{Binding RunBenchmarkCommand}" ToolTip="{loc:Tr 'Misura quanto è veloce l\'analisi su questo PC'}" />
-                                </StackPanel>
-                            </ui:CardExpander>
-
-                            <ui:CardExpander Header="{loc:Tr 'Opzioni'}" Icon="{ui:SymbolIcon Options24}" IsExpanded="False" Margin="0,0,0,12"
-                                             IsEnabled="{Binding IsNotAnalyzing}">
-                                <StackPanel>
-                                    <ui:ToggleSwitch IsChecked="{Binding SkipStaticFrames}" Content="{loc:Tr 'Salta i tratti senza movimento'}" />
-                                    <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,10" Text="{loc:Tr 'Il modello non viene eseguito mentre la strada è vuota.'}" />
-                                    <Grid Margin="0,14,0,0">
-                                        <TextBlock Style="{StaticResource Label}" Text="{loc:Tr 'Confidenza minima per seguire un veicolo'}" />
-                                        <TextBlock HorizontalAlignment="Right" Text="{Binding StartScoreText}" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" />
-                                    </Grid>
-                                    <Slider Minimum="0.25" Maximum="0.8" TickFrequency="0.05" IsSnapToTickEnabled="True" Value="{Binding StartScore}" Margin="0,6,0,0" />
-                                    <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="{loc:Tr 'Più alta: meno falsi veicoli, più veicoli persi. Consigliato 0,50.'}" />
-                                </StackPanel>
-                            </ui:CardExpander>
-
                             <!-- Avvio: verde finché l'analisi non è stata completata, poi l'azione principale è «Procedi» -->
                             <Grid Margin="0,0,0,12" Visibility="{Binding IsAnalyzing, Converter={StaticResource TruthyToVisibility}, ConverterParameter=Invert}">
                                 <Grid.ColumnDefinitions>
@@ -1183,14 +1145,6 @@
                         <StackPanel Visibility="{Binding SelectedStep, Converter={StaticResource EnumToVisibility}, ConverterParameter=Results}">
                             <TextBlock Text="{loc:Tr 'Risultati'}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,14" Foreground="{StaticResource TextPrimary}" />
 
-                            <!-- Solo i veicoli con la ruota anteriore seguita bene vicino alle linee -->
-                            <Border Style="{StaticResource Notice}" Background="#142FCB79" BorderBrush="#442FCB79" Margin="0,0,0,12" Visibility="{Binding ShowWheelFilter, Converter={StaticResource BoolToVisibility}}">
-                                <StackPanel>
-                                    <ui:ToggleSwitch IsChecked="{Binding OnlyWellTrackedWheels}" Content="{loc:Tr 'Solo veicoli con la ruota seguita bene'}" />
-                                    <TextBlock Style="{StaticResource Body}" Margin="0,6,0,0" Text="{Binding HiddenPassagesText}" Visibility="{Binding HiddenPassageCount, Converter={StaticResource TruthyToVisibility}}" />
-                                    <TextBlock Style="{StaticResource Caption}" Margin="0,4,0,0" Text="{loc:Tr 'Spento: si mostrano anche i veicoli misurati sullo spigolo del riquadro o con la ruota persa vicino alle linee, meno precisi.'}" />
-                                </StackPanel>
-                            </Border>
                             <Border Style="{StaticResource Notice}" Background="#1FFFB547" BorderBrush="#55FFB547"
                                     Visibility="{Binding InvalidPassageCount, Converter={StaticResource TruthyToVisibility}}">
                                 <StackPanel>
@@ -1385,14 +1339,63 @@
                                        Command="{Binding ExportResultsCommand}" />
                             <ui:Button Content="{loc:Tr 'Apri la cartella esportata'}" Icon="{ui:SymbolIcon Folder24}"
                                        HorizontalAlignment="Stretch" Command="{Binding OpenExportFolderCommand}" />
-                            <TextBlock Style="{StaticResource Caption}" Margin="0,12,0,16"
-                                       Text="{loc:Tr 'Tabella CSV, due rapporti PDF (in chiaro e con i veicoli pixellati) e le immagini di ogni veicolo. Misure non omologate.'}" />
 
+                            <!-- Due linguette: passaggi corretti (statistiche, grafico, esportazione e PDF) e passaggi da correggere
+                                 (ruota anteriore non seguita bene vicino alle linee, o spostati qui con «Elimina») -->
+                            <Grid Margin="0,14,0,10" Visibility="{Binding HasAnyPassage, Converter={StaticResource BoolToVisibility}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:Button Grid.Column="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="8,8" Margin="0,0,3,0" Command="{Binding ShowValidTabCommand}">
+                                    <ui:Button.Style>
+                                        <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                            <Setter Property="Appearance" Value="Transparent" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsValidTab}" Value="True">
+                                                    <Setter Property="Appearance" Value="Secondary" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ui:Button.Style>
+                                    <Grid HorizontalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:SymbolIcon Symbol="CheckmarkCircle24" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding ValidTabText}" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+                                </ui:Button>
+                                <ui:Button Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="8,8" Margin="3,0,0,0" Command="{Binding ShowReviewTabCommand}">
+                                    <ui:Button.Style>
+                                        <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                            <Setter Property="Appearance" Value="Transparent" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsReviewTab}" Value="True">
+                                                    <Setter Property="Appearance" Value="Secondary" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ui:Button.Style>
+                                    <Grid HorizontalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:SymbolIcon Symbol="Warning24" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding ReviewTabText}" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+                                </ui:Button>
+                            </Grid>
+                            <TextBlock Style="{StaticResource Caption}" Margin="2,0,0,10" TextWrapping="Wrap"
+                                       Visibility="{Binding IsReviewTab, Converter={StaticResource BoolToVisibility}}"
+                                       Text="{loc:Tr 'Passaggi in cui la ruota anteriore non è stata seguita bene vicino alle linee A e B, o tolti dai passaggi corretti. Non entrano nell\'esportazione: correggili con «Modifica» o riportali con «Sposta in passaggi validi».'}" />
                             <DockPanel Margin="2,0,0,8">
                                 <!-- Ordine dell'elenco: orologio = orario, tachimetro = velocità; la freccia in giù indica valori che crescono
                                      scendendo nell'elenco (primo → ultimo, velocità crescente), quella in su il contrario -->
                                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center"
-                                            Visibility="{Binding HasPassages, Converter={StaticResource BoolToVisibility}}">
+                                            Visibility="{Binding ShowSortButtons, Converter={StaticResource BoolToVisibility}}">
                                     <RadioButton GroupName="PassageSort" Style="{StaticResource SortButton}" IsChecked="{Binding IsSortFirstToLast}"
                                                  ToolTip="{loc:Tr 'Dal primo all\'ultimo'}" AutomationProperties.Name="{loc:Tr 'Dal primo all\'ultimo'}">
                                         <StackPanel Orientation="Horizontal">
@@ -1428,7 +1431,7 @@
                                        Visibility="{Binding ShowNoPassageHint, Converter={StaticResource BoolToVisibility}}"
                                        Text="{loc:Tr 'Nessun veicolo attraversa le linee A e B. Esegui l\'analisi e la calibrazione, oppure misura un veicolo a mano.'}" />
 
-                            <ListBox ItemsSource="{Binding Passages}" SelectedItem="{Binding SelectedPassage}"
+                            <ListBox ItemsSource="{Binding ShownPassages}" SelectedItem="{Binding SelectedPassage}"
                                      ItemContainerStyle="{StaticResource ResultItem}" Background="Transparent" BorderThickness="0"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled" Padding="0" Margin="0,0,0,14">
                                 <ListBox.ItemTemplate>
@@ -1475,9 +1478,10 @@
                                                 <TextBlock HorizontalAlignment="Right" Text="{Binding UncertaintyText}" FontSize="11.5" Foreground="{StaticResource TextTertiary}" />
                                             </StackPanel>
 
-                                            <!-- Azioni: solo sull'auto selezionata -->
-                                            <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,0"
-                                                       Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BoolToVisibility}}">
+                                            <!-- Azioni: solo sull'auto selezionata; in modifica «Annulla modifica» e «Salva modifica» -->
+                                            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,10,0,0"
+                                                        Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BoolToVisibility}}">
+                                            <WrapPanel Visibility="{Binding DataContext.IsEditingPassage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource TruthyToVisibility}, ConverterParameter=Invert}">
                                                 <WrapPanel.Resources>
                                                     <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
                                                         <Setter Property="Margin" Value="0,0,6,6" />
@@ -1485,11 +1489,38 @@
                                                         <Setter Property="FontSize" Value="12.5" />
                                                     </Style>
                                                 </WrapPanel.Resources>
-                                                <ui:Button Content="{loc:Tr 'Vai all\'ingresso'}" Command="{Binding DataContext.ShowEntryFrameCommand, RelativeSource={RelativeSource AncestorType=Window}}" ToolTip="{loc:Tr 'Mostra il fotogramma di ingresso'}" />
-                                                <ui:Button Content="{loc:Tr 'Vai all\'uscita'}" Command="{Binding DataContext.ShowExitFrameCommand, RelativeSource={RelativeSource AncestorType=Window}}" ToolTip="{loc:Tr 'Mostra il fotogramma di uscita'}" />
+                                                <ui:Button Content="{loc:Tr 'Ingresso'}" Command="{Binding DataContext.ShowEntryFrameCommand, RelativeSource={RelativeSource AncestorType=Window}}" ToolTip="{loc:Tr 'Mostra il fotogramma di ingresso'}" />
+                                                <ui:Button Content="{loc:Tr 'Uscita'}" Command="{Binding DataContext.ShowExitFrameCommand, RelativeSource={RelativeSource AncestorType=Window}}" ToolTip="{loc:Tr 'Mostra il fotogramma di uscita'}" />
                                                 <ui:Button Content="{loc:Tr 'Modifica'}" Icon="{ui:SymbolIcon Edit24}" Command="{Binding DataContext.EditPassageCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-                                                <ui:Button Content="{loc:Tr 'Elimina'}" Icon="{ui:SymbolIcon Delete24}" Command="{Binding DataContext.DeletePassageCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                                <ui:Button Content="{loc:Tr 'Sposta in passaggi validi'}" Icon="{ui:SymbolIcon CheckmarkCircle24}"
+                                                           Command="{Binding DataContext.MoveToValidCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                           Visibility="{Binding DataContext.IsReviewTab, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+                                                <!-- Nei passaggi corretti «Non valido» sposta tra i non validi; nei non validi «Elimina» cancella -->
+                                                <ui:Button Content="{loc:Tr 'Non valido'}" Icon="{ui:SymbolIcon DismissCircle24}" Command="{Binding DataContext.DeletePassageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                           ToolTip="{Binding DataContext.DeleteTooltip, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                           Visibility="{Binding DataContext.IsValidTab, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
+                                                <ui:Button Content="{loc:Tr 'Elimina'}" Icon="{ui:SymbolIcon Delete24}" Command="{Binding DataContext.DeletePassageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                           ToolTip="{Binding DataContext.DeleteTooltip, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                           Visibility="{Binding DataContext.IsReviewTab, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}" />
                                             </WrapPanel>
+                                            <StackPanel Visibility="{Binding DataContext.IsEditingPassage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}">
+                                                <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,0,0,8"
+                                                           Text="{Binding DataContext.EditHintText, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                                <WrapPanel>
+                                                    <WrapPanel.Resources>
+                                                        <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                                            <Setter Property="Margin" Value="0,0,6,6" />
+                                                            <Setter Property="Padding" Value="10,5" />
+                                                            <Setter Property="FontSize" Value="12.5" />
+                                                        </Style>
+                                                    </WrapPanel.Resources>
+                                                    <ui:Button Content="{loc:Tr 'Annulla modifica'}" Icon="{ui:SymbolIcon ArrowUndo24}"
+                                                               Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                                    <ui:Button Content="{loc:Tr 'Salva modifica'}" Icon="{ui:SymbolIcon Save24}" Appearance="Primary"
+                                                               Command="{Binding DataContext.SaveEditCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                                </WrapPanel>
+                                            </StackPanel>
+                                            </StackPanel>
                                         </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>

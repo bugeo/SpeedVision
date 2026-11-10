@@ -162,20 +162,79 @@ public class GuidedWorkflowTests
         ScreenshotTests.Save(w, "08-calibrazione-pronta");
         Assert.Equal("Procedi >>", Text(Assert.Single(PrimaryButtons(w))));
         w.KeyPressQwerty(PhysicalKey.Enter, RawInputModifiers.None);
-        await ScreenshotTests.WaitUntil(() => vm.Passages.Count + vm.HiddenPassageCount >= 2, "velocità calcolate", 30);
+        await ScreenshotTests.WaitUntil(() => vm.Passages.Count + vm.ReviewPassages.Count >= 2, "velocità calcolate", 30);
 
-        // Passo 5: risultati. Ripresa dall'alto: le ruote non si vedono, quindi con l'interruttore «solo veicoli con
-        // la ruota seguita bene» (acceso all'inizio) le due auto non sono mostrate e un avviso lo dice. Spento
-        // l'interruttore, compaiono le misure sullo spigolo del riquadro.
+        // Passo 5: risultati. Ripresa dall'alto: le ruote non si vedono, quindi le due auto finiscono nella
+        // linguetta «non validi» e non si possono ancora esportare.
         Assert.Equal(WorkflowStep.Results, vm.SelectedStep);
-        Assert.True(vm.OnlyWellTrackedWheels);
-        Assert.Equal(2, vm.HiddenPassageCount);
         Assert.Empty(vm.Passages);
-        Assert.True(vm.ShowWheelFilter);
-        ScreenshotTests.Save(w, "09-risultati-solo-ruote");
-        vm.OnlyWellTrackedWheels = false;
+        Assert.Equal(2, vm.ReviewPassages.Count);
+        Assert.Equal("0 passaggi corretti", vm.ValidTabText);
+        Assert.Equal("2 non validi", vm.ReviewTabText);
+        Assert.False(vm.ExportResultsCommand.CanExecute(null));
+        ScreenshotTests.Save(w, "09-risultati-corretti-vuoti");
+
+        // Linguetta «non validi»: si sceglie un'auto e la si sposta tra i passaggi validi, poi l'altra.
+        w.GetVisualDescendants().OfType<UiButton>().Single(b => b.Name == "ReviewTabButton").Command!.Execute(null);
         Dispatcher.UIThread.RunJobs();
-        Assert.Equal(0, vm.HiddenPassageCount);
+        Assert.True(vm.IsReviewTab);
+        Assert.Same(vm.ReviewPassages, vm.ShownPassages);
+        vm.SelectedPassage = vm.ReviewPassages[0];
+        Dispatcher.UIThread.RunJobs();
+        ScreenshotTests.Save(w, "09b-risultati-da-correggere");
+        Assert.Contains(w.GetVisualDescendants().OfType<UiButton>(), b => Equals(b.Content, "Sposta in passaggi validi") && b.IsEffectivelyVisible);
+
+        // «Modifica» resta nei risultati: l'elenco resta visibile, al posto delle azioni compaiono «Annulla modifica»
+        // e «Salva modifica», e un clic sul video sposta il punto. Salvata, l'auto resta tra le non valide.
+        bool Visible(string text) => w.GetVisualDescendants().OfType<UiButton>().Any(b => Equals(b.Content, text) && b.IsEffectivelyVisible);
+        int editedId = vm.SelectedPassage!.Id;
+        vm.EditPassageCommand.Execute(null);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(WorkflowStep.Results, vm.SelectedStep);
+        Assert.True(vm.IsEditingPassage);
+        Assert.Equal(ViewportMode.PlacePoint, vm.ViewportMode);
+        Assert.True(Visible("Annulla modifica") && Visible("Salva modifica"));
+        Assert.False(Visible("Ingresso") || Visible("Sposta in passaggi validi"));
+        Assert.Equal(2, vm.ReviewPassages.Count);
+        ScreenshotTests.Save(w, "09c-modifica");
+        double before = vm.ReviewPassages.Single(p => p.Id == editedId).Passage.Speed.SpeedKmh;
+        vm.CancelEditCommand.Execute(null);
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(vm.IsEditingPassage);
+        Assert.Equal(before, vm.ReviewPassages.Single(p => p.Id == editedId).Passage.Speed.SpeedKmh);
+        vm.SelectedPassage = vm.ReviewPassages.Single(p => p.Id == editedId);
+        vm.EditPassageCommand.Execute(null);
+        Assert.True(vm.SaveEditCommand.CanExecute(null));
+        vm.SaveEditCommand.Execute(null);
+        Dispatcher.UIThread.RunJobs();
+        Assert.False(vm.IsEditingPassage);
+        Assert.Contains(vm.ReviewPassages, p => p.Id == editedId);
+        Assert.Empty(vm.Passages);
+        vm.SelectedPassage = vm.ReviewPassages[0];
+        vm.MoveToValidCommand.Execute(null);
+        vm.SelectedPassage = vm.ReviewPassages[0];
+        vm.MoveToValidCommand.Execute(null);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Empty(vm.ReviewPassages);
+        Assert.Equal(2, vm.Passages.Count);
+
+        // Nei passaggi corretti al posto di «Elimina» c'è «Non valido»: sposta tra i non validi (fuori dall'esportazione).
+        vm.ShowValidTabCommand.Execute(null);
+        vm.SelectedPassage = vm.Passages[0];
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Visible("Non valido"));
+        Assert.False(Visible("Elimina"));
+        int movedId = vm.SelectedPassage.Id;
+        vm.DeletePassageCommand.Execute(null);
+        Assert.Single(vm.Passages);
+        Assert.Equal(movedId, Assert.Single(vm.ReviewPassages).Id);
+        vm.ShowReviewTabCommand.Execute(null);
+        vm.SelectedPassage = vm.ReviewPassages[0];
+        vm.MoveToValidCommand.Execute(null);
+        vm.ShowValidTabCommand.Execute(null);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(2, vm.Passages.Count);
+        Assert.True(vm.ExportResultsCommand.CanExecute(null));
         ScreenshotTests.Save(w, "09-risultati");
         double[] speeds = [.. vm.Passages.Select(p => p.Passage.Speed.SpeedKmh).Order()];
         Assert.Equal(2, speeds.Length);

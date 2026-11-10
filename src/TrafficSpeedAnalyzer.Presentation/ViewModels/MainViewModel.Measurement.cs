@@ -213,6 +213,12 @@ public sealed partial class MainViewModel
         }
 
         MeasurementHint = BuildHint(obs.Count);
+        if (IsEditingPassage)
+        {
+            SaveEditCommand.NotifyCanExecuteChanged();
+            OnPropertyChanged(nameof(EditHintText));
+        }
+
         RefreshOverlay();
         OnPropertyChanged(nameof(IsPointOnCurrentFrame));
     }
@@ -297,7 +303,7 @@ public sealed partial class MainViewModel
         ManualTrack? track = SelectedStep switch
         {
             WorkflowStep.Measurement => _currentTrack,
-            WorkflowStep.Results => SelectedPassage?.Track,
+            WorkflowStep.Results => IsEditingPassage ? _currentTrack : SelectedPassage?.Track,
             _ => null,
         };
 
