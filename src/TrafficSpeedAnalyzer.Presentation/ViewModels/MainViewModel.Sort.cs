@@ -65,9 +65,9 @@ public sealed partial class MainViewModel
     /// <summary>Righe nell'ordine scelto; a parità di velocità vale l'orario di ingresso.</summary>
     private IEnumerable<PassageRow> Sorted(IEnumerable<PassageRow> rows) => SortOrder switch
     {
-        PassageSortOrder.LastToFirst => rows.OrderByDescending(r => r.Passage.Entry.TimeSeconds).ThenByDescending(r => r.Id),
-        PassageSortOrder.SpeedAscending => rows.OrderBy(r => r.Passage.Speed.SpeedKmh).ThenBy(r => r.Passage.Entry.TimeSeconds),
-        PassageSortOrder.SpeedDescending => rows.OrderByDescending(r => r.Passage.Speed.SpeedKmh).ThenBy(r => r.Passage.Entry.TimeSeconds),
-        _ => rows.OrderBy(r => r.Passage.Entry.TimeSeconds).ThenBy(r => r.Id),
+        PassageSortOrder.LastToFirst => rows.OrderByDescending(r => r.FirstTime).ThenByDescending(r => r.Id),
+        PassageSortOrder.SpeedAscending => rows.OrderBy(r => r.SpeedKmh ?? double.MaxValue).ThenBy(r => r.FirstTime),
+        PassageSortOrder.SpeedDescending => rows.OrderByDescending(r => r.SpeedKmh ?? double.MinValue).ThenBy(r => r.FirstTime),
+        _ => rows.OrderBy(r => r.FirstTime).ThenBy(r => r.Id),
     };
 }

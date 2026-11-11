@@ -21,18 +21,19 @@ public sealed partial class MainViewModel
     /// <summary>L'utente ha confermato che la strada verde è sui bordi della strada.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsRoadAreaStepActive), nameof(IsRoadLanesStepActive), nameof(ShowRoadLanesCard),
-        nameof(IsRoadDividersStepActive), nameof(ShowRoadDividersCard), nameof(ShowRoadProceed))]
+        nameof(IsRoadDividersStepActive), nameof(ShowRoadDividersCard), nameof(ShowRoadProceed), nameof(ShowConfirmRoadEdges),
+        nameof(ShowConfirmRoadDividers), nameof(IsVideoStepActive))]
     private bool _roadEdgesConfirmed;
 
     /// <summary>L'utente ha scelto il numero di corsie (finché non lo fa la strada ha una sola corsia provvisoria).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsRoadLanesStepActive), nameof(RoadLaneCount), nameof(IsRoadDividersStepActive),
-        nameof(ShowRoadDividersCard), nameof(ShowRoadProceed))]
+        nameof(ShowRoadDividersCard), nameof(ShowRoadProceed), nameof(ShowConfirmRoadDividers), nameof(IsVideoStepActive))]
     private bool _roadLanesChosen;
 
     /// <summary>L'utente ha confermato le linee tra le corsie.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsRoadDividersStepActive), nameof(ShowRoadProceed))]
+    [NotifyPropertyChangedFor(nameof(IsRoadDividersStepActive), nameof(ShowRoadProceed), nameof(ShowConfirmRoadDividers), nameof(IsVideoStepActive))]
     private bool _roadDividersConfirmed;
 
     public bool HasRoad => Road is not null;
@@ -59,13 +60,48 @@ public sealed partial class MainViewModel
 
     public bool IsRoadDividersStepActive => ShowRoadDividersCard && !RoadDividersConfirmed;
 
+    /// <summary>Vertici della zona verde spostati dalla posizione proposta (0–4).</summary>
+    public int RoadCornersMoved =>
+        Road is { } r && VideoWidth > 0 && VideoHeight > 0
+            ? r.Corners.Zip(RoadLayout.CreateCentered(1, VideoWidth, VideoHeight).Corners).Count(c => Point2.Distance(c.First, c.Second) > 0.5)
+            : 0;
+
     /// <summary>
-    /// Almeno un vertice è stato spostato dalla posizione proposta: solo allora «I bordi sono a posto» si accende,
-    /// così la zona verde non viene confermata senza essere stata portata sulla strada.
+    /// Tutti e quattro i vertici sono stati spostati dalla posizione proposta: solo allora compare «I bordi sono a posto»,
+    /// così la zona verde non viene confermata senza essere stata portata sugli angoli della strada.
     /// </summary>
-    public bool RoadEdgesMoved =>
-        Road is { } r && VideoWidth > 0 && VideoHeight > 0 &&
-        r.Corners.Zip(RoadLayout.CreateCentered(1, VideoWidth, VideoHeight).Corners).Any(c => Point2.Distance(c.First, c.Second) > 0.5);
+    public bool RoadEdgesMoved => RoadCornersMoved == 4;
+
+    /// <summary>«I bordi sono a posto» è visibile: passo dei bordi in corso e tutti i vertici spostati.</summary>
+    public bool ShowConfirmRoadEdges => IsRoadAreaStepActive && RoadEdgesMoved;
+
+    /// <summary>Cosa manca nel passo dei bordi: quanti pallini restano da spostare, poi la conferma.</summary>
+    public string RoadCornersHint => (4 - RoadCornersMoved) switch
+    {
+        0 => Loc.T("Controlla che la zona verde copra la carreggiata, poi conferma."),
+        1 => Loc.T("Manca ancora 1 pallino da spostare."),
+        int left => Loc.S($"Mancano ancora {left} pallini da spostare."),
+    };
+
+    /// <summary>
+    /// Almeno una linea tra le corsie è stata spostata dalla posizione proposta (corsie uguali): solo allora compare
+    /// «Le linee sono a posto», così le linee non vengono confermate senza essere state portate sulle separazioni.
+    /// </summary>
+    public bool RoadDividersMoved =>
+        Road is { Lanes: > 1 } r &&
+        r.Dividers.Zip(RoadLayout.EvenDividers(r.Lanes)).Any(d => Math.Abs(d.First.Left - d.Second.Left) > 0.002 || Math.Abs(d.First.Right - d.Second.Right) > 0.002);
+
+    /// <summary>«Le linee sono a posto» è visibile: passo delle linee in corso e almeno una linea spostata.</summary>
+    public bool ShowConfirmRoadDividers => IsRoadDividersStepActive && RoadDividersMoved;
+
+    public string RoadDividersHint => RoadDividersMoved
+        ? Loc.T("Controlla che ogni linea stia sulla separazione tra le corsie, poi conferma.")
+        : Loc.T("Sposta almeno una linea tratteggiata sulla separazione tra le corsie.");
+
+    /// <summary>
+    /// Il prossimo passo si fa sul video (bordi della strada o linee tra le corsie): il visore ha la cornice verde.
+    /// </summary>
+    public bool IsVideoStepActive => SelectedStep == WorkflowStep.Road && (IsRoadAreaStepActive || IsRoadDividersStepActive);
 
     public bool ShowRoadProceed => Road is not null && RoadEdgesConfirmed && RoadLanesChosen && (!HasLaneDividers || RoadDividersConfirmed);
 
@@ -85,6 +121,14 @@ public sealed partial class MainViewModel
         OnPropertyChanged(nameof(IsRoadDividersStepActive));
         OnPropertyChanged(nameof(ShowRoadProceed));
         OnPropertyChanged(nameof(RoadEdgesMoved));
+        OnPropertyChanged(nameof(RoadCornersMoved));
+        OnPropertyChanged(nameof(ShowConfirmRoadEdges));
+        OnPropertyChanged(nameof(RoadCornersHint));
+        OnPropertyChanged(nameof(RoadDividersMoved));
+        OnPropertyChanged(nameof(ShowConfirmRoadDividers));
+        OnPropertyChanged(nameof(RoadDividersHint));
+        OnPropertyChanged(nameof(IsVideoStepActive));
+        ConfirmRoadDividersCommand.NotifyCanExecuteChanged();
         ConfirmRoadEdgesCommand.NotifyCanExecuteChanged();
         UpdateAnalysisRegion();
         OnLanesChanged();
@@ -122,7 +166,7 @@ public sealed partial class MainViewModel
     private void ConfirmRoadEdges() => RoadEdgesConfirmed = true;
 
     /// <summary>«Le linee sono a posto»: la strada è completa, si passa subito all'analisi.</summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(RoadDividersMoved))]
     private void ConfirmRoadDividers()
     {
         RoadDividersConfirmed = true;

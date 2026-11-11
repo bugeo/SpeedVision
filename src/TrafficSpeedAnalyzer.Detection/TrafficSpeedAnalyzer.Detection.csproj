@@ -25,6 +25,10 @@
     <ProjectReference Include="..\TrafficSpeedAnalyzer.Core\TrafficSpeedAnalyzer.Core.csproj" />
     <ProjectReference Include="..\TrafficSpeedAnalyzer.Video\TrafficSpeedAnalyzer.Video.csproj" />
   </ItemGroup>
+  <!-- Rete delle ruote (allenata per SpeedVision, stessa licenza del programma), incorporata: niente download. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Models\wheelnet.onnx" LogicalName="wheelnet.onnx" />
+  </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="TrafficSpeedAnalyzer.Detection.Tests" />
   </ItemGroup>

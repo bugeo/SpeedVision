@@ -50,7 +50,17 @@ public readonly record struct BoundingBox(double X, double Y, double Width, doub
     }
 }
 
-/// <param name="Wheels">Ruote trovate nel riquadro (<see cref="WheelLocator"/>), null se non cercate.</param>
+/// <summary>Come si trovano le ruote nel riquadro di un veicolo.</summary>
+public enum WheelMethod
+{
+    /// <summary>Rete neurale addestrata sui punti di contatto a terra (predefinito).</summary>
+    Network,
+
+    /// <summary>Ricerca dei cerchi dello pneumatico nell'immagine (<see cref="WheelLocator"/>), il metodo delle prime versioni.</summary>
+    Classic,
+}
+
+/// <param name="Wheels">Ruote trovate nel riquadro, null se non cercate.</param>
 public sealed record VehicleDetection(BoundingBox Box, VehicleClass Class, float Score, IReadOnlyList<WheelCandidate>? Wheels = null);
 
 /// <summary>Rilevatore di veicoli su un singolo fotogramma (immagine BGR 8 bit).</summary>

@@ -30,8 +30,10 @@ Sito del progetto: <https://bugeo.github.io/SpeedVision/> · [Offrimi un caffè]
   altrimenti CPU. Su alcuni PC DirectML restituisce uscite non valide senza errori: il controllo lo evita.
 - Il tracker segue i veicoli tra i fotogrammi; ogni traccia che attraversa A e B diventa un passaggio,
   con lo stesso calcolo sub-fotogramma della misura manuale. Punto di riferimento: il contatto a terra
-  della ruota anteriore, trovato nel riquadro di ogni veicolo (pneumatico scuro, cerchio chiaro, centro
-  con precisione inferiore al pixel anche con il mosso), quando è coerente nei fotogrammi; sta sulla strada
+  della ruota anteriore, trovato nel riquadro di ogni veicolo da una piccola rete neurale inclusa nel programma
+  (`Models/wheelnet.onnx`, 1,7 MB, sul processore; allenata su fotogrammi sintetici con i punti veri e su auto vere
+  etichettate a mano) oppure, a scelta nelle impostazioni, con il metodo classico (pneumatico scuro, cerchio chiaro,
+  centro con precisione inferiore al pixel anche con il mosso), quando è coerente nei fotogrammi; sta sulla strada
   come le linee, quindi senza parallasse. Altrimenti il vertice in basso sul davanti del riquadro (il destro
   per chi va verso destra, il sinistro per chi va verso sinistra). I riquadri tagliati dal bordo vengono esclusi.
 - Ogni passaggio automatico si può rivedere, correggere a mano o eliminare.

@@ -45,7 +45,7 @@ public sealed partial class MainViewModel
             var counts = new int[bins + 1];   // l'ultima: oltre 100 km/h
             foreach (PassageRow r in Passages)
             {
-                double v = r.Passage.Speed.SpeedKmh;
+                double v = r.Passage!.Speed.SpeedKmh;
                 int i = v >= HistogramMaxKmh ? bins : Math.Max(0, (int)Math.Floor(v / HistogramStepKmh));
                 counts[i]++;
             }

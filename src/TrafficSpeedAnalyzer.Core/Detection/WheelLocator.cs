@@ -3,14 +3,21 @@ using TrafficSpeedAnalyzer.Core.Geometry;
 namespace TrafficSpeedAnalyzer.Core.Detection;
 
 /// <summary>Ruota trovata nel riquadro di un veicolo (coordinate dell'immagine).</summary>
-/// <param name="Score">Contrasto tra pneumatico scuro, cerchio e dintorni (livelli di grigio, 0–255): più alto = più sicuro.</param>
-public sealed record WheelCandidate(Point2 Center, double Radius, double Score)
+/// <param name="Score">
+/// Quanto è sicura la ruota, da 0 a 255: per <see cref="WheelLocator"/> il contrasto tra pneumatico scuro, cerchio e
+/// dintorni (livelli di grigio); per la rete neurale la probabilità che la ruota sia visibile × 100.
+/// </param>
+/// <param name="GroundContact">
+/// Punto a terra dato direttamente (rete neurale); null: si ricava dal centro e dal raggio.
+/// </param>
+public sealed record WheelCandidate(Point2 Center, double Radius, double Score, Point2? GroundContact = null)
 {
     /// <summary>Punto in cui la ruota tocca l'asfalto: sta sul piano della strada, come le linee A e B.</summary>
-    public Point2 Contact => new(Center.X, Center.Y + Radius);
+    public Point2 Contact => GroundContact ?? new(Center.X, Center.Y + Radius);
 
     public WheelCandidate Scale(double sx, double sy) =>
-        new(new Point2(Center.X * sx, Center.Y * sy), Radius * Math.Sqrt(sx * sy), Score);
+        new(new Point2(Center.X * sx, Center.Y * sy), Radius * Math.Sqrt(sx * sy), Score,
+            GroundContact is Point2 g ? new Point2(g.X * sx, g.Y * sy) : null);
 }
 
 /// <summary>

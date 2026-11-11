@@ -165,9 +165,60 @@ public static class TrackPassageExtractor
         double tolerance = Math.Max(options.WheelOffsetTolerance, 3 * spread);
         var consistent = found
             .Where(f => Math.Abs(f.Offset - offset) <= tolerance && Math.Abs(f.Size - size) <= 0.15 * size)
-            .Select(f => new TrackObservation(f.Point.FrameIndex, f.Point.TimeSeconds, f.Wheel.Contact))
+            .Select(f => (Obs: new TrackObservation(f.Point.FrameIndex, f.Point.TimeSeconds, f.Wheel.Contact), Height: f.Point.Box.Height))
             .ToList();
-        return consistent.Count >= needed ? consistent : null;
+        List<TrackObservation> forward = MovingForward(consistent, dir);
+        return forward.Count >= needed ? forward : null;
+    }
+
+    /// <summary>Arretramento massimo tollerato tra due punti della ruota, in altezze del riquadro.</summary>
+    public const double MaxBackwardStep = 0.15;
+
+    /// <summary>
+    /// La ruota di un veicolo in marcia non torna indietro: si tiene la sequenza più lunga di punti che avanzano nel verso
+    /// di marcia (con una piccola tolleranza). Un salto all'indietro vuol dire che in quei fotogrammi è stata presa la
+    /// ruota posteriore o un'altra cosa, per esempio quando il veicolo esce dall'inquadratura.
+    /// </summary>
+    private static List<TrackObservation> MovingForward(List<(TrackObservation Obs, double Height)> points, int dir)
+    {
+        var p = points.OrderBy(x => x.Obs.TimeSeconds).ToList();
+        int n = p.Count;
+        if (n < 2)
+        {
+            return [.. p.Select(x => x.Obs)];
+        }
+
+        var length = new int[n];
+        var previous = new int[n];
+        int best = 0;
+        for (int i = 0; i < n; i++)
+        {
+            length[i] = 1;
+            previous[i] = -1;
+            for (int j = 0; j < i; j++)
+            {
+                double step = dir * (p[i].Obs.Position.X - p[j].Obs.Position.X);
+                if (step >= -MaxBackwardStep * p[i].Height && length[j] + 1 > length[i])
+                {
+                    length[i] = length[j] + 1;
+                    previous[i] = j;
+                }
+            }
+
+            if (length[i] > length[best])
+            {
+                best = i;
+            }
+        }
+
+        var kept = new List<TrackObservation>(length[best]);
+        for (int k = best; k >= 0; k = previous[k])
+        {
+            kept.Add(p[k].Obs);
+        }
+
+        kept.Reverse();
+        return kept;
     }
 
     private static double Median(IEnumerable<double> values)

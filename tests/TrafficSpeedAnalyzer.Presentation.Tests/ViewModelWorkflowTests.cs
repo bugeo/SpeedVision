@@ -1,3 +1,4 @@
+using TrafficSpeedAnalyzer.Core.Calibration;
 using System.Diagnostics;
 using TrafficSpeedAnalyzer.App;
 using TrafficSpeedAnalyzer.App.Services;
@@ -132,7 +133,7 @@ public sealed class ViewModelWorkflowTests : IAsyncLifetime
         vm.SavePassageCommand.Execute(null);
 
         PassageRow row = Assert.Single(vm.Passages);
-        Assert.Equal(ExpectedKmh, row.Passage.Speed.SpeedKmh, 0.5);
+        Assert.Equal(ExpectedKmh, row.Passage!.Speed.SpeedKmh, 0.5);
         Assert.True(vm.HasUnsavedMeasurements);
     }
 
@@ -154,18 +155,52 @@ public sealed class ViewModelWorkflowTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task RoadEdges_CanBeConfirmedOnlyAfterMovingACorner()
+    public async Task RoadEdges_CanBeConfirmedOnlyAfterMovingAllFourCorners()
     {
         (MainViewModel vm, _) = await OpenAsync();
         vm.SelectedStep = WorkflowStep.Road;
         Assert.NotNull(vm.Road);
         Assert.False(vm.ConfirmRoadEdgesCommand.CanExecute(null));
+        Assert.False(vm.ShowConfirmRoadEdges);
+        Assert.Equal("Mancano ancora 4 pallini da spostare.", vm.RoadCornersHint);
 
-        // Si sposta un solo vertice di 20 pixel: ora si può confermare.
+        // Si spostano i vertici uno alla volta di 20 pixel: il pulsante compare solo dopo il quarto.
         Point2[] corners = [.. vm.Road!.Corners];
-        corners[0] += new Point2(-20, -20);
-        vm.RoadEditedCommand.Execute(vm.Road.WithCorners(corners, vm.VideoWidth, vm.VideoHeight));
+        for (int i = 0; i < 4; i++)
+        {
+            Assert.False(vm.ShowConfirmRoadEdges);
+            corners[i] += new Point2(-20, -20);
+            vm.RoadEditedCommand.Execute(vm.Road!.WithCorners(corners, vm.VideoWidth, vm.VideoHeight));
+            Assert.Equal(i + 1, vm.RoadCornersMoved);
+        }
+
         Assert.True(vm.ConfirmRoadEdgesCommand.CanExecute(null));
+        Assert.True(vm.ShowConfirmRoadEdges);
+        Assert.True(vm.IsVideoStepActive);    // cornice verde sul video mentre si sistemano i bordi
+    }
+
+    [Fact]
+    public async Task RoadDividers_CanBeConfirmedOnlyAfterMovingALine()
+    {
+        (MainViewModel vm, _) = await OpenAsync();
+        vm.SelectedStep = WorkflowStep.Road;
+        vm.RoadEdgesConfirmed = true;
+        Assert.False(vm.IsVideoStepActive);   // domanda sulle corsie: si risponde nel pannello, non sul video
+        vm.SetLaneCountCommand.Execute("2");
+
+        // Linea tra le corsie dove l'ha proposta il programma: niente conferma, cornice verde sul video.
+        Assert.True(vm.IsRoadDividersStepActive);
+        Assert.True(vm.IsVideoStepActive);
+        Assert.False(vm.ShowConfirmRoadDividers);
+        Assert.False(vm.ConfirmRoadDividersCommand.CanExecute(null));
+
+        // Spostata la linea: il pulsante compare.
+        LaneDivider d = vm.Road!.Dividers[0];
+        vm.RoadEditedCommand.Execute(vm.Road with { Dividers = [new LaneDivider(d.Left + 0.05, d.Right + 0.03)] });
+        Assert.True(vm.ShowConfirmRoadDividers);
+        Assert.True(vm.ConfirmRoadDividersCommand.CanExecute(null));
+        vm.ConfirmRoadDividersCommand.Execute(null);
+        Assert.False(vm.IsVideoStepActive);
     }
 
     [Fact]

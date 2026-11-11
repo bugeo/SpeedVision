@@ -56,7 +56,7 @@ public sealed partial class MainViewModel
     public bool ShowLaneFilter => LaneFilters.Count > 1;
 
     /// <summary>Vero se esiste almeno un passaggio valido, anche se nascosto dal filtro.</summary>
-    public bool HasAnyPassage => _allRows.Count + _reviewRows.Count > 0;
+    public bool HasAnyPassage => _allRows.Count + _reviewRows.Count + _discardedRows.Count > 0;
 
     /// <summary>Titolo del riquadro (chiuso all'inizio): dice se il filtro sta nascondendo qualcosa.</summary>
     public string FilterHeaderText => IsFilterActive ? Loc.T("Filtro (attivo)") : Loc.T("Filtro");
@@ -150,12 +150,12 @@ public sealed partial class MainViewModel
 
     private bool PassesFilter(PassageRow row)
     {
-        if (MinSpeedFilter is { } min && row.Passage.Speed.SpeedKmh <= min)
+        if (MinSpeedFilter is { } min && row.SpeedKmh is { } speed && speed <= min)
         {
             return false;
         }
 
-        bool directionShown = row.Passage.Direction == TravelDirection.AToB ? ShowAToB : ShowBToA;
+        bool directionShown = row.Passage is not { } passage || (passage.Direction == TravelDirection.AToB ? ShowAToB : ShowBToA);
         if (!directionShown)
         {
             return false;

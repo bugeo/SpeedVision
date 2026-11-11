@@ -43,6 +43,9 @@ public sealed class AppSettings
     /// <summary>Fotogrammi minimi con la ruota prima e dopo ciascuna linea.</summary>
     public int WheelFramesPerSide { get; set; } = 2;
 
+    /// <summary>Come trovare le ruote: "rete" (rete neurale) o "classico" (cerchi dello pneumatico).</summary>
+    public string WheelMethod { get; set; } = "rete";
+
     public double StartScore { get; set; } = 0.5;
 
     /// <summary>Ultima vista della mappa (calibrazione sulla mappa) e livello scelto ("map" o "satellite").</summary>

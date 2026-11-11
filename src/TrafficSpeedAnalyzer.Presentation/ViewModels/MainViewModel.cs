@@ -642,6 +642,7 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
 
     partial void OnSelectedStepChanged(WorkflowStep value)
     {
+        OnPropertyChanged(nameof(IsVideoStepActive));
         // La modifica di un passaggio avviene nei risultati: cambiando passo si annulla.
         if (IsEditingPassage && value != WorkflowStep.Results)
         {

@@ -99,7 +99,7 @@ public sealed class PdfReport : IDisposable
 
         // Statistiche
         y += 14;
-        List<double> speeds = s.Rows.Where(r => !r.HideSpeed).Select(r => r.Passage.Speed.SpeedKmh).ToList();
+        List<double> speeds = s.Rows.Where(r => !r.HideSpeed).Select(r => r.Passage!.Speed.SpeedKmh).ToList();
         double tileW = (ContentWidth - 20) / 4;
         (string Label, string Value)[] tiles =
         [
@@ -164,23 +164,23 @@ public sealed class PdfReport : IDisposable
         PdfPage page = NewPage();
         double y = Margin + 46;
         page.Text(Margin, y, Loc.S($"Veicolo {row.IdText}"), 18, bold: true, color: Ink);
-        string speed = row.HideSpeed ? "—" : row.Passage.Speed.SpeedKmh.ToString("0.0", Loc.Culture) + " km/h";
+        string speed = row.HideSpeed ? "—" : row.Passage!.Speed.SpeedKmh.ToString("0.0", Loc.Culture) + " km/h";
         page.Text(PdfWriter.A4Width - Margin - PdfWriter.TextWidth(speed, 18, true), y, speed, 18, bold: true, color: Accent);
         y += 18;
 
         var data = new List<(string, string)>
         {
-            (Loc.T("Verso"), CsvExporter.FormatDirection(row.Passage.Direction)),
+            (Loc.T("Verso"), CsvExporter.FormatDirection(row.Passage!.Direction)),
         };
         if (_showLane && row.Lane >= 0)
         {
             data.Add((Loc.T("Corsia"), (row.Lane + 1).ToString(Loc.Culture)));
         }
 
-        data.Add((Loc.T("Orario ingresso"), CsvExporter.FormatTime(row.Passage.Entry.TimeSeconds, _recordingStart)));
-        data.Add((Loc.T("Orario uscita"), CsvExporter.FormatTime(row.Passage.Exit.TimeSeconds, _recordingStart)));
-        data.Add((Loc.T("Tempo impiegato (s)"), row.Passage.Speed.DurationSeconds.ToString("F3", Loc.Culture)));
-        data.Add((Loc.T("Velocità (km/h)"), row.HideSpeed ? "—" : row.Passage.Speed.SpeedKmh.ToString("F1", Loc.Culture)));
+        data.Add((Loc.T("Orario ingresso"), CsvExporter.FormatTime(row.Passage!.Entry.TimeSeconds, _recordingStart)));
+        data.Add((Loc.T("Orario uscita"), CsvExporter.FormatTime(row.Passage!.Exit.TimeSeconds, _recordingStart)));
+        data.Add((Loc.T("Tempo impiegato (s)"), row.Passage!.Speed.DurationSeconds.ToString("F3", Loc.Culture)));
+        data.Add((Loc.T("Velocità (km/h)"), row.HideSpeed ? "—" : row.Passage!.Speed.SpeedKmh.ToString("F1", Loc.Culture)));
         data.Add((Loc.T("Incertezza"), row.UncertaintyText));
         data.Add((Loc.T("Rilevamento"), row.SourceText));
         y = Table(page, y, data, columns: 2);

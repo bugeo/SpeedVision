@@ -80,6 +80,16 @@ public class ScreenshotTests
         frames.Value = 2;
         Dispatcher.UIThread.RunJobs();
 
+        // Metodo per trovare le ruote: rete neurale di partenza, metodo classico selezionabile.
+        ComboBox method = settings.GetVisualDescendants().OfType<ComboBox>().Single(c => c.Name == "WheelMethodBox");
+        Assert.Equal(0, method.SelectedIndex);
+        Assert.Equal(TrafficSpeedAnalyzer.Core.Detection.WheelMethod.Network, w.ViewModel.SelectedWheelMethod);
+        method.SelectedIndex = 1;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Equal(TrafficSpeedAnalyzer.Core.Detection.WheelMethod.Classic, w.ViewModel.SelectedWheelMethod);
+        method.SelectedIndex = 0;
+        Dispatcher.UIThread.RunJobs();
+
         // Inglese: i testi cambiano subito, senza riaprire le finestre.
         w.ViewModel.SelectedLanguage = w.ViewModel.Languages.Single(l => l.Code == "en");
         Dispatcher.UIThread.RunJobs();

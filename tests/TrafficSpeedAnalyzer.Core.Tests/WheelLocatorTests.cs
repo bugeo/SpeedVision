@@ -1,4 +1,5 @@
 using TrafficSpeedAnalyzer.Core.Detection;
+using TrafficSpeedAnalyzer.Core.Geometry;
 using Xunit;
 
 namespace TrafficSpeedAnalyzer.Core.Tests;
@@ -110,5 +111,17 @@ public sealed class WheelLocatorTests
     {
         (byte[] px, _) = SideViewCar(700, 330, 38, 420);
         Assert.Empty(WheelLocator.Locate(px, W, H, W * 3, new BoundingBox(300, 390, 60, 30)));
+    }
+
+    [Fact]
+    public void Contact_UsesGivenGroundPoint_AndScalesIt()
+    {
+        var fromCircle = new WheelCandidate(new Point2(100, 200), 30, 80);
+        Assert.Equal(new Point2(100, 230), fromCircle.Contact);
+
+        // La rete dà direttamente il punto a terra: vale quello, non centro + raggio.
+        var fromNetwork = new WheelCandidate(new Point2(100, 200), 30, 90, new Point2(103, 236));
+        Assert.Equal(new Point2(103, 236), fromNetwork.Contact);
+        Assert.Equal(new Point2(206, 472), fromNetwork.Scale(2, 2).Contact);
     }
 }

@@ -103,6 +103,23 @@
         </Style.Triggers>
     </Style>
 
+    <!-- Visore del video: cornice verde di 3 px quando il prossimo passo si fa sul video (Tag = True) -->
+    <Style x:Key="Viewer" TargetType="Border">
+        <Setter Property="Background" Value="#FF0A0D12" />
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Style.Triggers>
+            <Trigger Property="Tag">
+                <Trigger.Value>
+                    <sys:Boolean>True</sys:Boolean>
+                </Trigger.Value>
+                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                <Setter Property="BorderThickness" Value="3" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="Chip" TargetType="Border">
         <Setter Property="Background" Value="#14FFFFFF" />
         <Setter Property="BorderBrush" Value="#1FFFFFFF" />

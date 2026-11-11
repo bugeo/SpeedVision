@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Threading.Channels;
+using Microsoft.ML.OnnxRuntime;
 using TrafficSpeedAnalyzer.Core.Calibration;
 using TrafficSpeedAnalyzer.Core.Detection;
 using TrafficSpeedAnalyzer.Core.Tracking;
@@ -43,6 +44,9 @@ public sealed record AnalysisOptions
     /// il riferimento della misura quando è trovato con coerenza (vedi <see cref="TrackPassageExtractor"/>).
     /// </summary>
     public bool LocateWheels { get; init; } = true;
+
+    /// <summary>Come cercare le ruote: rete neurale (predefinito) o ricerca dei cerchi dello pneumatico.</summary>
+    public WheelMethod WheelMethod { get; init; } = WheelMethod.Network;
 
     /// <summary>
     /// Consegna anche le tracce che non attraversano le linee (abbastanza lunghe e affidabili).
@@ -136,6 +140,7 @@ public static class AnalysisPipeline
             NewTrackScore = options.StartScore,
             HighScore = Math.Min(options.StartScore, ByteTrackerOptions.Default.HighScore),
         });
+        WheelPointNetwork? wheelNet = options.LocateWheels && options.WheelMethod == WheelMethod.Network ? LoadWheelNetwork() : null;
         var gate = new MotionGate();
         var clock = Stopwatch.StartNew();
         var previewClock = Stopwatch.StartNew();
@@ -211,20 +216,12 @@ public static class AnalysisPipeline
                         // In coordinate del video, come le linee.
                         var dets = new List<VehicleDetection>(raw.Count);
                         var truncated = new List<bool>(raw.Count);
-                        foreach (VehicleDetection d in raw)
+                        IReadOnlyList<WheelCandidate>?[] found = FindWheels(frame, raw, regionAnalysis, options, wheelNet);
+                        for (int i = 0; i < raw.Count; i++)
                         {
-                            bool cut = AnalysisRegion.IsTruncated(d.Box, regionAnalysis);
-                            truncated.Add(cut);
-
-                            // Ruote: solo nei veicoli interi, cercate sul fotogramma analizzato e riportate al video.
-                            IReadOnlyList<WheelCandidate>? wheels = null;
-                            if (options.LocateWheels && !cut)
-                            {
-                                wheels = WheelLocator.Locate(frame.Pixels, frame.Width, frame.Height, frame.Stride, d.Box)
-                                    .Select(w => w.Scale(1 / toAnalysisX, 1 / toAnalysisY))
-                                    .ToList();
-                            }
-
+                            VehicleDetection d = raw[i];
+                            truncated.Add(AnalysisRegion.IsTruncated(d.Box, regionAnalysis));
+                            IReadOnlyList<WheelCandidate>? wheels = found[i]?.Select(w => w.Scale(1 / toAnalysisX, 1 / toAnalysisY)).ToList();
                             dets.Add(d with { Box = AnalysisRegion.Scale(d.Box, 1 / toAnalysisX, 1 / toAnalysisY), Wheels = wheels });
                         }
 
@@ -277,6 +274,59 @@ public static class AnalysisPipeline
 
         return new AnalysisSummary(done, detected, skipped, passages, rejected,
             detected > 0 ? detectMs / detected : 0, detector.ExecutionProvider, clock.Elapsed, cancelled, reasons);
+    }
+
+    /// <summary>Distanza minima dal bordo della zona analizzata, in frazione della larghezza, per cercare le ruote in un riquadro.</summary>
+    public const double WheelEdgeMargin = 0.015;
+
+    /// <summary>Rete delle ruote; null se non si carica (si usa allora la ricerca dei cerchi).</summary>
+    private static WheelPointNetwork? LoadWheelNetwork()
+    {
+        try
+        {
+            return WheelPointNetwork.Shared;
+        }
+        catch (Exception e) when (e is OnnxRuntimeException or InvalidOperationException or IOException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Ruote dei veicoli rilevati, in coordinate del fotogramma analizzato: solo nei veicoli interi (non tagliati dal
+    /// bordo della zona analizzata), con la rete se c'è, altrimenti con la ricerca dei cerchi. Null = non cercate.
+    /// </summary>
+    private static IReadOnlyList<WheelCandidate>?[] FindWheels(
+        VideoFrame frame, IReadOnlyList<VehicleDetection> raw, BoundingBox region, AnalysisOptions options, WheelPointNetwork? net)
+    {
+        var found = new IReadOnlyList<WheelCandidate>?[raw.Count];
+        if (!options.LocateWheels)
+        {
+            return found;
+        }
+
+        // Margine più largo che per il tracker: quando un veicolo esce dall'inquadratura il rilevatore disegna il riquadro
+        // sulla sola parte visibile, che spesso finisce qualche pixel prima del bordo, e la ruota posteriore sembrerebbe
+        // quella anteriore.
+        double margin = Math.Max(2, WheelEdgeMargin * region.Width);
+        List<int> whole = [.. Enumerable.Range(0, raw.Count).Where(i => !AnalysisRegion.IsTruncated(raw[i].Box, region, margin))];
+        if (net is not null)
+        {
+            IReadOnlyList<WheelCandidate>[] wheels = net.Locate(frame.Pixels, frame.Width, frame.Height, frame.Stride, [.. whole.Select(i => raw[i].Box)]);
+            for (int k = 0; k < whole.Count; k++)
+            {
+                found[whole[k]] = wheels[k];
+            }
+        }
+        else
+        {
+            foreach (int i in whole)
+            {
+                found[i] = WheelLocator.Locate(frame.Pixels, frame.Width, frame.Height, frame.Stride, raw[i].Box);
+            }
+        }
+
+        return found;
     }
 
     /// <summary>

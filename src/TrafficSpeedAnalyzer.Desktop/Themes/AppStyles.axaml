@@ -59,6 +59,17 @@
         <Setter Property="BorderThickness" Value="3" />
         <Setter Property="Padding" Value="14" />
     </Style>
+    <!-- Visore del video: cornice normale; verde di 3 px quando il prossimo passo si fa sul video -->
+    <Style Selector="Border.viewer">
+        <Setter Property="Background" Value="#FF0A0D12" />
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+    </Style>
+    <Style Selector="Border.viewer.active">
+        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="BorderThickness" Value="3" />
+    </Style>
     <Style Selector="Border.chip">
         <Setter Property="Background" Value="#14FFFFFF" />
         <Setter Property="BorderBrush" Value="#1FFFFFFF" />

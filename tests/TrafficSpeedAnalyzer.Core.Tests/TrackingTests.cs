@@ -243,6 +243,29 @@ public class ByteTrackerTests
 
 public class TrackPassageExtractorTests
 {
+    [Fact]
+    public void FrontWheel_DropsPointsThatJumpBackwards()
+    {
+        // Veicolo verso destra, 20 px per fotogramma; negli ultimi 4 fotogrammi (quando esce dall'inquadratura) la
+        // «ruota anteriore» trovata torna indietro di 250 px: è la posteriore, e quei punti vanno scartati.
+        var points = new List<TrackPoint>();
+        for (int i = 0; i < 20; i++)
+        {
+            double x = 100 + (20 * i);
+            // Quando esce, il riquadro copre solo la parte visibile: la ruota posteriore sta alla solita distanza dal suo bordo.
+            double wheelX = i < 16 ? x + 330 : x + 80;
+            var box = i < 16 ? new BoundingBox(x, 300, 400, 160) : new BoundingBox(x, 300, 150, 160);
+            points.Add(new TrackPoint(i, i / 30.0, box, VehicleClass.Car, 0.9f, false,
+                [new WheelCandidate(new Point2(wheelX, 428), 32, 90, new Point2(wheelX, 460))]));
+        }
+
+        List<TrackObservation> obs = TrackPassageExtractor.FrontWheelObservations(points)!;
+
+        Assert.NotNull(obs);
+        Assert.Equal(16, obs.Count);
+        Assert.All(obs, o => Assert.True(o.FrameIndex < 16));
+    }
+
     private static FinishedTrack TrackAt(double kmh, double fps, double phase, Func<int, bool>? truncated = null, float score = 0.9f, double noisePx = 0, int seed = 1)
     {
         var rng = new Random(seed);

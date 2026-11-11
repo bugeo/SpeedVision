@@ -53,6 +53,32 @@ public sealed partial class MainViewModel
 
     public int WheelFramesPerSideMax => Core.Tracking.WheelCrossingCheck.PointsPerSide;
 
+    /// <summary>Metodi per trovare le ruote, nell'ordine dell'elenco delle impostazioni.</summary>
+    public IReadOnlyList<LocText> WheelMethodOptions { get; } =
+        [LocText.For("Rete neurale (consigliato)"), LocText.For("Cerchi dello pneumatico (metodo classico)")];
+
+    /// <summary>0 = rete neurale, 1 = metodo classico (impostazioni).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(WheelMethodDescription), nameof(WheelMethodNote))]
+    private int _wheelMethodIndex;
+
+    public WheelMethod SelectedWheelMethod => WheelMethodIndex == 1 ? WheelMethod.Classic : WheelMethod.Network;
+
+    /// <summary>Metodo con cui sono stati ottenuti i risultati automatici mostrati; null se non ce ne sono di questa sessione.</summary>
+    private WheelMethod? _resultsWheelMethod;
+
+    public string WheelMethodDescription => SelectedWheelMethod == WheelMethod.Network
+        ? Loc.T("Una rete neurale, addestrata su auto vere e sintetiche, trova il punto in cui ciascuna ruota tocca terra. È il metodo più preciso.")
+        : Loc.T("Cerca nell'immagine il disco scuro dello pneumatico, come nelle versioni precedenti. Utile per confrontare i risultati.");
+
+    public string WheelMethodNote =>
+        _resultsWheelMethod is { } used && used != SelectedWheelMethod && _savedTracks.Any(t => t.Source == PassageSource.Automatic)
+            ? Loc.T("Vale dalla prossima analisi: i risultati attuali sono stati misurati con l'altro metodo. Per applicarlo, rifai l'analisi.")
+            : Loc.T("Vale dalla prossima analisi.");
+
+    private static string WheelMethodName(WheelMethod m) =>
+        m == WheelMethod.Network ? Loc.T("ruote con la rete neurale") : Loc.T("ruote con il metodo classico");
+
     partial void OnWheelFramesPerSideChanged(int value)
     {
         int clamped = Math.Clamp(value, 1, WheelFramesPerSideMax);
@@ -155,6 +181,7 @@ public sealed partial class MainViewModel
         _regionAroundLines = _settings.RegionAroundLines;
         _skipStaticFrames = _settings.SkipStaticFrames;
         _wheelFramesPerSide = Math.Clamp(_settings.WheelFramesPerSide, 1, Core.Tracking.WheelCrossingCheck.PointsPerSide);
+        _wheelMethodIndex = _settings.WheelMethod == "classico" ? 1 : 0;
         _startScore = Math.Clamp(_settings.StartScore, 0.25, 0.8);
     }
 
@@ -165,6 +192,7 @@ public sealed partial class MainViewModel
         _settings.RegionAroundLines = RegionAroundLines;
         _settings.SkipStaticFrames = SkipStaticFrames;
         _settings.WheelFramesPerSide = WheelFramesPerSide;
+        _settings.WheelMethod = SelectedWheelMethod == WheelMethod.Classic ? "classico" : "rete";
         _settings.StartScore = StartScore;
     }
 
@@ -305,6 +333,7 @@ public sealed partial class MainViewModel
         SkipStaticFrames = SkipStaticFrames,
         StartScore = (float)StartScore,
         StartIndex = AnalyzeFromCurrentFrame ? CurrentIndex : 0,
+        WheelMethod = SelectedWheelMethod,
     };
 
     private bool CanStartAnalysis() => CanAnalyze();
@@ -356,7 +385,9 @@ public sealed partial class MainViewModel
                 return;
             }
 
-            LastModelDescription = $"{detector.ModelName}, {detector.ExecutionProvider}";
+            LastModelDescription = $"{detector.ModelName}, {detector.ExecutionProvider}, {WheelMethodName(SelectedWheelMethod)}";
+            _resultsWheelMethod = SelectedWheelMethod;
+            OnPropertyChanged(nameof(WheelMethodNote));
             VideoSession session = _session;
             AnalysisOptions options = BuildOptions();
             AnalysisStatusText = "Avvio…";

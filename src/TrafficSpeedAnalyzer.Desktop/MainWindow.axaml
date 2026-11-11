@@ -169,9 +169,8 @@
                     </Grid>
                 </Border>
 
-                <!-- Visore -->
-                <Border Grid.Row="2" CornerRadius="10" BorderBrush="{StaticResource CardBorder}" BorderThickness="1" ClipToBounds="True"
-                        Background="#FF0A0D12">
+                <!-- Visore: cornice verde quando il prossimo passo si fa sul video (bordi della strada, linee tra le corsie) -->
+                <Border Grid.Row="2" Classes="viewer" Classes.active="{Binding IsVideoStepActive}" ClipToBounds="True">
                     <Grid>
                         <c:VideoViewport Name="Viewport"
                                          IsVisible="{Binding HasVideo}"
@@ -408,10 +407,12 @@
                             <Border Classes="card" Classes.active="{Binding IsRoadAreaStepActive}" IsVisible="{Binding ShowRoadAreaCard}">
                                 <StackPanel>
                                     <TextBlock Classes="sectionTitle" Text="{loc:Tr 'Bordi della strada'}" />
-                                    <TextBlock Classes="caption" Margin="0,0,0,10" Text="{loc:Tr 'Porta i quattro pallini sugli angoli della carreggiata.'}" />
+                                    <TextBlock Classes="caption" Margin="0,0,0,6" Text="{loc:Tr 'Porta i quattro pallini sugli angoli della carreggiata.'}" />
+                                    <TextBlock Classes="body" Margin="0,0,0,10" TextWrapping="Wrap" FontWeight="SemiBold" Text="{Binding RoadCornersHint}"
+                                               IsVisible="{Binding IsRoadAreaStepActive}" />
                                     <c:UiButton Content="{loc:Tr 'I bordi sono a posto'}" Icon="{StaticResource Icon.Checkmark24}" HorizontalAlignment="Stretch" Padding="12,9"
                                                 Appearance="Primary" Command="{Binding ConfirmRoadEdgesCommand}"
-                                                IsVisible="{Binding IsRoadAreaStepActive}" />
+                                                IsVisible="{Binding ShowConfirmRoadEdges}" />
                                 </StackPanel>
                             </Border>
 
@@ -466,11 +467,13 @@
                             <Border Classes="card" Classes.active="{Binding IsRoadDividersStepActive}" IsVisible="{Binding ShowRoadDividersCard}">
                                 <StackPanel>
                                     <TextBlock Classes="sectionTitle" Text="{loc:Tr 'Linee tra le corsie'}" />
-                                    <TextBlock Classes="caption" Margin="0,0,0,10"
+                                    <TextBlock Classes="caption" Margin="0,0,0,6"
                                                Text="{loc:Tr 'Porta ogni linea tratteggiata sulla separazione tra le corsie. Il pallino centrale sposta la linea intera.'}" />
+                                    <TextBlock Classes="body" Margin="0,0,0,10" TextWrapping="Wrap" FontWeight="SemiBold" Text="{Binding RoadDividersHint}"
+                                               IsVisible="{Binding IsRoadDividersStepActive}" />
                                     <c:UiButton Content="{loc:Tr 'Le linee sono a posto'}" Icon="{StaticResource Icon.Checkmark24}" HorizontalAlignment="Stretch" Padding="12,9"
                                                 Appearance="Primary" Command="{Binding ConfirmRoadDividersCommand}"
-                                                IsVisible="{Binding IsRoadDividersStepActive}" />
+                                                IsVisible="{Binding ShowConfirmRoadDividers}" />
                                 </StackPanel>
                             </Border>
 
@@ -876,13 +879,6 @@
                         <StackPanel IsVisible="{Binding SelectedStep, Converter={StaticResource EnumIn}, ConverterParameter=Results}">
                             <TextBlock Classes="stepTitle" Text="{loc:Tr 'Risultati'}" Margin="0,0,0,14" />
 
-                            <Border Classes="notice warning" IsVisible="{Binding InvalidPassageCount, Converter={StaticResource Truthy}}">
-                                <StackPanel>
-                                    <TextBlock Classes="body" Text="{Binding InvalidPassagesText}" />
-                                    <c:UiButton Content="{loc:Tr 'Elimina le misure non valide'}" Command="{Binding DeleteInvalidPassagesCommand}" Margin="0,8,0,0" />
-                                </StackPanel>
-                            </Border>
-
                             <!-- Filtro: chiuso all'inizio; il titolo dice se è attivo -->
                             <Expander Classes="card" IsExpanded="False" Margin="0,0,0,8" IsVisible="{Binding HasAnyPassage}">
                                 <Expander.Header>
@@ -1038,28 +1034,56 @@
                             <c:UiButton Content="{loc:Tr 'Apri la cartella esportata'}" Icon="{StaticResource Icon.Folder24}"
                                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding OpenExportFolderCommand}" />
 
-                            <!-- Due linguette: passaggi corretti (statistiche, grafico, esportazione e PDF) e passaggi da correggere
-                                 (ruota anteriore non seguita bene vicino alle linee, o spostati qui con «Elimina») -->
-                            <Grid ColumnDefinitions="*,*" Margin="0,14,0,10" IsVisible="{Binding HasAnyPassage}">
-                                <c:UiButton Name="ValidTabButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="8,8" Margin="0,0,3,0"
+                            <!-- Tre linguette, con un'icona e il numero (il nome nel suggerimento): auto verde con la V = corretti, auto rossa
+                                 con la matita = da correggere, auto grigia con il cestino = scartati.
+                                 Passaggi corretti (statistiche, grafico, esportazione e PDF), da correggere
+                                 (ruota anteriore non seguita bene vicino alle linee, o tolti dai corretti) e scartati (senza un
+                                 passaggio valido tra le linee, o eliminati da «Da correggere») -->
+                            <Grid ColumnDefinitions="*,*,*" Margin="0,14,0,10" IsVisible="{Binding HasAnyPassage}">
+                                <c:UiButton Name="ValidTabButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="6,8" Margin="0,0,3,0"
                                             Command="{Binding ShowValidTabCommand}"
                                             Appearance="{Binding IsValidTab, Converter={StaticResource Pick}, ConverterParameter=Secondary|Transparent}">
-                                    <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon.CheckmarkCircle24}" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Column="1" Text="{Binding ValidTabText}" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" />
-                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" ToolTip.Tip="{Binding ValidTabText}">
+                                        <Panel Width="33" Height="26">
+                                            <PathIcon Data="{StaticResource Icon.VehicleCar24}" Width="24" Height="24" Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                            <Border Width="17" Height="17" CornerRadius="9" Background="{StaticResource AccentBrush}" BorderBrush="#FF1B1F26" BorderThickness="1.5"
+                                                    HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                                <PathIcon Data="{StaticResource Icon.Checkmark24}" Width="10" Height="10" Foreground="White" />
+                                            </Border>
+                                        </Panel>
+                                        <TextBlock Text="{Binding Passages.Count}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </c:UiButton>
-                                <c:UiButton Name="ReviewTabButton" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="8,8" Margin="3,0,0,0"
+                                <c:UiButton Name="ReviewTabButton" Grid.Column="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="6,8" Margin="3,0,3,0"
                                             Command="{Binding ShowReviewTabCommand}"
                                             Appearance="{Binding IsReviewTab, Converter={StaticResource Pick}, ConverterParameter=Secondary|Transparent}">
-                                    <Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Center">
-                                        <PathIcon Data="{StaticResource Icon.Warning24}" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                        <TextBlock Grid.Column="1" Text="{Binding ReviewTabText}" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" />
-                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" ToolTip.Tip="{Binding ReviewTabText}">
+                                        <Panel Width="33" Height="26">
+                                            <PathIcon Data="{StaticResource Icon.VehicleCar24}" Width="24" Height="24" Foreground="{StaticResource ErrorBrush}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                            <Border Width="17" Height="17" CornerRadius="9" Background="{StaticResource ErrorBrush}" BorderBrush="#FF1B1F26" BorderThickness="1.5"
+                                                    HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                                <PathIcon Data="{StaticResource Icon.Edit24}" Width="10" Height="10" Foreground="White" />
+                                            </Border>
+                                        </Panel>
+                                        <TextBlock Text="{Binding ReviewPassages.Count}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </c:UiButton>
+                                <c:UiButton Name="DiscardedTabButton" Grid.Column="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="6,8" Margin="3,0,0,0"
+                                            Command="{Binding ShowDiscardedTabCommand}"
+                                            Appearance="{Binding IsDiscardedTab, Converter={StaticResource Pick}, ConverterParameter=Secondary|Transparent}">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" ToolTip.Tip="{Binding DiscardedTabText}">
+                                        <Panel Width="33" Height="26">
+                                            <PathIcon Data="{StaticResource Icon.VehicleCar24}" Width="24" Height="24" Foreground="{StaticResource TextTertiary}" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                            <Border Width="17" Height="17" CornerRadius="9" Background="{StaticResource TextTertiary}" BorderBrush="#FF1B1F26" BorderThickness="1.5"
+                                                    HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                                <PathIcon Data="{StaticResource Icon.Delete24}" Width="10" Height="10" Foreground="White" />
+                                            </Border>
+                                        </Panel>
+                                        <TextBlock Text="{Binding DiscardedPassages.Count}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    </StackPanel>
                                 </c:UiButton>
                             </Grid>
-                            <TextBlock Classes="caption" Margin="2,0,0,10" TextWrapping="Wrap" IsVisible="{Binding IsReviewTab}"
-                                       Text="{loc:Tr 'Passaggi in cui la ruota anteriore non è stata seguita bene vicino alle linee A e B, o tolti dai passaggi corretti. Non entrano nell\'esportazione: correggili con «Modifica» o riportali con «Sposta in passaggi validi».'}" />
+                            <TextBlock Classes="caption" Margin="2,0,0,10" TextWrapping="Wrap" IsVisible="{Binding ShowTabCaption}" Text="{Binding TabCaption}" />
                             <DockPanel Margin="2,0,0,8">
                                 <!-- Ordine dell'elenco: orologio = orario, tachimetro = velocità; la freccia in giù indica valori che crescono
                                      scendendo nell'elenco (primo → ultimo, velocità crescente), quella in su il contrario -->
@@ -1145,9 +1169,10 @@
                                                     <c:UiButton Content="{loc:Tr 'Modifica'}" Icon="{StaticResource Icon.Edit24}" Command="{Binding $parent[Window].DataContext.EditPassageCommand}" />
                                                     <c:UiButton Content="{loc:Tr 'Sposta in passaggi validi'}" Icon="{StaticResource Icon.CheckmarkCircle24}"
                                                                 Command="{Binding $parent[Window].DataContext.MoveToValidCommand}"
-                                                                IsVisible="{Binding $parent[Window].DataContext.IsReviewTab}" />
-                                                    <!-- Nei passaggi corretti «Non valido» sposta tra i non validi; nei non validi «Elimina» cancella -->
-                                                    <c:UiButton Content="{loc:Tr 'Non valido'}" Icon="{StaticResource Icon.DismissCircle24}" Command="{Binding $parent[Window].DataContext.DeletePassageCommand}"
+                                                                IsVisible="{Binding $parent[Window].DataContext.IsNotValidTab}" />
+                                                    <!-- Nessun veicolo si cancella: nei corretti «Da correggere» lo sposta tra quelli da correggere,
+                                                         nei da correggere «Elimina» lo sposta tra gli scartati -->
+                                                    <c:UiButton Content="{loc:Tr 'Da correggere'}" Icon="{StaticResource Icon.Warning24}" Command="{Binding $parent[Window].DataContext.DeletePassageCommand}"
                                                                 ToolTip.Tip="{Binding $parent[Window].DataContext.DeleteTooltip}" IsVisible="{Binding $parent[Window].DataContext.IsValidTab}" />
                                                     <c:UiButton Content="{loc:Tr 'Elimina'}" Icon="{StaticResource Icon.Delete24}" Command="{Binding $parent[Window].DataContext.DeletePassageCommand}"
                                                                 ToolTip.Tip="{Binding $parent[Window].DataContext.DeleteTooltip}" IsVisible="{Binding $parent[Window].DataContext.IsReviewTab}" />

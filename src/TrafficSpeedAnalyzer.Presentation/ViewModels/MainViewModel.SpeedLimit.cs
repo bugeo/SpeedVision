@@ -31,7 +31,7 @@ public sealed partial class MainViewModel
 
     public bool HasFines => SpeedLimitKmh is not null && !IsDistanceProvisional && Passages.Any(IsOverLimit);
 
-    private bool IsOverLimit(PassageRow r) => SpeedLimitKmh is { } limit && !r.HideSpeed && r.Passage.Speed.SpeedKmh > limit;
+    private bool IsOverLimit(PassageRow r) => SpeedLimitKmh is { } limit && !r.HideSpeed && r.SpeedKmh > limit;
 
     private void InitializeSpeedLimit()
     {
@@ -53,7 +53,7 @@ public sealed partial class MainViewModel
     /// <summary>Aggiorna righe, grafico e riquadro «Multe» dopo un cambio di passaggi, filtro o limite.</summary>
     private void RefreshSpeedLimitMarks()
     {
-        foreach (PassageRow r in _allRows.Concat(_reviewRows))
+        foreach (PassageRow r in _allRows.Concat(_reviewRows).Concat(_discardedRows))
         {
             r.IsOverLimit = IsOverLimit(r);
         }

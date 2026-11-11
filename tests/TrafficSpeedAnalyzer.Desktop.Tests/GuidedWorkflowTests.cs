@@ -112,6 +112,8 @@ public class GuidedWorkflowTests
         Point2[] targets = [new(4, 4), new(764, 4), new(764, 428), new(4, 428)];
         for (int i = 0; i < 4; i++)
         {
+            // Il pulsante compare solo quando tutti e quattro i pallini sono stati spostati.
+            Assert.Empty(PrimaryButtons(w));
             DragVideo(w, viewport, vm.Road!.Corners[i], targets[i]);
             Assert.True(Point2.Distance(vm.Road!.Corners[i], targets[i]) < 2, $"vertice {i} non spostato: {vm.Road.Corners[i]}");
         }
@@ -165,16 +167,18 @@ public class GuidedWorkflowTests
         await ScreenshotTests.WaitUntil(() => vm.Passages.Count + vm.ReviewPassages.Count >= 2, "velocità calcolate", 30);
 
         // Passo 5: risultati. Ripresa dall'alto: le ruote non si vedono, quindi le due auto finiscono nella
-        // linguetta «non validi» e non si possono ancora esportare.
+        // linguetta «da correggere» e non si possono ancora esportare.
         Assert.Equal(WorkflowStep.Results, vm.SelectedStep);
         Assert.Empty(vm.Passages);
         Assert.Equal(2, vm.ReviewPassages.Count);
-        Assert.Equal("0 passaggi corretti", vm.ValidTabText);
-        Assert.Equal("2 non validi", vm.ReviewTabText);
+        Assert.Equal("0 corretti", vm.ValidTabText);
+        Assert.Equal("2 da correggere", vm.ReviewTabText);
+        Assert.Equal($"{vm.DiscardedPassages.Count} scartati", vm.DiscardedTabText);
+        int discardedAtStart = vm.DiscardedPassages.Count;
         Assert.False(vm.ExportResultsCommand.CanExecute(null));
         ScreenshotTests.Save(w, "09-risultati-corretti-vuoti");
 
-        // Linguetta «non validi»: si sceglie un'auto e la si sposta tra i passaggi validi, poi l'altra.
+        // Linguetta «da correggere»: si sceglie un'auto e la si sposta tra i passaggi validi, poi l'altra.
         w.GetVisualDescendants().OfType<UiButton>().Single(b => b.Name == "ReviewTabButton").Command!.Execute(null);
         Dispatcher.UIThread.RunJobs();
         Assert.True(vm.IsReviewTab);
@@ -197,11 +201,11 @@ public class GuidedWorkflowTests
         Assert.False(Visible("Ingresso") || Visible("Sposta in passaggi validi"));
         Assert.Equal(2, vm.ReviewPassages.Count);
         ScreenshotTests.Save(w, "09c-modifica");
-        double before = vm.ReviewPassages.Single(p => p.Id == editedId).Passage.Speed.SpeedKmh;
+        double before = vm.ReviewPassages.Single(p => p.Id == editedId).Passage!.Speed.SpeedKmh;
         vm.CancelEditCommand.Execute(null);
         Dispatcher.UIThread.RunJobs();
         Assert.False(vm.IsEditingPassage);
-        Assert.Equal(before, vm.ReviewPassages.Single(p => p.Id == editedId).Passage.Speed.SpeedKmh);
+        Assert.Equal(before, vm.ReviewPassages.Single(p => p.Id == editedId).Passage!.Speed.SpeedKmh);
         vm.SelectedPassage = vm.ReviewPassages.Single(p => p.Id == editedId);
         vm.EditPassageCommand.Execute(null);
         Assert.True(vm.SaveEditCommand.CanExecute(null));
@@ -218,25 +222,41 @@ public class GuidedWorkflowTests
         Assert.Empty(vm.ReviewPassages);
         Assert.Equal(2, vm.Passages.Count);
 
-        // Nei passaggi corretti al posto di «Elimina» c'è «Non valido»: sposta tra i non validi (fuori dall'esportazione).
+        // Nei passaggi corretti al posto di «Elimina» c'è «Da correggere»: sposta tra quelli da correggere (fuori dall'esportazione).
         vm.ShowValidTabCommand.Execute(null);
         vm.SelectedPassage = vm.Passages[0];
         Dispatcher.UIThread.RunJobs();
-        Assert.True(Visible("Non valido"));
+        Assert.True(Visible("Da correggere"));
         Assert.False(Visible("Elimina"));
         int movedId = vm.SelectedPassage.Id;
         vm.DeletePassageCommand.Execute(null);
         Assert.Single(vm.Passages);
         Assert.Equal(movedId, Assert.Single(vm.ReviewPassages).Id);
+
+        // Da correggere, «Elimina» non cancella: sposta tra gli scartati, da dove si può riportare tra i corretti.
         vm.ShowReviewTabCommand.Execute(null);
         vm.SelectedPassage = vm.ReviewPassages[0];
+        Dispatcher.UIThread.RunJobs();
+        Assert.True(Visible("Elimina"));
+        vm.DeletePassageCommand.Execute(null);
+        Assert.Empty(vm.ReviewPassages);
+        Assert.Equal(discardedAtStart + 1, vm.DiscardedPassages.Count);
+        w.GetVisualDescendants().OfType<UiButton>().Single(b => b.Name == "DiscardedTabButton").Command!.Execute(null);
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(vm.DiscardedPassages, vm.ShownPassages);
+        vm.SelectedPassage = vm.DiscardedPassages.Single(p => p.Id == movedId);
+        Dispatcher.UIThread.RunJobs();
+        ScreenshotTests.Save(w, "09d-risultati-scartati");
+        Assert.False(Visible("Elimina") || Visible("Da correggere"));
+        Assert.True(Visible("Sposta in passaggi validi") && Visible("Modifica"));
+        Assert.False(vm.DeletePassageCommand.CanExecute(null));
         vm.MoveToValidCommand.Execute(null);
         vm.ShowValidTabCommand.Execute(null);
         Dispatcher.UIThread.RunJobs();
         Assert.Equal(2, vm.Passages.Count);
         Assert.True(vm.ExportResultsCommand.CanExecute(null));
         ScreenshotTests.Save(w, "09-risultati");
-        double[] speeds = [.. vm.Passages.Select(p => p.Passage.Speed.SpeedKmh).Order()];
+        double[] speeds = [.. vm.Passages.Select(p => p.Passage!.Speed.SpeedKmh).Order()];
         Assert.Equal(2, speeds.Length);
         Assert.InRange(speeds[0], 50 * 0.96, 50 * 1.04);
         Assert.InRange(speeds[1], 72 * 0.96, 72 * 1.04);
