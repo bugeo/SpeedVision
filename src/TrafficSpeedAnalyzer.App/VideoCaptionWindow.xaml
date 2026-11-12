@@ -1,0 +1,38 @@
+<ui:FluentWindow x:Class="TrafficSpeedAnalyzer.App.VideoCaptionWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:loc="clr-namespace:TrafficSpeedAnalyzer.App.Localization"
+                 xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                 Title="{loc:Tr 'Genera video'}"
+                 Icon="pack://application:,,,/Assets/app.ico"
+                 Width="460" SizeToContent="Height" ResizeMode="NoResize"
+                 WindowStartupLocation="CenterOwner"
+                 ExtendsContentIntoTitleBar="True"
+                 WindowBackdropType="Mica"
+                 WindowCornerPreference="Round">
+    <!--
+      Prima di generare il video dei passaggi: indirizzo della strada e data, scritti in basso nel video
+      (via a sinistra, data a destra). Vuoti = non scritti. Con «Offusca auto e persone» (attivo all'apertura) i veicoli sono pixellati. DataContext = MainViewModel.
+    -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ui:TitleBar Grid.Row="0" Title="{loc:Tr 'Genera video'}" ShowMinimize="False" ShowMaximize="False" />
+        <StackPanel Grid.Row="1" Margin="20,8,20,20">
+            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,0,0,12"
+                       Text="{loc:Tr 'Scritte in basso nel video: la via a sinistra, la data a destra. Lascia vuoto ciò che non vuoi mostrare.'}" />
+            <TextBlock Style="{StaticResource Label}" Text="{loc:Tr 'Indirizzo della strada'}" Margin="0,0,0,4" />
+            <ui:TextBox x:Name="AddressBox" Text="{Binding VideoAddress, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="{loc:Tr 'es. Via Roma 12, Milano'}" />
+            <TextBlock Style="{StaticResource Label}" Text="{loc:Tr 'Data del video'}" Margin="0,12,0,4" />
+            <ui:TextBox Text="{Binding VideoDateText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="{loc:Tr 'es. 10/11/2026'}" />
+            <CheckBox Content="{loc:Tr 'Offusca auto e persone'}" IsChecked="{Binding VideoBlurVehicles}" Margin="0,14,0,0" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                <ui:Button Content="{loc:Tr 'Annulla'}" Padding="16,8" Margin="0,0,8,0" IsCancel="True" />
+                <ui:Button Content="{loc:Tr 'Genera video…'}" Icon="{ui:SymbolIcon VideoClip24}" Appearance="Primary" Padding="16,8"
+                           IsDefault="True" Click="OnGenerateClick" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</ui:FluentWindow>

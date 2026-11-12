@@ -118,7 +118,7 @@ public static class PassageImageRenderer
         return Encode(small, quality);
     }
 
-    private static void DrawLine(SKCanvas canvas, SKPoint a, SKPoint b, SKColor color, string label, bool highlighted, float unit)
+    internal static void DrawLine(SKCanvas canvas, SKPoint a, SKPoint b, SKColor color, string label, bool highlighted, float unit)
     {
         float width = (highlighted ? 4.5f : 2.5f) * unit;
         using (SKPaint shadow = Stroke(Shadow, (highlighted ? 8 : 5) * unit))
@@ -209,10 +209,10 @@ public static class PassageImageRenderer
         return data.ToArray();
     }
 
-    private static SKPaint Stroke(SKColor color, float width) =>
+    internal static SKPaint Stroke(SKColor color, float width) =>
         new() { Color = color, Style = SKPaintStyle.Stroke, StrokeWidth = width, IsAntialias = true };
 
-    private static SKPaint Fill(SKColor color) =>
+    internal static SKPaint Fill(SKColor color) =>
         new() { Color = color, Style = SKPaintStyle.Fill, IsAntialias = true };
 
     private static SKTypeface Typeface(bool bold, bool mono)
@@ -231,7 +231,7 @@ public static class PassageImageRenderer
     }
 
     /// <summary>Una riga di testo misurata: larghezza e altezza come la riga di testo in WPF (interlinea del carattere).</summary>
-    private sealed class TextLine : IDisposable
+    internal sealed class TextLine : IDisposable
     {
         private readonly string _text;
         private readonly SKFont _font;

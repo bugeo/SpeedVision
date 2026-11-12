@@ -33,7 +33,7 @@ public sealed partial class MainViewModel
 
     /// <summary>L'utente ha confermato le linee tra le corsie.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsRoadDividersStepActive), nameof(ShowRoadProceed), nameof(ShowConfirmRoadDividers), nameof(IsVideoStepActive))]
+    [NotifyPropertyChangedFor(nameof(IsRoadDividersStepActive), nameof(ShowRoadProceed), nameof(ShowConfirmRoadDividers), nameof(IsVideoStepActive), nameof(LaneVanishingPoint))]
     private bool _roadDividersConfirmed;
 
     public bool HasRoad => Road is not null;
@@ -63,7 +63,7 @@ public sealed partial class MainViewModel
     /// <summary>Vertici della zona verde spostati dalla posizione proposta (0–4).</summary>
     public int RoadCornersMoved =>
         Road is { } r && VideoWidth > 0 && VideoHeight > 0
-            ? r.Corners.Zip(RoadLayout.CreateCentered(1, VideoWidth, VideoHeight).Corners).Count(c => Point2.Distance(c.First, c.Second) > 0.5)
+            ? r.CornersAtStart(VideoWidth, VideoHeight).Count(atStart => !atStart)
             : 0;
 
     /// <summary>
@@ -88,8 +88,7 @@ public sealed partial class MainViewModel
     /// «Le linee sono a posto», così le linee non vengono confermate senza essere state portate sulle separazioni.
     /// </summary>
     public bool RoadDividersMoved =>
-        Road is { Lanes: > 1 } r &&
-        r.Dividers.Zip(RoadLayout.EvenDividers(r.Lanes)).Any(d => Math.Abs(d.First.Left - d.Second.Left) > 0.002 || Math.Abs(d.First.Right - d.Second.Right) > 0.002);
+        Road is { Lanes: > 1 } r && !r.DividersAtStart;
 
     /// <summary>«Le linee sono a posto» è visibile: passo delle linee in corso e almeno una linea spostata.</summary>
     public bool ShowConfirmRoadDividers => IsRoadDividersStepActive && RoadDividersMoved;
@@ -111,8 +110,19 @@ public sealed partial class MainViewModel
             : Loc.S($"{r.Lanes} corsie."))
         : Loc.T("Strada non indicata: l'analisi considera tutta l'immagine.");
 
+    /// <summary>
+    /// Nella calibrazione, con almeno 2 corsie sistemate: dove potrebbe essere il punto di fuga dei segmenti A e B,
+    /// calcolato dai bordi della strada e dalle linee tra le corsie (corsie larghe uguali). Solo un aiuto visivo
+    /// (pallino rosso): l'utente decide se orientare i segmenti verso di esso.
+    /// </summary>
+    public Point2? LaneVanishingPoint =>
+        SelectedStep == WorkflowStep.Calibration && Road is { Lanes: > 1 } r && RoadDividersConfirmed && VideoWidth > 0
+            ? LaneVanishing.Estimate(r, VideoWidth, VideoHeight)
+            : null;
+
     partial void OnRoadChanged(RoadLayout? value)
     {
+        OnPropertyChanged(nameof(LaneVanishingPoint));
         OnPropertyChanged(nameof(IsRoadLanesStepActive));
         OnPropertyChanged(nameof(ShowRoadLanesCard));
         OnPropertyChanged(nameof(IsRoadAreaStepActive));

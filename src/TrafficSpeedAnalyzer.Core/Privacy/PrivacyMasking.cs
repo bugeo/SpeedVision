@@ -93,6 +93,46 @@ public static class PrivacyMasking
     }
 
     /// <summary>
+    /// Riquadro stimato fuori dalla traccia (prima del primo rilevamento o dopo l'ultimo), al più
+    /// <paramref name="maxFrames"/> fotogrammi lontano: prosegue il moto dei primi (o degli ultimi) rilevamenti e si
+    /// allarga con la distanza, per pixellare un veicolo che entra o esce dall'inquadratura prima di essere seguito.
+    /// Null dentro la traccia, troppo lontano o con meno di due rilevamenti.
+    /// </summary>
+    public static BoundingBox? ExtrapolatedBox(IReadOnlyList<TrackPoint> points, long frameIndex, int maxFrames)
+    {
+        if (points.Count < 2)
+        {
+            return null;
+        }
+
+        List<TrackPoint> sorted = [.. points.OrderBy(p => p.FrameIndex)];
+        bool before = frameIndex < sorted[0].FrameIndex;
+        if (!before && frameIndex <= sorted[^1].FrameIndex)
+        {
+            return null;
+        }
+
+        // Velocità del riquadro dai rilevamenti a un estremo (circa mezzo secondo di traccia, se c'è).
+        TrackPoint edge = before ? sorted[0] : sorted[^1];
+        TrackPoint other = before
+            ? sorted.FirstOrDefault(p => p.FrameIndex - edge.FrameIndex >= 15) ?? sorted[^1]
+            : sorted.LastOrDefault(p => edge.FrameIndex - p.FrameIndex >= 15) ?? sorted[0];
+        long gap = Math.Abs(frameIndex - edge.FrameIndex);
+        if (gap > maxFrames || other.FrameIndex == edge.FrameIndex)
+        {
+            return null;
+        }
+
+        double steps = (frameIndex - edge.FrameIndex) / (double)(other.FrameIndex - edge.FrameIndex);
+        BoundingBox a = edge.Box, b = other.Box;
+        double cx = a.X + (a.Width / 2) + (((b.X + (b.Width / 2)) - (a.X + (a.Width / 2))) * steps);
+        double cy = a.Y + (a.Height / 2) + (((b.Y + (b.Height / 2)) - (a.Y + (a.Height / 2))) * steps);
+        double grow = 1.2 + (0.02 * gap);
+        double w = a.Width * grow, h = a.Height * grow;
+        return new BoundingBox(cx - (w / 2), cy - (h / 2), w, h);
+    }
+
+    /// <summary>
     /// Pixella una zona di un'immagine (pixel interlacciati, es. BGR) sostituendo ogni blocco con il suo colore medio.
     /// I blocchi sono abbastanza grandi da rendere illeggibili targhe e volti, ma lasciano riconoscibile la forma del veicolo.
     /// </summary>

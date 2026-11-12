@@ -14,12 +14,17 @@ public sealed partial class MainViewModel
     public const double DefaultSpeedLimitKmh = 50;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SpeedLimitKmh), nameof(SpeedLimitError))]
+    [NotifyPropertyChangedFor(nameof(SpeedLimitKmh), nameof(SpeedLimitError), nameof(SpeedLimitButtonText))]
     private string _speedLimitText = DefaultSpeedLimitKmh.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>Limite in km/h; null se la casella è vuota o non valida.</summary>
     public double? SpeedLimitKmh =>
         double.TryParse(SpeedLimitText.Trim().Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out double v) && v > 0 ? v : null;
+
+    /// <summary>Etichetta del pulsante del limite nei risultati: «Limite: 50 km/h».</summary>
+    public string SpeedLimitButtonText => SpeedLimitKmh is { } limit
+        ? Loc.S($"Limite: {limit.ToString("0.#", Loc.Culture)} km/h")
+        : Loc.T("Limite");
 
     public string SpeedLimitError =>
         SpeedLimitKmh is not null ? string.Empty : Loc.T("Inserisci il limite in km/h, per esempio 50.");

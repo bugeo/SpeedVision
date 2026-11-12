@@ -638,11 +638,15 @@ public sealed partial class MainViewModel : ObservableObject, IAsyncDisposable
     {
         OnPropertyChanged(nameof(ShowEmptyState));
         ExportResultsCommand.NotifyCanExecuteChanged();
+        ExportVideoCommand.NotifyCanExecuteChanged();
+        RequestVideoCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnSelectedStepChanged(WorkflowStep value)
     {
         OnPropertyChanged(nameof(IsVideoStepActive));
+        OnPropertyChanged(nameof(LaneVanishingPoint));
+        OnPropertyChanged(nameof(ShowResultsButtons));
         // La modifica di un passaggio avviene nei risultati: cambiando passo si annulla.
         if (IsEditingPassage && value != WorkflowStep.Results)
         {

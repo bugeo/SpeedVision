@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using TrafficSpeedAnalyzer.App.ViewModels;
 using TrafficSpeedAnalyzer.Core.Calibration;
@@ -22,6 +23,7 @@ public partial class VideoViewport : UserControl
     private static readonly Color ColorA = Color.FromRgb(0x4C, 0xC2, 0xFF);
     private static readonly Color ColorB = Color.FromRgb(0xFF, 0xB5, 0x47);
     private static readonly Color ColorPoint = Color.FromRgb(0xFF, 0x5C, 0x8A);
+    private static readonly Color ColorLaneVanishing = Color.FromRgb(0xE5, 0x2B, 0x2B);
     private static readonly Color ColorMarker = Color.FromRgb(0x5E, 0xE0, 0x9A);
 
     private const double HandleHitPixels = 12;
@@ -98,6 +100,7 @@ public partial class VideoViewport : UserControl
     public static readonly DependencyProperty RefPointAProperty = Register(nameof(RefPointA), typeof(Point2?), null);
     public static readonly DependencyProperty RefPointBProperty = Register(nameof(RefPointB), typeof(Point2?), null);
     public static readonly DependencyProperty VanishingPointProperty = Register(nameof(VanishingPoint), typeof(Point2?), null);
+    public static readonly DependencyProperty LaneVanishingPointProperty = Register(nameof(LaneVanishingPoint), typeof(Point2?), null);
     public static readonly DependencyProperty BoxesProperty = Register(nameof(Boxes), typeof(IReadOnlyList<OverlayBox>), null);
     public static readonly DependencyProperty RegionProperty = Register(nameof(Region), typeof(BoundingBox?), null);
     public static readonly DependencyProperty ShowRegionProperty = Register(nameof(ShowRegion), typeof(bool), false);
@@ -152,6 +155,9 @@ public partial class VideoViewport : UserControl
     public Point2? RefPointB { get => (Point2?)GetValue(RefPointBProperty); set => SetValue(RefPointBProperty, value); }
 
     public Point2? VanishingPoint { get => (Point2?)GetValue(VanishingPointProperty); set => SetValue(VanishingPointProperty, value); }
+
+    /// <summary>Punto di fuga stimato da bordi e linee tra le corsie: pallino rosso, solo indicativo.</summary>
+    public Point2? LaneVanishingPoint { get => (Point2?)GetValue(LaneVanishingPointProperty); set => SetValue(LaneVanishingPointProperty, value); }
 
     /// <summary>Riquadri dei veicoli rilevati (analisi automatica).</summary>
     public IReadOnlyList<OverlayBox>? Boxes { get => (IReadOnlyList<OverlayBox>?)GetValue(BoxesProperty); set => SetValue(BoxesProperty, value); }
@@ -659,6 +665,7 @@ public partial class VideoViewport : UserControl
         }
 
         DrawVanishing(inv);
+        DrawLaneVanishing(inv);
 
         if (Mode is ViewportMode.PlacePoint or ViewportMode.PlaceRefA or ViewportMode.PlaceRefB && _mouse is { } cross && _dragLine is null)
         {
@@ -673,6 +680,62 @@ public partial class VideoViewport : UserControl
     /// Calibrazione con punto di fuga: i riferimenti A e B, il punto di fuga e le rette che li uniscono.
     /// Mentre si sceglie il punto di fuga le rette seguono il mouse.
     /// </summary>
+    /// <summary>
+    /// Punto di fuga stimato dalle corsie: pallino rosso con il bordo bianco e una scritta accanto. Se cade fuori
+    /// dall'immagine (di solito molto sopra), una freccia rossa sul bordo indica da che parte si trova.
+    /// </summary>
+    private void DrawLaneVanishing(double inv)
+    {
+        if (LaneVanishingPoint is not { } v)
+        {
+            return;
+        }
+
+        var red = new SolidColorBrush(ColorLaneVanishing);
+        string text = Loc.T("Punto di fuga stimato");
+        Point2 at = v;
+        if (v.X < 0 || v.X > VideoWidth || v.Y < 0 || v.Y > VideoHeight)
+        {
+            // Freccia sul bordo verso il punto: punta nella direzione del punto vero.
+            double margin = 24 * inv;
+            var center = new Point2(VideoWidth / 2, VideoHeight / 2);
+            Point2 d = v - center;
+            double tx = Math.Abs(d.X) < 1e-9 ? double.PositiveInfinity : ((VideoWidth / 2) - margin) / Math.Abs(d.X);
+            double ty = Math.Abs(d.Y) < 1e-9 ? double.PositiveInfinity : ((VideoHeight / 2) - margin) / Math.Abs(d.Y);
+            at = center + (d * Math.Min(tx, ty));
+            Point2 dir = d * (1 / d.Length);
+            Point2 side = new Point2(-dir.Y, dir.X) * (9 * inv);
+            Point2 tip = at + (dir * (12 * inv)), back = at - (dir * (8 * inv));
+            Overlay.Children.Add(new Polygon
+            {
+                Points = new PointCollection([new Point(tip.X, tip.Y), new Point(back.X + side.X, back.Y + side.Y), new Point(back.X - side.X, back.Y - side.Y)]),
+                Fill = red,
+                Stroke = Brushes.White,
+                StrokeThickness = 2 * inv,
+                StrokeLineJoin = PenLineJoin.Round,
+            });
+            text = Loc.T("Punto di fuga stimato (fuori dall'immagine)");
+        }
+        else
+        {
+            AddDot(v, 13 * inv, null, new SolidColorBrush(Color.FromArgb(150, 0, 0, 0)), 3 * inv);
+            AddDot(v, 8 * inv, red, Brushes.White, 2.5 * inv);
+        }
+
+        var label = new TextBlock
+        {
+            Text = text,
+            FontSize = 12 * inv,
+            FontWeight = FontWeights.SemiBold,
+            Foreground = Brushes.White,
+            Background = new SolidColorBrush(Color.FromArgb(200, 0, 0, 0)),
+            Padding = new Thickness(5 * inv, 2 * inv, 5 * inv, 2 * inv),
+        };
+        Canvas.SetLeft(label, at.X + (14 * inv));
+        Canvas.SetTop(label, at.Y - (10 * inv));
+        Overlay.Children.Add(label);
+    }
+
     private void DrawVanishing(double inv)
     {
         Point2? v = Mode == ViewportMode.PlaceVanishing ? _mouseAnywhere : VanishingPoint;
@@ -911,17 +974,36 @@ public partial class VideoViewport : UserControl
             if (EditRoad && EditRoadDividers)
             {
                 // Estremità: si spostano una per volta; il punto centrale sposta tutta la linea.
-                AddDot(l, 6 * inv, white, brush, 2.5 * inv);
-                AddDot(r, 6 * inv, white, brush, 2.5 * inv);
-                AddDot(Point2.Lerp(l, r, 0.5), 5 * inv, brush, white, 2 * inv);
+                // Finché nessuna linea è stata spostata, i pallini lampeggiano per indicare cosa trascinare.
+                if (road.DividersAtStart)
+                {
+                    AddBlinkDot(l, 6, inv);
+                    AddBlinkDot(r, 6, inv);
+                    AddBlinkDot(Point2.Lerp(l, r, 0.5), 5, inv);
+                }
+                else
+                {
+                    AddDot(l, 6 * inv, white, brush, 2.5 * inv);
+                    AddDot(r, 6 * inv, white, brush, 2.5 * inv);
+                    AddDot(Point2.Lerp(l, r, 0.5), 5 * inv, brush, white, 2 * inv);
+                }
             }
         }
 
         if (EditRoad)
         {
-            foreach (Point2 c in road.Corners)
+            // Vertici non ancora spostati: lampeggiano; quelli già spostati sono bianchi con il contorno verde.
+            bool[] atStart = road.CornersAtStart(VideoWidth, VideoHeight);
+            for (int i = 0; i < road.Corners.Count; i++)
             {
-                AddDot(c, 8 * inv, Brushes.White, brush, 3 * inv);
+                if (atStart[i] && !EditRoadDividers)
+                {
+                    AddBlinkDot(road.Corners[i], 8, inv);
+                }
+                else
+                {
+                    AddDot(road.Corners[i], 8 * inv, Brushes.White, brush, 3 * inv);
+                }
             }
         }
 
@@ -1125,6 +1207,47 @@ public partial class VideoViewport : UserControl
         Canvas.SetLeft(e, c.X - radius);
         Canvas.SetTop(e, c.Y - radius);
         Overlay.Children.Add(e);
+    }
+
+    /// <summary>Durata di un lampeggio.</summary>
+    private static readonly Duration BlinkHalfPeriod = new(TimeSpan.FromMilliseconds(550));
+
+    /// <summary>Pallino da spostare: verde pieno che si attenua, con un anello che si allarga (animazioni di WPF).</summary>
+    private void AddBlinkDot(Point2 c, double radius, double inv)
+    {
+        double r = radius * inv;
+        var ring = new Ellipse
+        {
+            Width = (r + (3 * inv)) * 2,
+            Height = (r + (3 * inv)) * 2,
+            Stroke = new SolidColorBrush(ColorRoad),
+            StrokeThickness = 2.5 * inv,
+            RenderTransformOrigin = new Point(0.5, 0.5),
+            RenderTransform = new ScaleTransform(),
+            IsHitTestVisible = false,
+        };
+        Canvas.SetLeft(ring, c.X - (ring.Width / 2));
+        Canvas.SetTop(ring, c.Y - (ring.Height / 2));
+        Overlay.Children.Add(ring);
+        double grow = 1 + (9 * inv / (r + (3 * inv)));
+        var scale = new DoubleAnimation(1, grow, BlinkHalfPeriod) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever };
+        ring.RenderTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scale);
+        ring.RenderTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scale);
+        ring.BeginAnimation(OpacityProperty, new DoubleAnimation(0.85, 0, BlinkHalfPeriod) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever });
+
+        var dot = new Ellipse
+        {
+            Width = r * 2,
+            Height = r * 2,
+            Fill = new SolidColorBrush(ColorRoad),
+            Stroke = Brushes.White,
+            StrokeThickness = 2.5 * inv,
+            IsHitTestVisible = false,
+        };
+        Canvas.SetLeft(dot, c.X - r);
+        Canvas.SetTop(dot, c.Y - r);
+        Overlay.Children.Add(dot);
+        dot.BeginAnimation(OpacityProperty, new DoubleAnimation(1, 0.4, BlinkHalfPeriod) { AutoReverse = true, RepeatBehavior = RepeatBehavior.Forever });
     }
 
     private static Point ToPoint(Point2 p) => new(p.X, p.Y);

@@ -1,0 +1,28 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="using:TrafficSpeedAnalyzer.Desktop.Localization"
+        xmlns:c="using:TrafficSpeedAnalyzer.Desktop.Controls"
+        x:Class="TrafficSpeedAnalyzer.Desktop.VideoCaptionWindow"
+        Title="{loc:Tr 'Genera video'}"
+        Icon="avares://SpeedVision/Assets/app.ico"
+        Width="460" SizeToContent="Height" CanResize="False" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+    <!--
+      Prima di generare il video dei passaggi: indirizzo della strada e data, scritti in basso nel video
+      (via a sinistra, data a destra). Vuoti = non scritti. Con «Offusca auto e persone» (attivo all'apertura) i veicoli sono pixellati. DataContext = MainViewModel.
+    -->
+    <StackPanel Margin="20,18,20,20" Spacing="6">
+        <TextBlock Classes="caption" TextWrapping="Wrap" Margin="0,0,0,8"
+                   Text="{loc:Tr 'Scritte in basso nel video: la via a sinistra, la data a destra. Lascia vuoto ciò che non vuoi mostrare.'}" />
+        <TextBlock Classes="label" Text="{loc:Tr 'Indirizzo della strada'}" />
+        <TextBox Name="AddressBox" Text="{Binding VideoAddress, Mode=TwoWay}" PlaceholderText="{loc:Tr 'es. Via Roma 12, Milano'}" />
+        <TextBlock Classes="label" Text="{loc:Tr 'Data del video'}" Margin="0,8,0,0" />
+        <TextBox Text="{Binding VideoDateText, Mode=TwoWay}" PlaceholderText="{loc:Tr 'es. 10/11/2026'}" />
+        <CheckBox Content="{loc:Tr 'Offusca auto e persone'}" IsChecked="{Binding VideoBlurVehicles}" Margin="0,12,0,0" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,16,0,0">
+            <c:UiButton Content="{loc:Tr 'Annulla'}" Padding="16,8" IsCancel="True" Click="OnCancelClick" />
+            <c:UiButton Content="{loc:Tr 'Genera video…'}" Icon="{StaticResource Icon.VideoClip24}" Appearance="Primary" Padding="16,8"
+                        IsDefault="True" Click="OnGenerateClick" />
+        </StackPanel>
+    </StackPanel>
+</Window>

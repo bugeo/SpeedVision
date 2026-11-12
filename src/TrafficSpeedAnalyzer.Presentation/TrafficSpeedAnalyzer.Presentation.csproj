@@ -30,5 +30,7 @@
   <ItemGroup>
     <!-- Logo nell'intestazione del rapporto PDF. -->
     <EmbeddedResource Include="Assets\speedvision-logo-report.jpg" LogicalName="speedvision-logo-report.jpg" />
+    <!-- Logo sovrimpresso nel video dei passaggi (bianco e azzurro su fondo trasparente). -->
+    <EmbeddedResource Include="Assets\speedvision-logo.png" LogicalName="speedvision-logo.png" />
   </ItemGroup>
 </Project>

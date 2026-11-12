@@ -189,6 +189,7 @@
                                          RefPointA="{Binding ShownRefPointA}"
                                          RefPointB="{Binding ShownRefPointB}"
                                          VanishingPoint="{Binding ShownVanishingPoint}"
+                                         LaneVanishingPoint="{Binding LaneVanishingPoint}"
                                          Boxes="{Binding OverlayBoxes}"
                                          Region="{Binding AnalysisRegionBox}"
                                          ShowRegion="{Binding ShowAnalysisRegion}"
@@ -289,6 +290,52 @@
 
             <!-- ═══════════ Pannello del passo ═══════════ -->
             <Border Grid.Column="0" Background="{StaticResource PanelBackground}" BorderBrush="{StaticResource CardBorder}" BorderThickness="0,0,1,0">
+              <DockPanel>
+                <!-- Pulsanti dei risultati, fissi in fondo -->
+                <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource CardBorder}" BorderThickness="0,1,0,0" Padding="16,10,16,12">
+                    <Border.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="SelectedStep" Converter="{StaticResource EnumIn}" ConverterParameter="Results" />
+                            <Binding Path="HasAnyPassage" />
+                        </MultiBinding>
+                    </Border.IsVisible>
+                    <!-- Pulsanti dei risultati, fissi in fondo al pannello, su una riga: limite e statistiche si aprono in una
+                         finestra; «Esporta» e «Genera video» chiedono subito dove salvare. Il filtro è sopra l'elenco. -->
+                    <UniformGrid Columns="4" Margin="-2">
+                        <c:UiButton HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="2,8" Margin="2,2"
+                                    Click="OnResultsPanelClick" Tag="Limit" Appearance="Transparent"
+                                    ToolTip.Tip="{loc:Tr 'Limite di velocità'}">
+                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon.Gauge24}" Width="20" Height="20" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding SpeedLimitButtonText}" FontSize="11" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </c:UiButton>
+                        <c:UiButton HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="2,8" Margin="2,2"
+                                    Click="OnResultsPanelClick" Tag="Stats" Appearance="Transparent"
+                                    ToolTip.Tip="{loc:Tr 'Statistiche e distribuzione delle velocità'}">
+                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon.DataHistogram24}" Width="20" Height="20" HorizontalAlignment="Center" />
+                                <TextBlock Text="{loc:Tr 'Statistiche'}" FontSize="11" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </c:UiButton>
+                        <c:UiButton HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="2,8" Margin="2,2"
+                                    Command="{Binding ExportResultsCommand}" Appearance="Transparent"
+                                    ToolTip.Tip="{Binding ExportButtonText}">
+                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon.ArrowDownload24}" Width="20" Height="20" HorizontalAlignment="Center" />
+                                <TextBlock Text="{loc:Tr 'Esporta'}" FontSize="11" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </c:UiButton>
+                        <c:UiButton HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="2,8" Margin="2,2"
+                                    Command="{Binding RequestVideoCommand}" Appearance="Transparent"
+                                    ToolTip.Tip="{loc:Tr 'Un video con il tragitto di ogni veicolo corretto, il cronometro tra le linee e la velocità. I veicoli sono pixellati.'}">
+                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource Icon.VideoClip24}" Width="20" Height="20" HorizontalAlignment="Center" />
+                                <TextBlock Text="{loc:Tr 'Genera video'}" FontSize="11" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </c:UiButton>
+                    </UniformGrid>
+                </Border>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Name="StepScroller">
                     <Panel Margin="18,14,18,18">
 
@@ -487,13 +534,19 @@
                             <TextBlock Classes="caption" Margin="0,0,0,14"
                                        Text="{loc:Tr 'Trova e segue i veicoli nel video. Le velocità arrivano con la calibrazione.'}" />
 
-                            <!-- Avvio: verde finché l'analisi non è stata completata, poi l'azione principale è «Procedi» -->
-                            <Grid Margin="0,0,0,12" ColumnDefinitions="Auto,*" IsVisible="{Binding !IsAnalyzing}">
-                                <c:UiButton Content="{loc:Tr 'Analizza tutto'}" Icon="{StaticResource Icon.Play24}" HorizontalAlignment="Stretch" Padding="12,10" Margin="0,0,4,0"
-                                            Command="{Binding StartAnalysisCommand}" CommandParameter="all"
-                                            Appearance="{Binding HasCompletedAnalysis, Converter={StaticResource Pick}, ConverterParameter=Secondary|Primary}" />
-                                <!-- Verde solo se il video non è sul primo fotogramma e l'analisi non è ancora stata fatta -->
-                                <c:UiButton Grid.Column="1" HorizontalAlignment="Stretch" Padding="8,10" Margin="4,0,0,0"
+                            <!-- Avvio, un pulsante sotto l'altro. Uno solo è verde finché l'analisi non è stata completata:
+                                 «Dal fotogramma corrente» se il video è avanti, altrimenti «Analizza tutto». Poi l'azione principale è «Procedi». -->
+                            <StackPanel Margin="0,0,0,12" Spacing="8" IsVisible="{Binding !IsAnalyzing}">
+                                <c:UiButton Content="{loc:Tr 'Analizza tutto'}" Icon="{StaticResource Icon.Play24}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="12,10"
+                                            Command="{Binding StartAnalysisCommand}" CommandParameter="all">
+                                    <c:UiButton.Appearance>
+                                        <MultiBinding Converter="{StaticResource AllTrue}" ConverterParameter="!|!;Primary|Secondary">
+                                            <Binding Path="IsBeyondFirstFrame" />
+                                            <Binding Path="HasCompletedAnalysis" />
+                                        </MultiBinding>
+                                    </c:UiButton.Appearance>
+                                </c:UiButton>
+                                <c:UiButton Content="{loc:Tr 'Dal fotogramma corrente'}" Icon="{StaticResource Icon.Play24}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="12,10"
                                             Command="{Binding StartAnalysisCommand}" CommandParameter="current"
                                             ToolTip.Tip="{loc:Tr 'Analizza dal fotogramma mostrato nel video fino alla fine'}">
                                     <c:UiButton.Appearance>
@@ -502,9 +555,8 @@
                                             <Binding Path="HasCompletedAnalysis" />
                                         </MultiBinding>
                                     </c:UiButton.Appearance>
-                                    <TextBlock Text="{loc:Tr 'Dal fotogramma corrente'}" TextWrapping="Wrap" TextAlignment="Center" />
                                 </c:UiButton>
-                            </Grid>
+                            </StackPanel>
                             <c:UiButton Content="{loc:Tr 'Interrompi'}" Appearance="Danger" Icon="{StaticResource Icon.Stop24}" HorizontalAlignment="Stretch" Padding="12,10" Margin="0,0,0,12"
                                         Command="{Binding StopAnalysisCommand}" IsVisible="{Binding IsAnalyzing}" />
 
@@ -879,161 +931,6 @@
                         <StackPanel IsVisible="{Binding SelectedStep, Converter={StaticResource EnumIn}, ConverterParameter=Results}">
                             <TextBlock Classes="stepTitle" Text="{loc:Tr 'Risultati'}" Margin="0,0,0,14" />
 
-                            <!-- Filtro: chiuso all'inizio; il titolo dice se è attivo -->
-                            <Expander Classes="card" IsExpanded="False" Margin="0,0,0,8" IsVisible="{Binding HasAnyPassage}">
-                                <Expander.Header>
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <PathIcon Data="{StaticResource Icon.Filter24}" Width="16" Height="16" />
-                                        <TextBlock Text="{Binding FilterHeaderText}" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </Expander.Header>
-                                <StackPanel>
-                                    <c:UiButton HorizontalAlignment="Right" Content="{loc:Tr 'Mostra tutti'}" Appearance="Transparent" Padding="8,3" FontSize="12" Margin="0,0,0,6"
-                                                Command="{Binding ResetFilterCommand}" IsVisible="{Binding IsFilterActive}" />
-                                    <Grid ColumnDefinitions="Auto,96,Auto">
-                                        <TextBlock Classes="label" Text="{loc:Tr 'Velocità superiore a'}" Margin="0,0,10,0" />
-                                        <TextBox Grid.Column="1" Text="{Binding MinSpeedFilterText, Mode=TwoWay}" PlaceholderText="{loc:Tr 'tutte'}" />
-                                        <TextBlock Grid.Column="2" Classes="label" Text="km/h" Margin="8,0,0,0" />
-                                    </Grid>
-                                    <TextBlock Classes="caption" Foreground="{StaticResource ErrorBrush}" Margin="0,4,0,0"
-                                               Text="{Binding MinSpeedFilterError}" IsVisible="{Binding MinSpeedFilterError, Converter={StaticResource Truthy}}" />
-                                    <WrapPanel Margin="0,10,0,0">
-                                        <CheckBox Content="{loc:Tr 'Auto'}" IsChecked="{Binding ShowCars}" Margin="0,0,14,4" />
-                                        <CheckBox Content="{loc:Tr 'Moto'}" IsChecked="{Binding ShowMotorcycles}" Margin="0,0,14,4" />
-                                        <CheckBox Content="{loc:Tr 'Autobus'}" IsChecked="{Binding ShowBuses}" Margin="0,0,14,4" />
-                                        <CheckBox Content="{loc:Tr 'Camion'}" IsChecked="{Binding ShowTrucks}" Margin="0,0,14,4" />
-                                        <CheckBox Content="{loc:Tr 'Misure manuali'}" IsChecked="{Binding ShowManual}" Margin="0,0,14,4" />
-                                    </WrapPanel>
-                                    <WrapPanel Margin="0,6,0,0">
-                                        <TextBlock Classes="label" Text="{loc:Tr 'Verso'}" Margin="0,0,12,4" />
-                                        <CheckBox Content="A → B" IsChecked="{Binding ShowAToB}" Margin="0,0,14,4" />
-                                        <CheckBox Content="B → A" IsChecked="{Binding ShowBToA}" Margin="0,0,14,4" />
-                                    </WrapPanel>
-                                    <!-- Punto di misura delle misure automatiche: ruota anteriore (icona della ruota nell'elenco) o spigolo del riquadro -->
-                                    <WrapPanel Margin="0,6,0,0">
-                                        <TextBlock Classes="label" Text="{loc:Tr 'Punto di misura'}" Margin="0,0,12,4" />
-                                        <CheckBox IsChecked="{Binding ShowWheelReference}" Margin="0,0,14,4"
-                                                  ToolTip.Tip="{loc:Tr 'Misure automatiche fatte dove la ruota anteriore tocca l\'asfalto'}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <c:WheelIcon Margin="0,0,6,0" VerticalAlignment="Center" />
-                                                <TextBlock Text="{loc:Tr 'Ruota anteriore'}" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </CheckBox>
-                                        <CheckBox Content="{loc:Tr 'Spigolo del riquadro'}" IsChecked="{Binding ShowBoxReference}" Margin="0,0,14,4"
-                                                  ToolTip.Tip="{loc:Tr 'Misure automatiche fatte sullo spigolo del riquadro, quando la ruota non è stata trovata con sicurezza'}" />
-                                    </WrapPanel>
-                                    <DockPanel Margin="0,6,0,0" IsVisible="{Binding ShowLaneFilter}">
-                                        <TextBlock DockPanel.Dock="Left" Classes="label" Text="{loc:Tr 'Corsia'}" Margin="0,0,12,4" VerticalAlignment="Top" />
-                                        <ItemsControl ItemsSource="{Binding LaneFilters}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <WrapPanel />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <CheckBox Content="{Binding Label}" IsChecked="{Binding IsShown}" Margin="0,0,14,4" />
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </DockPanel>
-                                    <TextBlock Classes="caption" Margin="0,4,0,0" Text="{loc:Tr 'Statistiche ed esportazione usano solo i passaggi mostrati.'}" />
-                                </StackPanel>
-                            </Expander>
-
-                            <!-- Limite di velocità: chi lo supera è in rosso nel grafico e nell'elenco -->
-                            <Border Classes="card" Padding="14,12" Margin="0,0,0,8" IsVisible="{Binding HasAnyPassage}">
-                                <StackPanel>
-                                    <Grid ColumnDefinitions="*,80,Auto">
-                                        <TextBlock Classes="sectionTitle" Text="{loc:Tr 'Limite di velocità'}" Margin="0" VerticalAlignment="Center" />
-                                        <TextBox Grid.Column="1" Text="{Binding SpeedLimitText, Mode=TwoWay}" />
-                                        <TextBlock Grid.Column="2" Classes="label" Text="km/h" Margin="8,0,0,0" />
-                                    </Grid>
-                                    <TextBlock Classes="caption" Foreground="{StaticResource ErrorBrush}" Margin="0,4,0,0"
-                                               Text="{Binding SpeedLimitError}" IsVisible="{Binding SpeedLimitError, Converter={StaticResource Truthy}}" />
-                                </StackPanel>
-                            </Border>
-
-                            <UniformGrid Columns="4" Margin="0,0,0,12">
-                                <Border Classes="card" Margin="0,0,6,0" Padding="12">
-                                    <StackPanel>
-                                        <TextBlock Text="{loc:Tr 'Media'}" Classes="label" />
-                                        <TextBlock Text="{Binding MeanSpeedText}" FontSize="22" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" />
-                                        <TextBlock Text="km/h" Classes="label" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Classes="card" Margin="3,0" Padding="12">
-                                    <StackPanel>
-                                        <TextBlock Text="{loc:Tr 'Minima'}" Classes="label" />
-                                        <TextBlock Text="{Binding MinSpeedText}" FontSize="22" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" />
-                                        <TextBlock Text="km/h" Classes="label" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Classes="card" Margin="3,0" Padding="12">
-                                    <StackPanel>
-                                        <TextBlock Text="{loc:Tr 'Massima'}" Classes="label" />
-                                        <TextBlock Text="{Binding MaxSpeedText}" FontSize="22" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextPrimary}" />
-                                        <TextBlock Text="km/h" Classes="label" />
-                                    </StackPanel>
-                                </Border>
-                                <!-- Veicoli oltre il limite (tra quelli mostrati dal filtro) -->
-                                <Border Classes="card" Margin="6,0,0,0" Padding="12">
-                                    <StackPanel>
-                                        <TextBlock Text="{loc:Tr 'Multe'}" Classes="label" />
-                                        <TextBlock Text="{Binding FinesText}" FontSize="22" FontWeight="SemiBold" FontFamily="{StaticResource MonoFont}"
-                                                   Foreground="{Binding HasFines, Converter={StaticResource FinesBrush}}" />
-                                        <TextBlock Text="{loc:Tr 'veicoli'}" Classes="label" />
-                                    </StackPanel>
-                                </Border>
-                            </UniformGrid>
-
-                            <!-- Grafico: passaggi per fascia di velocità (0–100 km/h a scaglioni di 5) -->
-                            <Border Classes="card" Padding="14,12" Margin="0,0,0,12" IsVisible="{Binding ShowHistogram}">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,8">
-                                        <TextBlock Classes="sectionTitle" Text="{loc:Tr 'Distribuzione delle velocità'}" Margin="0" VerticalAlignment="Center" />
-                                        <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Classes="caption" Text="{Binding HistogramMaxText}" />
-                                    </Grid>
-                                    <Border BorderBrush="{StaticResource CardBorder}" BorderThickness="1,0,0,1" Padding="2,0,0,0">
-                                        <ItemsControl ItemsSource="{Binding SpeedHistogram}" Height="130">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <UniformGrid Rows="1" />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <StackPanel VerticalAlignment="Bottom" Margin="1,0" ToolTip.Tip="{Binding ToolTip}" Background="Transparent">
-                                                        <TextBlock Text="{Binding CountText}" FontSize="10" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondary}" />
-                                                        <Border Classes="bar" Classes.over="{Binding OverLimit}" Height="{Binding BarHeight}" />
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </Border>
-                                    <!-- Asse delle velocità: limite inferiore di ogni fascia (uno sì e uno no) -->
-                                    <ItemsControl ItemsSource="{Binding SpeedHistogram}" Margin="3,3,0,0">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <UniformGrid Rows="1" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Label}" FontSize="10" HorizontalAlignment="Left" Foreground="{StaticResource TextTertiary}" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                    <TextBlock Classes="caption" HorizontalAlignment="Center" Margin="0,2,0,0" Text="{loc:Tr 'Velocità (km/h) · numero di passaggi per fascia di 5 km/h'}" />
-                                </StackPanel>
-                            </Border>
-
-                            <c:UiButton Content="{Binding ExportButtonText}" Appearance="Primary" Icon="{StaticResource Icon.ArrowDownload24}"
-                                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="12,10" Margin="0,0,0,8"
-                                        Command="{Binding ExportResultsCommand}" />
-                            <c:UiButton Content="{loc:Tr 'Apri la cartella esportata'}" Icon="{StaticResource Icon.Folder24}"
-                                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding OpenExportFolderCommand}" />
-
                             <!-- Tre linguette, con un'icona e il numero (il nome nel suggerimento): auto verde con la V = corretti, auto rossa
                                  con la matita = da correggere, auto grigia con il cestino = scartati.
                                  Passaggi corretti (statistiche, grafico, esportazione e PDF), da correggere
@@ -1113,6 +1010,15 @@
                                         </StackPanel>
                                     </RadioButton>
                                 </StackPanel>
+                                <!-- Filtro: si apre in una finestra; evidenziato quando è attivo -->
+                                <c:UiButton DockPanel.Dock="Left" Click="OnResultsPanelClick" Tag="Filter" Padding="8,4" Margin="0,0,10,0" VerticalAlignment="Center"
+                                            Appearance="{Binding IsFilterActive, Converter={StaticResource Pick}, ConverterParameter=Secondary|Transparent}"
+                                            ToolTip.Tip="{loc:Tr 'Filtra i passaggi mostrati'}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <PathIcon Data="{StaticResource Icon.Filter24}" Width="16" Height="16" />
+                                        <TextBlock Text="{Binding FilterHeaderText}" FontSize="12" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </c:UiButton>
                                 <TextBlock Text="{Binding PassageCountText}" Classes="label" VerticalAlignment="Center" />
                             </DockPanel>
                             <TextBlock Classes="caption" Margin="0,0,0,10" IsVisible="{Binding ShowNoPassageHint}"
@@ -1201,6 +1107,7 @@
                         </StackPanel>
                     </Panel>
                 </ScrollViewer>
+              </DockPanel>
             </Border>
         </Grid>
     </Grid>

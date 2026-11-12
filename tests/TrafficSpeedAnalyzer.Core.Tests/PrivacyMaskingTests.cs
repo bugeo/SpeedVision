@@ -96,4 +96,26 @@ public class PrivacyMaskingTests
         // Auto vicina: il blocco cresce con il riquadro, ma la sagoma resta riconoscibile (20×30 blocchi).
         Assert.Equal(20, PrivacyMasking.BlockSize(400, 600, 1080));
     }
+
+    [Fact]
+    public void ExtrapolatedBox_FollowsTheMotionOutsideTheTrack()
+    {
+        // Veicolo che va verso destra di 10 px a fotogramma, seguito dal fotogramma 100 al 200.
+        static TrackPoint P(long f) => new(f, f / 30.0, new BoundingBox(f * 10, 100, 200, 80), VehicleClass.Car, 0.9f, false);
+        List<TrackPoint> pts = [.. Enumerable.Range(0, 11).Select(i => P(100 + (i * 10)))];
+
+        // 30 fotogrammi prima: centro 300 px più a sinistra, riquadro più grande per l'incertezza.
+        BoundingBox before = PrivacyMasking.ExtrapolatedBox(pts, 70, 120)!.Value;
+        Assert.Equal(1000 + 100 - 300, before.X + (before.Width / 2), 6);
+        Assert.Equal(140, before.Y + (before.Height / 2), 6);
+        Assert.True(before.Width > 200);
+
+        // Dopo la fine prosegue verso destra.
+        BoundingBox after = PrivacyMasking.ExtrapolatedBox(pts, 210, 120)!.Value;
+        Assert.Equal(2000 + 100 + 100, after.X + (after.Width / 2), 6);
+
+        // Dentro la traccia o troppo lontano: niente.
+        Assert.Null(PrivacyMasking.ExtrapolatedBox(pts, 150, 120));
+        Assert.Null(PrivacyMasking.ExtrapolatedBox(pts, 0, 60));
+    }
 }

@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using TrafficSpeedAnalyzer.App.Localization;
 using TrafficSpeedAnalyzer.App.ViewModels;
 using TrafficSpeedAnalyzer.Core.Calibration;
@@ -27,6 +28,7 @@ public sealed class VideoViewport : UserControl
     private static readonly Color ColorA = Color.FromRgb(0x4C, 0xC2, 0xFF);
     private static readonly Color ColorB = Color.FromRgb(0xFF, 0xB5, 0x47);
     private static readonly Color ColorPoint = Color.FromRgb(0xFF, 0x5C, 0x8A);
+    private static readonly Color ColorLaneVanishing = Color.FromRgb(0xE5, 0x2B, 0x2B);
     private static readonly Color ColorMarker = Color.FromRgb(0x5E, 0xE0, 0x9A);
     private static readonly Color ColorRoad = Color.FromRgb(0x2F, 0xCB, 0x79);
     private static readonly IBrush White = Brushes.White;
@@ -145,6 +147,7 @@ public sealed class VideoViewport : UserControl
     public static readonly StyledProperty<Point2?> RefPointAProperty = AvaloniaProperty.Register<VideoViewport, Point2?>(nameof(RefPointA));
     public static readonly StyledProperty<Point2?> RefPointBProperty = AvaloniaProperty.Register<VideoViewport, Point2?>(nameof(RefPointB));
     public static readonly StyledProperty<Point2?> VanishingPointProperty = AvaloniaProperty.Register<VideoViewport, Point2?>(nameof(VanishingPoint));
+    public static readonly StyledProperty<Point2?> LaneVanishingPointProperty = AvaloniaProperty.Register<VideoViewport, Point2?>(nameof(LaneVanishingPoint));
     public static readonly StyledProperty<IReadOnlyList<OverlayBox>?> BoxesProperty = AvaloniaProperty.Register<VideoViewport, IReadOnlyList<OverlayBox>?>(nameof(Boxes));
     public static readonly StyledProperty<BoundingBox?> RegionProperty = AvaloniaProperty.Register<VideoViewport, BoundingBox?>(nameof(Region));
     public static readonly StyledProperty<bool> ShowRegionProperty = AvaloniaProperty.Register<VideoViewport, bool>(nameof(ShowRegion));
@@ -186,6 +189,9 @@ public sealed class VideoViewport : UserControl
     public Point2? RefPointB { get => GetValue(RefPointBProperty); set => SetValue(RefPointBProperty, value); }
 
     public Point2? VanishingPoint { get => GetValue(VanishingPointProperty); set => SetValue(VanishingPointProperty, value); }
+
+    /// <summary>Punto di fuga stimato da bordi e linee tra le corsie: pallino rosso, solo indicativo.</summary>
+    public Point2? LaneVanishingPoint { get => GetValue(LaneVanishingPointProperty); set => SetValue(LaneVanishingPointProperty, value); }
 
     public IReadOnlyList<OverlayBox>? Boxes { get => GetValue(BoxesProperty); set => SetValue(BoxesProperty, value); }
 
@@ -714,6 +720,7 @@ public sealed class VideoViewport : UserControl
         }
 
         DrawVanishing(c);
+        DrawLaneVanishing(c);
 
         if (Mode is ViewportMode.PlacePoint or ViewportMode.PlaceRefA or ViewportMode.PlaceRefB && _mouse is { } cross && _dragLine is null)
         {
@@ -722,6 +729,51 @@ public sealed class VideoViewport : UserControl
             c.Line(new Point2(cross.X, 0), new Point2(cross.X, VideoHeight), guide, 1, dashed: false);
             c.Dot(cross, 8, null, new SolidColorBrush(ColorPoint), 1.5);
         }
+    }
+
+    /// <summary>
+    /// Punto di fuga stimato dalle corsie: pallino rosso con il bordo bianco e una scritta accanto. Se cade fuori
+    /// dall'immagine (di solito molto sopra), una freccia rossa sul bordo indica da che parte si trova.
+    /// </summary>
+    private void DrawLaneVanishing(Painter c)
+    {
+        if (LaneVanishingPoint is not { } v)
+        {
+            return;
+        }
+
+        var red = new SolidColorBrush(ColorLaneVanishing);
+        var labelBack = new SolidColorBrush(Color.FromArgb(200, 0, 0, 0));
+        (Point2 shown, Point2? toward) = LaneVanishingMarker(v, 24 * c.Inv);
+        if (toward is { } dir)
+        {
+            // Freccia sul bordo verso il punto: punta nella direzione del punto vero.
+            Point2 side = new Point2(-dir.Y, dir.X) * (9 * c.Inv);
+            Point2 tip = shown + (dir * (12 * c.Inv)), back = shown - (dir * (8 * c.Inv));
+            c.Polygon([tip, back + side, back - side], red, White, 2, dashed: false);
+            c.Label(shown + new Point2(14 * c.Inv, -10 * c.Inv), Loc.T("Punto di fuga stimato (fuori dall'immagine)"), 12, FontWeight.SemiBold, White, labelBack, 5, 2);
+            return;
+        }
+
+        c.Dot(v, 13, null, new SolidColorBrush(Color.FromArgb(150, 0, 0, 0)), 3);
+        c.Dot(v, 8, red, White, 2.5);
+        c.Label(v + new Point2(14 * c.Inv, -10 * c.Inv), Loc.T("Punto di fuga stimato"), 12, FontWeight.SemiBold, White, labelBack, 5, 2);
+    }
+
+    /// <summary>Dove disegnare il punto di fuga: dentro l'immagine il punto stesso; fuori, il bordo e la direzione verso il punto.</summary>
+    private (Point2 Shown, Point2? Toward) LaneVanishingMarker(Point2 v, double margin)
+    {
+        if (v.X >= 0 && v.X <= VideoWidth && v.Y >= 0 && v.Y <= VideoHeight)
+        {
+            return (v, null);
+        }
+
+        var center = new Point2(VideoWidth / 2, VideoHeight / 2);
+        Point2 d = v - center;
+        double tx = Math.Abs(d.X) < 1e-9 ? double.PositiveInfinity : ((VideoWidth / 2) - margin) / Math.Abs(d.X);
+        double ty = Math.Abs(d.Y) < 1e-9 ? double.PositiveInfinity : ((VideoHeight / 2) - margin) / Math.Abs(d.Y);
+        Point2 shown = center + (d * Math.Min(tx, ty));
+        return (shown, d * (1 / d.Length));
     }
 
     private void DrawVanishing(Painter c)
@@ -845,9 +897,11 @@ public sealed class VideoViewport : UserControl
     {
         if (road is null)
         {
+            SetBlinking(false);
             return;
         }
 
+        bool blinking = false;
         var brush = new SolidColorBrush(ColorRoad);
         c.Polygon(
             road.Corners,
@@ -864,25 +918,87 @@ public sealed class VideoViewport : UserControl
             if (EditRoad && EditRoadDividers)
             {
                 // Estremità: si spostano una per volta; il punto centrale sposta tutta la linea.
-                c.Dot(l, 6, White, brush, 2.5);
-                c.Dot(r, 6, White, brush, 2.5);
-                c.Dot(Point2.Lerp(l, r, 0.5), 5, brush, White, 2);
+                // Finché nessuna linea è stata spostata, i pallini lampeggiano per indicare cosa trascinare.
+                if (road.DividersAtStart)
+                {
+                    BlinkDot(c, l, 6);
+                    BlinkDot(c, r, 6);
+                    BlinkDot(c, Point2.Lerp(l, r, 0.5), 5);
+                    blinking = true;
+                }
+                else
+                {
+                    c.Dot(l, 6, White, brush, 2.5);
+                    c.Dot(r, 6, White, brush, 2.5);
+                    c.Dot(Point2.Lerp(l, r, 0.5), 5, brush, White, 2);
+                }
             }
         }
 
         if (EditRoad)
         {
-            foreach (Point2 corner in road.Corners)
+            // Vertici non ancora spostati: lampeggiano; quelli già spostati sono bianchi con il contorno verde.
+            bool[] atStart = road.CornersAtStart(VideoWidth, VideoHeight);
+            for (int i = 0; i < road.Corners.Count; i++)
             {
-                c.Dot(corner, 8, White, brush, 3);
+                if (atStart[i] && !EditRoadDividers)
+                {
+                    BlinkDot(c, road.Corners[i], 8);
+                    blinking = true;
+                }
+                else
+                {
+                    c.Dot(road.Corners[i], 8, White, brush, 3);
+                }
             }
         }
+
+        SetBlinking(blinking);
 
         for (int lane = 0; lane < road.Lanes; lane++)
         {
             Point2 center = road.LaneCenter(lane);
             c.Label(center + new Point2(-28 * c.Inv, -9 * c.Inv), Loc.S($"Corsia {lane + 1}"), 12, FontWeight.SemiBold, Black, brush, 5, 1);
         }
+    }
+
+    // ───────────── Pallini che lampeggiano ─────────────
+
+    /// <summary>Durata di un lampeggio (ms).</summary>
+    private const int BlinkPeriodMs = 1100;
+
+    private DispatcherTimer? _blinkTimer;
+
+    /// <summary>Fase del lampeggio, da 0 (pieno) a 1 (tenue) e ritorno.</summary>
+    private static double BlinkPhase => (1 - Math.Cos(Environment.TickCount64 % BlinkPeriodMs / (double)BlinkPeriodMs * 2 * Math.PI)) / 2;
+
+    /// <summary>Pallino da spostare: verde pieno che si attenua, con un anello che si allarga.</summary>
+    private static void BlinkDot(Painter c, Point2 center, double radius)
+    {
+        double k = BlinkPhase;
+        c.Dot(center, radius + 3 + (9 * k), null, new SolidColorBrush(ColorRoad, 0.85 * (1 - k)), 2.5);
+        c.Dot(center, radius, new SolidColorBrush(ColorRoad, 1 - (0.6 * k)), new SolidColorBrush(Colors.White, 1 - (0.4 * k)), 2.5);
+    }
+
+    /// <summary>Ridisegna di continuo solo mentre c'è qualcosa che lampeggia.</summary>
+    private void SetBlinking(bool on)
+    {
+        if (on && _blinkTimer is null)
+        {
+            _blinkTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(40), DispatcherPriority.Render, (_, _) => Redraw());
+            _blinkTimer.Start();
+        }
+        else if (!on && _blinkTimer is not null)
+        {
+            _blinkTimer.Stop();
+            _blinkTimer = null;
+        }
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        SetBlinking(false);
     }
 
     private void DrawTrack(Painter c)

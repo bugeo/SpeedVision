@@ -27,12 +27,31 @@ public partial class MainWindow
         Closing += OnClosing;
         PreviewKeyDown += OnPreviewKeyDown;
         _vm.PropertyChanged += OnViewModelPropertyChanged;
+        _vm.VideoCaptionRequested += OnVideoCaptionRequested;
         DragOver += OnDragOver;
         Drop += OnDrop;
     }
 
     private void OnSettingsClick(object sender, RoutedEventArgs e) =>
         new SettingsWindow { Owner = this, DataContext = _vm }.ShowDialog();
+
+    /// <summary>«Genera video»: prima indirizzo e data da scrivere nel video, poi la scelta del file.</summary>
+    private async void OnVideoCaptionRequested(object? sender, EventArgs e)
+    {
+        if (new VideoCaptionWindow { Owner = this, DataContext = _vm }.ShowDialog() == true)
+        {
+            await _vm.ExportVideoCommand.ExecuteAsync(null);
+        }
+    }
+
+    /// <summary>Pulsanti in fondo ai risultati: filtro, limite o statistiche in una finestra (il Tag dice quale).</summary>
+    private void OnResultsPanelClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: string name } && Enum.TryParse(name, out ResultsPanel panel))
+        {
+            new ResultsPanelWindow(_vm, panel) { Owner = this }.ShowDialog();
+        }
+    }
 
     private void ApplyLanguage() =>
         Language = System.Windows.Markup.XmlLanguage.GetLanguage(Loc.Culture.IetfLanguageTag);

@@ -88,6 +88,21 @@ public sealed record RoadLayout
     /// <summary>Stessa strada con il numero di corsie indicato e linee equidistanti.</summary>
     public RoadLayout WithLanes(int lanes) => new(Corners, EvenDividers(lanes));
 
+    /// <summary>
+    /// Per ciascun vertice: è ancora nella posizione proposta da <see cref="CreateCentered"/> (entro mezzo pixel),
+    /// cioè l'utente non l'ha ancora spostato.
+    /// </summary>
+    public bool[] CornersAtStart(double imageWidth, double imageHeight)
+    {
+        IReadOnlyList<Point2> start = CreateCentered(1, imageWidth, imageHeight).Corners;
+        return [.. Corners.Select((c, i) => Point2.Distance(c, start[i]) <= 0.5)];
+    }
+
+    /// <summary>Le linee tra le corsie sono ancora equidistanti come all'inizio (nessuna spostata); falso con una sola corsia.</summary>
+    public bool DividersAtStart =>
+        Lanes > 1 &&
+        Dividers.Zip(EvenDividers(Lanes)).All(d => Math.Abs(d.First.Left - d.Second.Left) <= 0.002 && Math.Abs(d.First.Right - d.Second.Right) <= 0.002);
+
     public static IReadOnlyList<LaneDivider> EvenDividers(int lanes)
     {
         int n = Math.Clamp(lanes, 1, MaxLanes);

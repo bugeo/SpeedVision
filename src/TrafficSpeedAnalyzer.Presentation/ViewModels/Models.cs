@@ -90,6 +90,15 @@ public enum PassageSource
 }
 
 /// <summary>Linguette dei risultati.</summary>
+/// <summary>Riquadro aperto sotto i pulsanti dei risultati (uno alla volta).</summary>
+public enum ResultsPanel
+{
+    None,
+    Filter,
+    Limit,
+    Stats,
+}
+
 public enum ResultsTab
 {
     /// <summary>Passaggi corretti: statistiche, grafico, esportazione e PDF.</summary>

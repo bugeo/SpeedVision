@@ -42,6 +42,7 @@ public partial class MainWindow : Window
         Closing += OnClosing;
         AddHandler(KeyDownEvent, OnPreviewKeyDown, RoutingStrategies.Tunnel);
         _vm.PropertyChanged += OnViewModelPropertyChanged;
+        _vm.VideoCaptionRequested += OnVideoCaptionRequested;
         AddHandler(DragDrop.DragOverEvent, OnDragOver);
         AddHandler(DragDrop.DropEvent, OnDrop);
     }
@@ -56,6 +57,24 @@ public partial class MainWindow : Window
 
     private void OnSettingsClick(object? sender, RoutedEventArgs e) =>
         _ = new SettingsWindow { DataContext = _vm }.ShowDialog(this);
+
+    /// <summary>«Genera video»: prima indirizzo e data da scrivere nel video, poi la scelta del file.</summary>
+    private async void OnVideoCaptionRequested(object? sender, EventArgs e)
+    {
+        if (await new VideoCaptionWindow { DataContext = _vm }.ShowDialog<bool>(this))
+        {
+            await _vm.ExportVideoCommand.ExecuteAsync(null);
+        }
+    }
+
+    /// <summary>Pulsanti in fondo ai risultati: filtro, limite o statistiche in una finestra (il Tag dice quale).</summary>
+    private void OnResultsPanelClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Control { Tag: string name } && Enum.TryParse(name, out ResultsPanel panel))
+        {
+            _ = new ResultsPanelWindow(_vm, panel).ShowDialog(this);
+        }
+    }
 
     private void OnCloseStatusClick(object? sender, RoutedEventArgs e) => _vm.IsStatusOpen = false;
 

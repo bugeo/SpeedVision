@@ -261,5 +261,21 @@ public class GuidedWorkflowTests
         Assert.InRange(speeds[0], 50 * 0.96, 50 * 1.04);
         Assert.InRange(speeds[1], 72 * 0.96, 72 * 1.04);
         Assert.Equal(2, vm.Passages.Count(p => p.IsWheelReference || p.IsAutomatic));
+
+        // Video dei passaggi: un MP4 con i due veicoli corretti, a fotogrammi costanti.
+        string video = Path.Combine(Path.GetTempPath(), "tsa-passaggi-" + Guid.NewGuid().ToString("N") + ".mp4");
+        platform.NextFile = video;
+        try
+        {
+            Assert.True(vm.ExportVideoCommand.CanExecute(null));
+            _ = vm.ExportVideoCommand.ExecuteAsync(null);
+            await ScreenshotTests.WaitUntil(() => !vm.ExportVideoCommand.IsRunning, "video dei passaggi", 120);
+            Assert.True(File.Exists(video), vm.StatusMessage);
+            Assert.True(new FileInfo(video).Length > 10_000);
+        }
+        finally
+        {
+            File.Delete(video);
+        }
     }
 }

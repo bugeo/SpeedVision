@@ -160,6 +160,30 @@ public sealed partial class MainViewModel
     [NotifyCanExecuteChangedFor(nameof(OpenExportFolderCommand))]
     private bool _hasExportFolder;
 
+    /// <summary>
+    /// Riquadro mostrato nella finestra aperta dai pulsanti in fondo ai risultati: filtro, limite di velocità o
+    /// statistiche (None con la finestra chiusa).
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsFilterPanelOpen), nameof(IsLimitPanelOpen), nameof(IsStatsPanelOpen))]
+    private ResultsPanel _openResultsPanel;
+
+    /// <summary>Pulsanti in fondo al pannello: solo nei risultati, con almeno un veicolo.</summary>
+    public bool ShowResultsButtons => SelectedStep == WorkflowStep.Results && HasAnyPassage;
+
+    public bool IsFilterPanelOpen => OpenResultsPanel == ResultsPanel.Filter;
+
+    public bool IsLimitPanelOpen => OpenResultsPanel == ResultsPanel.Limit;
+
+    public bool IsStatsPanelOpen => OpenResultsPanel == ResultsPanel.Stats;
+
+    [RelayCommand]
+    private void ToggleResultsPanel(string? name)
+    {
+        ResultsPanel panel = Enum.TryParse(name, out ResultsPanel p) ? p : ResultsPanel.None;
+        OpenResultsPanel = OpenResultsPanel == panel ? ResultsPanel.None : panel;
+    }
+
     public bool HasPassages => Passages.Count > 0;
 
     /// <summary>Con il filtro attivo il pulsante dice quanti passaggi verranno esportati.</summary>
@@ -285,6 +309,7 @@ public sealed partial class MainViewModel
         SelectedPassage = ShownPassages.FirstOrDefault(p => p.Id == selectedId);
         OnPropertyChanged(nameof(HasPassages));
         OnPropertyChanged(nameof(HasAnyPassage));
+        OnPropertyChanged(nameof(ShowResultsButtons));
         OnPropertyChanged(nameof(ShowNoPassageHint));
         OnPropertyChanged(nameof(ValidTabText));
         OnPropertyChanged(nameof(ReviewTabText));
@@ -305,6 +330,8 @@ public sealed partial class MainViewModel
         RefreshSpeedLimitMarks();
         RefreshHistogram();
         ExportResultsCommand.NotifyCanExecuteChanged();
+        ExportVideoCommand.NotifyCanExecuteChanged();
+        RequestVideoCommand.NotifyCanExecuteChanged();
     }
 
     private void RefreshPassageTimes()
@@ -471,6 +498,8 @@ public sealed partial class MainViewModel
     {
         SaveEditCommand.NotifyCanExecuteChanged();
         ExportResultsCommand.NotifyCanExecuteChanged();
+        ExportVideoCommand.NotifyCanExecuteChanged();
+        RequestVideoCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(EditHintText));
     }
 

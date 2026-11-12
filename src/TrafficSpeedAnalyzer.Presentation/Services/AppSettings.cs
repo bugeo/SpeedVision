@@ -28,6 +28,9 @@ public sealed class AppSettings
 
     public string? LastExportFolder { get; set; }
 
+    /// <summary>Ultimo indirizzo scritto per il video dei passaggi (spesso si riprende sempre la stessa strada).</summary>
+    public string? LastVideoAddress { get; set; }
+
     public bool AutoAdvance { get; set; } = true;
 
     public int AutoAdvanceFrames { get; set; } = 1;

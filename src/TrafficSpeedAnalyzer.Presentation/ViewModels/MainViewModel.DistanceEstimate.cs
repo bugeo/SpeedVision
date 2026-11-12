@@ -656,6 +656,8 @@ public sealed partial class MainViewModel
         UseReferenceVehicleCommand.NotifyCanExecuteChanged();
         UseManualLengthCommand.NotifyCanExecuteChanged();
         ExportResultsCommand.NotifyCanExecuteChanged();
+        ExportVideoCommand.NotifyCanExecuteChanged();
+        RequestVideoCommand.NotifyCanExecuteChanged();
         RefreshReferenceOverlay();
     }
 
