@@ -247,6 +247,37 @@ public static class RoadPerspective
         return (Toward(new Point2(box.CenterX - half, box.Bottom)), Toward(new Point2(box.CenterX + half, box.Bottom)));
     }
 
+    /// <summary>
+    /// Linee A e B per i punti in cui le ruote del veicolo di riferimento toccano terra (nel fotogramma in cui è al
+    /// centro), dirette verso il punto di fuga: la distanza tra le due linee sulla strada è il passo del veicolo. Si
+    /// estendono sotto il veicolo e verso l'orizzonte per coprire le altre corsie; senza prospettiva sono
+    /// perpendicolari alla strada.
+    /// </summary>
+    public static (LineSegment A, LineSegment B) LinesAtWheels(
+        CenterFrameMeasurement m, WheelContacts wheels, HorizonEstimate? horizon, double imageWidth, double imageHeight)
+    {
+        BoundingBox box = m.Best.Box;
+        LineSegment Through(Point2 p, Point2 dir, double back, double forward) =>
+            new(ClampInside(p, p - (dir * back), imageWidth, imageHeight), ClampInside(p, p + (dir * forward), imageWidth, imageHeight));
+
+        if (horizon is { HasPerspective: true } h && m.Horizontal)
+        {
+            LineSegment Toward(Point2 p)
+            {
+                Point2 d = h.VanishingPoint - p;
+                double dist = d.Length;
+                Point2 dir = d * (1 / dist);
+                return Through(p, dir, 1.2 * box.Height, Math.Min(3 * box.Height, 0.85 * dist));
+            }
+
+            return (Toward(wheels.Left), Toward(wheels.Right));
+        }
+
+        Point2 up = m.Horizontal ? new Point2(0, -1) : new Point2(1, 0);
+        double back = m.Horizontal ? 0.6 * box.Height : 1.5 * box.Width, forward = m.Horizontal ? 2 * box.Height : 1.5 * box.Width;
+        return (Through(wheels.Left, up, back, forward), Through(wheels.Right, up, back, forward));
+    }
+
     /// <summary>Descrizione per l'utente e per info.txt.</summary>
     public static string Describe(HorizonEstimate? h) => h switch
     {

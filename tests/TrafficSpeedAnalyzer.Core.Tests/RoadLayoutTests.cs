@@ -158,11 +158,12 @@ public class RoadLayoutTests
     }
 
     [Fact]
-    public void ManualVehicle_KeepsTheLength()
+    public void ManualVehicle_KeepsTheWheelbase()
     {
-        ReferenceVehicle v = ReferenceVehicle.Manual(4.256);
+        ReferenceVehicle v = ReferenceVehicle.Manual(2.556);
         Assert.True(v.IsManual);
-        Assert.Equal(4256, v.LengthMm);
+        Assert.True(v.HasWheelbase);
+        Assert.Equal(2556, v.WheelbaseMm);
         Assert.Equal("anno non indicato", v.Years);
     }
 

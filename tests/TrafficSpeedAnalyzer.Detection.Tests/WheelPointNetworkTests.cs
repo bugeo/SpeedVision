@@ -46,6 +46,21 @@ public sealed class WheelPointNetworkTests
     }
 
     [Fact]
+    public void Calibration_UsesBothGroundContacts()
+    {
+        // Calibrazione con l'auto: dalle ruote trovate dalla rete ai due punti a terra per le linee A e B.
+        (byte[] px, Fixture f) = Load();
+        var box = new BoundingBox(f.Box[0], f.Box[1], f.Box[2], f.Box[3]);
+        IReadOnlyList<WheelCandidate> wheels = WheelPointNetwork.Shared.Locate(px, f.Width, f.Height, f.Width * 3, [box])[0];
+
+        Core.Calibration.WheelContacts c = Core.Calibration.VehicleWheels.FromCandidates(wheels, box)!.Value;
+
+        Assert.InRange(c.Left.X, f.Truth[0][0] - 3, f.Truth[0][0] + 3);
+        Assert.InRange(c.Right.X, f.Truth[1][0] - 3, f.Truth[1][0] + 3);
+        Assert.InRange(c.Right.Y, f.Truth[1][1] - 3, f.Truth[1][1] + 3);
+    }
+
+    [Fact]
     public void Locate_SkipsBoxesTooSmall()
     {
         (byte[] px, Fixture f) = Load();

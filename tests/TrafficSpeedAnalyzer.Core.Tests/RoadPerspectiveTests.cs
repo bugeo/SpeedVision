@@ -175,6 +175,38 @@ public class RoadPerspectiveTests
     }
 
     [Fact]
+    public void LinesAtWheels_AreOneWheelbaseApart_OnEveryLane()
+    {
+        var scene = new PinholeScene();
+        const double wheelbase = 2.6, kmh = 40;
+        List<TrackPoint> refTrack = scene.Track(PinholeScene.NearLane, 4.36, kmh);
+        CenterFrameMeasurement reference = Measure(refTrack);
+        CenterFrameMeasurement second = Measure(scene.Track(PinholeScene.FarLane, 3.84, 45));
+        HorizonEstimate horizon = RoadPerspective.FromTwoReferences(reference, 4.36, second, 3.84, 0, PinholeScene.W, PinholeScene.H)!;
+
+        // Punti in cui le ruote toccano terra nel fotogramma scelto (lato vicino dell'auto, mezzo passo per parte).
+        double x = -15 + (kmh / 3.6 * reference.Best.TimeSeconds);
+        var wheels = new WheelContacts(scene.Ground(x - (wheelbase / 2), PinholeScene.NearLane), scene.Ground(x + (wheelbase / 2), PinholeScene.NearLane));
+
+        (LineSegment a, LineSegment b) = RoadPerspective.LinesAtWheels(reference, wheels, horizon, PinholeScene.W, PinholeScene.H);
+        // Ogni linea passa per il punto a terra della sua ruota.
+        Assert.True(Point2.Distance(ClosestOn(a, wheels.Left), wheels.Left) < 0.5);
+        Assert.True(Point2.Distance(ClosestOn(b, wheels.Right), wheels.Right) < 0.5);
+
+        List<TrackPoint> farCar = scene.Track(PinholeScene.FarLane, 4.1, 50, phase: 0.017);
+        List<TrackPoint> nearCar = scene.Track(PinholeScene.NearLane, 4.6, 70, phase: 0.009, leftToRight: false);
+        Assert.InRange(SpeedWith(a, b, wheelbase, nearCar), 70 * 0.98, 70 * 1.02);
+        Assert.InRange(SpeedWith(a, b, wheelbase, farCar), 50 * 0.98, 50 * 1.02);
+    }
+
+    private static Point2 ClosestOn(LineSegment s, Point2 p)
+    {
+        Point2 d = s.End - s.Start;
+        double t = Point2.Dot(p - s.Start, d) / Point2.Dot(d, d);
+        return s.Start + (d * t);
+    }
+
+    [Fact]
     public void StatisticalHorizon_FromManyCars_OnTwoLanes()
     {
         var scene = new PinholeScene();

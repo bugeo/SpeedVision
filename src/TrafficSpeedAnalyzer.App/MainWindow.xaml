@@ -681,18 +681,18 @@
                                             <ui:Button Grid.Column="1" Content="{loc:Tr 'Non lo so'}" Margin="8,0,0,0" Padding="12,8"
                                                        Command="{Binding SkipReferenceVehicleCommand}" ToolTip="{loc:Tr 'Passa all\'auto successiva'}" />
                                         </Grid>
-                                        <!-- Lunghezza inserita a mano, se il modello non è nell'elenco -->
+                                        <!-- Passo inserito a mano, se il modello non è nell'elenco -->
                                         <TextBlock Style="{StaticResource Caption}" Margin="0,10,0,4"
-                                                   Text="{loc:Tr 'Oppure scrivi la lunghezza dell\'auto:'}" />
+                                                   Text="{loc:Tr 'Oppure scrivi il passo dell\'auto (distanza tra i centri delle ruote):'}" />
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="96" />
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <ui:TextBox Text="{Binding ManualLengthText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="4,25" ClearButtonEnabled="False" />
+                                            <ui:TextBox Text="{Binding ManualLengthText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="2,60" ClearButtonEnabled="False" />
                                             <TextBlock Grid.Column="1" Style="{StaticResource Label}" Text="{loc:Tr 'metri'}" Margin="8,0,8,0" VerticalAlignment="Center" />
-                                            <ui:Button Grid.Column="2" Content="{loc:Tr 'Usa questa lunghezza'}" HorizontalAlignment="Stretch" Padding="10,7"
+                                            <ui:Button Grid.Column="2" Content="{loc:Tr 'Usa questo passo'}" HorizontalAlignment="Stretch" Padding="10,7"
                                                        Command="{Binding UseManualLengthCommand}">
                                                 <ui:Button.Style>
                                                     <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">

@@ -6,15 +6,21 @@ using TrafficSpeedAnalyzer.Core.Calibration;
 using TrafficSpeedAnalyzer.Core.Detection;
 using TrafficSpeedAnalyzer.Core.Geometry;
 using TrafficSpeedAnalyzer.Core.Localization;
+using TrafficSpeedAnalyzer.Detection;
+using TrafficSpeedAnalyzer.Video;
 
 namespace TrafficSpeedAnalyzer.App.ViewModels;
 
-/// <summary>Auto riconosciuta dall'utente (modello da scheda tecnica e misura al centro dell'immagine).</summary>
-public sealed record RecognizedVehicle(int TrackId, ReferenceVehicle Vehicle, CenterFrameMeasurement Measurement);
+/// <summary>
+/// Auto riconosciuta dall'utente: modello (con il passo da scheda tecnica), fotogramma in cui è al centro
+/// dell'immagine e punti in cui le sue ruote toccano terra. <see cref="CenterFrameMeasurement.LengthPixels"/> è il
+/// passo visto nell'immagine (distanza tra i due punti lungo la strada).
+/// </summary>
+public sealed record RecognizedVehicle(int TrackId, ReferenceVehicle Vehicle, CenterFrameMeasurement Measurement, WheelContacts Wheels);
 
 /// <summary>
-/// Calibrazione con un'auto riconosciuta: la prima (nella corsia più vicina) dà le linee A e B, con perno
-/// sugli spigoli bassi del suo riquadro (distanza = sua lunghezza); la seconda (nella corsia più lontana)
+/// Calibrazione con un'auto riconosciuta: la prima (nella corsia più vicina) dà le linee A e B, per i punti in
+/// cui le sue ruote toccano terra (distanza = suo passo); la seconda (nella corsia più lontana)
 /// non aggiunge linee ma dà l'orizzonte: le due linee ruotano attorno al perno verso il punto di fuga, così
 /// la distanza tra A e B è la stessa su tutte le corsie.
 /// </summary>
@@ -34,8 +40,9 @@ public sealed record ReferenceChoice(
 /// Calibrazione con un'auto di lunghezza nota. L'analisi (passo precedente) ha già tracciato tutti i
 /// veicoli; entrando nella calibrazione l'app giudica se la ripresa lo permette (camera perpendicolare
 /// alla strada: le auto non cambiano grandezza attraversando l'immagine). Poi propone le auto una alla
-/// volta e chiede il modello, oppure la lunghezza inserita a mano. Prima un'auto della corsia più vicina:
-/// le linee A e B partono dagli spigoli bassi del suo riquadro. Con più corsie poi un'auto della corsia più
+/// volta e chiede il modello, oppure il passo inserito a mano. Prima un'auto della corsia più vicina:
+/// le linee A e B passano per i punti in cui le sue ruote toccano terra (trovati dalla rete delle ruote) e
+/// distano quanto il suo passo. Con più corsie poi un'auto della corsia più
 /// lontana, che orienta le stesse due linee verso il punto di fuga; se non se ne riconosce nessuna,
 /// l'orizzonte si stima dalla grandezza di tutte le auto. Le linee attraversano tutta la strada.
 /// L'utente può correggere le linee; le velocità si ricalcolano senza rifare l'analisi.
@@ -96,7 +103,7 @@ public sealed partial class MainViewModel
     public string ManualLengthError =>
         string.IsNullOrWhiteSpace(ManualLengthText) || ManualLengthMeters is not null
             ? string.Empty
-            : Loc.S($"Inserisci una lunghezza tra {ReferenceVehicle.MinManualMeters:0} e {ReferenceVehicle.MaxManualMeters:0} metri, per esempio 4,25.");
+            : Loc.S($"Inserisci un passo tra {ReferenceVehicle.MinManualMeters:0.0} e {ReferenceVehicle.MaxManualMeters:0.0} metri, per esempio 2,60.");
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(UseReferenceVehicleCommand))]
@@ -156,8 +163,8 @@ public sealed partial class MainViewModel
     public string SecondCarDetail => _reference?.Second is { } s ? CarDetail(s.Vehicle) : string.Empty;
 
     private static string CarDetail(ReferenceVehicle v) => v.IsManual
-        ? Loc.S($"Lunghezza {v.LengthMeters:0.00} m (inserita a mano)")
-        : string.Create(It, $"{v.DisplayName} · lunghezza {v.LengthMeters:0.00} m");
+        ? Loc.S($"Passo {v.WheelbaseMeters:0.00} m (inserito a mano)")
+        : string.Create(It, $"{v.DisplayName} · ") + Loc.S($"passo {v.WheelbaseMeters:0.00} m");
 
     /// <summary>«Salta: va bene così» alla prima richiesta dell'auto della corsia lontana (non durante una modifica).</summary>
     public bool ShowSkipSecond => IsIdentifyingSecond && _reference!.Second is null;
@@ -203,12 +210,12 @@ public sealed partial class MainViewModel
         {
             if (IsIdentifyingSecond)
             {
-                return Loc.S($"Auto {_candidateIndex + 1} di {_referenceCandidates.Count}, corsia lontana: serve a orientare le linee A e B. Scegli il modello o scrivi la lunghezza.");
+                return Loc.S($"Auto {_candidateIndex + 1} di {_referenceCandidates.Count}, corsia lontana: serve a orientare le linee A e B. Scegli il modello o scrivi il passo.");
             }
 
             if (_reference is { } r && !_editingFirst)
             {
-                return Loc.S($"Linee A e B sulla {r.Vehicle.DisplayName} ({r.Vehicle.LengthMeters:0.00} m). ") +
+                return Loc.S($"Linee A e B sulle ruote della {r.Vehicle.DisplayName} (passo {r.Vehicle.WheelbaseMeters:0.00} m). ") +
                     RoadPerspective.Describe(r.Horizon) + Loc.T(" Se non coincidono, trascinale.");
             }
 
@@ -219,7 +226,7 @@ public sealed partial class MainViewModel
 
             return _referenceCandidates.Count == 0
                 ? Loc.T("Nessuna auto ripresa per intero al centro dell'immagine. Calibra con due riferimenti misurati sul campo.")
-                : Loc.S($"Auto {_candidateIndex + 1} di {_referenceCandidates.Count}{(HasLanes ? Loc.T(", passata nella corsia più vicina") : string.Empty)}. Se la riconosci scegli il modello o scrivi la lunghezza, altrimenti «Non lo so».");
+                : Loc.S($"Auto {_candidateIndex + 1} di {_referenceCandidates.Count}{(HasLanes ? Loc.T(", passata nella corsia più vicina") : string.Empty)}. Se la riconosci scegli il modello o scrivi il passo, altrimenti «Non lo so».");
         }
     }
 
@@ -229,7 +236,7 @@ public sealed partial class MainViewModel
     /// </summary>
     private static string? CatalogNote =>
         ReferenceVehicleCatalog.All.Count == 0
-            ? Loc.S($"Elenco delle auto non disponibile: {ReferenceVehicleCatalog.Problems.FirstOrDefault()} Puoi comunque scrivere la lunghezza dell'auto.")
+            ? Loc.S($"Elenco delle auto non disponibile: {ReferenceVehicleCatalog.Problems.FirstOrDefault()} Puoi comunque scrivere il passo dell'auto.")
             : ReferenceVehicleCatalog.Problems.Count > 0
                 ? Loc.S($"Elenco delle auto: {ReferenceVehicleCatalog.Problems.Count} righe del file {ReferenceVehicleCatalog.Source} non sono valide e sono state ignorate (dettagli nel registro).")
                 : null;
@@ -275,9 +282,9 @@ public sealed partial class MainViewModel
         ? Loc.S($"Riferimento: {r.Vehicle.DisplayName}, {r.Vehicle.LengthMeters:0.00} m.")
         : string.Empty;
 
-    /// <summary>Distanza usata per i calcoli: misurata a mano oppure lunghezza del veicolo di riferimento.</summary>
+    /// <summary>Distanza usata per i calcoli: misurata a mano oppure passo del veicolo di riferimento.</summary>
     private double? EffectiveDistanceMeters =>
-        EstimateDistanceFromVehicle ? _reference?.Vehicle.LengthMeters : IsDistanceKnownMode || IsVanishingMode ? DistanceMeters : null;
+        EstimateDistanceFromVehicle ? _reference?.Vehicle.WheelbaseMeters : IsDistanceKnownMode || IsVanishingMode ? DistanceMeters : null;
 
     partial void OnEstimateDistanceFromVehicleChanged(bool value)
     {
@@ -415,34 +422,83 @@ public sealed partial class MainViewModel
     }
 
     [RelayCommand(CanExecute = nameof(CanUseReferenceVehicle))]
-    private void UseReferenceVehicle()
+    private async Task UseReferenceVehicleAsync()
     {
         if (SelectedReferenceVehicle is { } vehicle)
         {
-            UseVehicle(vehicle);
+            await UseVehicleAsync(vehicle);
         }
     }
 
-    /// <summary>«Usa questa lunghezza»: l'utente conosce la lunghezza dell'auto ma non il modello.</summary>
+    /// <summary>«Usa questo passo»: l'utente conosce il passo dell'auto ma non il modello.</summary>
     [RelayCommand(CanExecute = nameof(CanUseManualLength))]
-    private void UseManualLength()
+    private async Task UseManualLengthAsync()
     {
         if (ManualLengthMeters is { } meters)
         {
-            UseVehicle(ReferenceVehicle.Manual(meters));
+            await UseVehicleAsync(ReferenceVehicle.Manual(meters));
+        }
+    }
+
+    /// <summary>
+    /// Punti in cui le due ruote verso la camera toccano terra, nel fotogramma in cui l'auto è al centro (rete delle
+    /// ruote); null se non si trovano entrambe.
+    /// </summary>
+    private async Task<WheelContacts?> FindWheelsAsync(CenterFrameMeasurement m)
+    {
+        if (_session is not { } session || VideoWidth <= 0 || VideoHeight <= 0)
+        {
+            return null;
+        }
+
+        try
+        {
+            VideoFrame frame = await session.Preview.GetFrameAsync((int)m.Best.FrameIndex);
+            double kx = frame.Width / (double)VideoWidth, ky = frame.Height / (double)VideoHeight;
+            BoundingBox b = m.Best.Box;
+            var box = new BoundingBox(b.X * kx, b.Y * ky, b.Width * kx, b.Height * ky);
+            IReadOnlyList<WheelCandidate> found = await Task.Run(() =>
+                WheelPointNetwork.Shared.Locate(frame.Pixels, frame.Width, frame.Height, frame.Stride, [box])[0]);
+            return VehicleWheels.FromCandidates(found, box) is { } w
+                ? new WheelContacts(new Point2(w.Left.X / kx, w.Left.Y / ky), new Point2(w.Right.X / kx, w.Right.Y / ky))
+                : null;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            AppLog.Info("Ruote dell'auto di riferimento non trovate: " + ex.Message);
+            return null;
         }
     }
 
     private bool CanUseManualLength() => ManualLengthMeters is not null && IsPickingVehicle;
 
-    private void UseVehicle(ReferenceVehicle vehicle)
+    private async Task UseVehicleAsync(ReferenceVehicle vehicle)
     {
-        if (CurrentCandidate is not { } track || CurrentCandidateMeasurement() is not { } m)
+        if (CurrentCandidate is not { } track || CurrentCandidateMeasurement() is not { } box)
         {
             return;
         }
 
-        var recognized = new RecognizedVehicle(track.Id, vehicle, m);
+        if (!vehicle.HasWheelbase)
+        {
+            ShowStatus(Loc.T("Passo non indicato"),
+                Loc.S($"Per la {vehicle.DisplayName} l'elenco non indica il passo: scrivilo qui sotto, oppure scegli «Non lo so»."),
+                StatusSeverity.Warning);
+            return;
+        }
+
+        // Le linee A e B passano per i punti in cui le ruote toccano terra: servono entrambe le ruote.
+        if (await FindWheelsAsync(box) is not { } wheels)
+        {
+            ShowStatus(Loc.T("Ruote non trovate"),
+                Loc.T("Non trovo i punti in cui le due ruote di quest'auto toccano terra. Passo all'auto successiva."),
+                StatusSeverity.Warning);
+            SkipReferenceVehicle();
+            return;
+        }
+
+        CenterFrameMeasurement m = box with { LengthPixels = wheels.AlongRoad(_roadAngle) };
+        var recognized = new RecognizedVehicle(track.Id, vehicle, m, wheels);
         SelectedReferenceVehicle = null;
         VehicleSearchText = string.Empty;
         ManualLengthText = string.Empty;
@@ -451,7 +507,7 @@ public sealed partial class MainViewModel
         {
             // Seconda auto: orizzonte esatto dalle due auto riconosciute.
             HorizonEstimate? h = RoadPerspective.FromTwoReferences(
-                first.Measurement, first.Vehicle.LengthMeters, m, vehicle.LengthMeters, _roadAngle, VideoWidth, VideoHeight);
+                first.Measurement, first.Vehicle.WheelbaseMeters, m, vehicle.WheelbaseMeters, _roadAngle, VideoWidth, VideoHeight);
             _askingSecond = false;
             if (h is null)
             {
@@ -474,7 +530,7 @@ public sealed partial class MainViewModel
             // Prima auto cambiata, seconda già confermata: si ricalcola l'orizzonte con le due auto.
             _editingFirst = false;
             HorizonEstimate? h2 = RoadPerspective.FromTwoReferences(
-                m, vehicle.LengthMeters, second.Measurement, second.Vehicle.LengthMeters, _roadAngle, VideoWidth, VideoHeight);
+                m, vehicle.WheelbaseMeters, second.Measurement, second.Vehicle.WheelbaseMeters, _roadAngle, VideoWidth, VideoHeight);
             ApplyReference(h2 is null
                 ? new ReferenceChoice(recognized, null, _statisticalHorizon)
                 : new ReferenceChoice(recognized, second, h2));
@@ -486,7 +542,7 @@ public sealed partial class MainViewModel
             return;
         }
 
-        // Prima auto: linee dagli spigoli bassi verso il punto di fuga stimato (se c'è).
+        // Prima auto: linee dai punti a terra delle ruote verso il punto di fuga stimato (se c'è).
         _editingFirst = false;
         ApplyReference(new ReferenceChoice(recognized, null, _statisticalHorizon));
         StartSecondIdentification(recognized);
@@ -494,7 +550,7 @@ public sealed partial class MainViewModel
 
         string perspective = RoadPerspective.Describe(_statisticalHorizon);
         ShowStatus(_askingSecond ? Loc.T("Velocità calcolate — ancora una domanda") : Loc.T("Velocità calcolate"),
-            Loc.S($"Linee A e B sulla {vehicle.DisplayName} ({vehicle.LengthMeters:0.00} m). {perspective}") +
+            Loc.S($"Linee A e B sulle ruote della {vehicle.DisplayName} (passo {vehicle.WheelbaseMeters:0.00} m). {perspective}") +
             (_askingSecond ? Loc.T(" Ora un'auto della corsia più lontana, per orientare le linee.") : Loc.T(" Controlla le linee e premi «Procedi».")) +
             (m.Warnings.Count > 0 ? " " + string.Join(" ", m.Warnings) : string.Empty),
             m.Warnings.Count > 0 ? StatusSeverity.Warning : StatusSeverity.Success);
@@ -504,11 +560,11 @@ public sealed partial class MainViewModel
     private void ApplyReference(ReferenceChoice choice)
     {
         _reference = choice;
-        (LineSegment a, LineSegment b) = AcrossRoad(RoadPerspective.LinesAtVehicleEnds(choice.Measurement, choice.Horizon, VideoWidth, VideoHeight));
+        (LineSegment a, LineSegment b) = AcrossRoad(RoadPerspective.LinesAtWheels(choice.Measurement, choice.First.Wheels, choice.Horizon, VideoWidth, VideoHeight));
         LineA = a;
         LineB = b;   // ricalcola calibrazione e velocità di tutti i veicoli
         AppLog.Info(string.Create(It,
-            $"Riferimento: veicolo {choice.TrackId} = {choice.Vehicle.DisplayName} ({choice.Vehicle.LengthMm} mm), {choice.Measurement.LengthPixels:0} px al fotogramma {choice.Measurement.Best.FrameIndex + 1}. ") +
+            $"Riferimento: veicolo {choice.TrackId} = {choice.Vehicle.DisplayName} (passo {choice.Vehicle.WheelbaseMm} mm), ruote a terra in ({choice.First.Wheels.Left.X:0}, {choice.First.Wheels.Left.Y:0}) e ({choice.First.Wheels.Right.X:0}, {choice.First.Wheels.Right.Y:0}), {choice.Measurement.LengthPixels:0} px al fotogramma {choice.Measurement.Best.FrameIndex + 1}. ") +
             (choice.Second is { } s ? string.Create(It, $"Seconda auto: veicolo {s.TrackId} = {s.Vehicle.DisplayName}. ") : string.Empty) +
             RoadPerspective.Describe(choice.Horizon));
         UpdateCalibration();
@@ -682,7 +738,7 @@ public sealed partial class MainViewModel
         else if (HasReference && _reference is { } r && SelectedStep == WorkflowStep.Calibration)
         {
             m = r.Measurement;
-            label = string.Create(It, $"{(r.Vehicle.IsManual ? Loc.T("Riferimento") : r.Vehicle.Model)} · {r.Vehicle.LengthMeters:0.00} m");
+            label = string.Create(It, $"{(r.Vehicle.IsManual ? Loc.T("Riferimento") : r.Vehicle.Model)} · ") + Loc.S($"passo {r.Vehicle.WheelbaseMeters:0.00} m");
         }
 
         if (m is null)
@@ -696,7 +752,7 @@ public sealed partial class MainViewModel
             return;
         }
 
-        OverlayBoxes = [new OverlayBox(m.Best.Box, label, true, Heading: 2)];   // perni delle linee A e B
+        OverlayBoxes = [new OverlayBox(m.Best.Box, label, true, Heading: 2)];
         var target = (m.Best.FrameIndex, SelectedStep);
         if (_lastGuideFrame != target)
         {
@@ -732,11 +788,11 @@ public sealed partial class MainViewModel
         }
 
         CenterFrameMeasurement m = r.Measurement;
-        yield return Loc.S($"Calibrazione da veicolo di riferimento (distanza non misurata sul campo): {r.Vehicle.DisplayName}, {r.Vehicle.Years}, lunghezza {r.Vehicle.LengthMm} mm {(r.Vehicle.IsManual ? Loc.T("inserita a mano") : Loc.T("da scheda tecnica"))}.");
-        yield return Loc.S($"  Linee A e B dagli spigoli bassi del veicolo {r.TrackId:0000} al fotogramma n. {m.Best.FrameIndex + 1} (lunghezza misurata {m.LengthPixels:0} px, media di {m.FramesUsed} fotogrammi), dirette verso il punto di fuga; eventuali correzioni manuali.");
+        yield return Loc.S($"Calibrazione da veicolo di riferimento (distanza non misurata sul campo): {r.Vehicle.DisplayName}, {r.Vehicle.Years}, passo {r.Vehicle.WheelbaseMm} mm {(r.Vehicle.IsManual ? Loc.T("inserito a mano") : Loc.T("da scheda tecnica"))}.");
+        yield return Loc.S($"  Linee A e B per i punti in cui le ruote del veicolo {r.TrackId:0000} toccano terra al fotogramma n. {m.Best.FrameIndex + 1} (passo visto {m.LengthPixels:0} px), dirette verso il punto di fuga; eventuali correzioni manuali.");
         if (r.Second is { } s)
         {
-            yield return Loc.S($"  Auto nella corsia lontana (orienta le linee verso il punto di fuga): {s.Vehicle.DisplayName}, {s.Vehicle.LengthMm} mm (veicolo {s.TrackId:0000}, {s.Measurement.LengthPixels:0} px).");
+            yield return Loc.S($"  Auto nella corsia lontana (orienta le linee verso il punto di fuga): {s.Vehicle.DisplayName}, passo {s.Vehicle.WheelbaseMm} mm (veicolo {s.TrackId:0000}, {s.Measurement.LengthPixels:0} px tra le ruote).");
         }
 
         yield return Loc.T("  Prospettiva: ") + RoadPerspective.Describe(r.Horizon);
@@ -745,7 +801,7 @@ public sealed partial class MainViewModel
             yield return Loc.T("  Ripresa: ") + shot.Message;
         }
 
-        yield return Loc.S($"  Incertezza della scala circa ±{VehicleScaleEstimator.RelativeUncertainty(m) * 100:0.0}% (riquadro del veicolo e allestimento). Camera perpendicolare alla strada.");
+        yield return Loc.S($"  Incertezza della scala circa ±{VehicleScaleEstimator.RelativeUncertainty(m) * 100:0.0}% (punti delle ruote e allestimento). Camera perpendicolare alla strada.");
         foreach (string w in m.Warnings)
         {
             yield return Loc.T("  Avviso: ") + w;

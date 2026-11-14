@@ -4,7 +4,10 @@ using TrafficSpeedAnalyzer.Core.Localization;
 
 namespace TrafficSpeedAnalyzer.Core.Calibration;
 
-/// <summary>Veicolo di lunghezza nota, usato come metro per stimare la distanza tra le linee.</summary>
+/// <summary>
+/// Veicolo di dimensioni note, usato come metro per la calibrazione: la distanza tra i punti in cui le ruote toccano
+/// terra è il passo (<see cref="WheelbaseMm"/>).
+/// </summary>
 public sealed record ReferenceVehicle(
     string Make,
     string Model,
@@ -15,19 +18,25 @@ public sealed record ReferenceVehicle(
     int WheelbaseMm,
     string Type)
 {
-    /// <summary>Tipo dei veicoli con lunghezza inserita dall'utente.</summary>
+    /// <summary>Tipo dei veicoli con il passo inserito dall'utente.</summary>
     public const string ManualType = "manuale";
 
-    /// <summary>Lunghezze accettate per l'inserimento a mano (metri).</summary>
-    public const double MinManualMeters = 2.0, MaxManualMeters = 20.0;
+    /// <summary>Passi accettati per l'inserimento a mano (metri): dalle microcar ai furgoni lunghi.</summary>
+    public const double MinManualMeters = 1.5, MaxManualMeters = 6.0;
 
-    /// <summary>Veicolo di cui l'utente conosce solo la lunghezza.</summary>
-    public static ReferenceVehicle Manual(double lengthMeters) =>
-        new(Loc.T("Auto"), Loc.T("con lunghezza inserita a mano"), string.Empty, 0, 0, (int)Math.Round(lengthMeters * 1000), 0, ManualType);
+    /// <summary>Veicolo di cui l'utente conosce solo il passo (distanza tra i centri delle ruote).</summary>
+    public static ReferenceVehicle Manual(double wheelbaseMeters) =>
+        new(Loc.T("Auto"), Loc.T("con passo inserito a mano"), string.Empty, 0, 0, 0, (int)Math.Round(wheelbaseMeters * 1000), ManualType);
 
     public bool IsManual => Type == ManualType;
 
     public double LengthMeters => LengthMm / 1000.0;
+
+    /// <summary>Passo in metri; 0 se l'elenco non lo indica.</summary>
+    public double WheelbaseMeters => WheelbaseMm / 1000.0;
+
+    /// <summary>Il passo è noto: l'auto si può usare per la calibrazione.</summary>
+    public bool HasWheelbase => WheelbaseMm > 0;
 
     public string Years => IsManual ? Loc.T("anno non indicato") : ToYear == 0
         ? string.Create(CultureInfo.InvariantCulture, $"dal {FromYear}")
@@ -36,7 +45,9 @@ public sealed record ReferenceVehicle(
     public string DisplayName => Make + " " + Model + (Generation.Length > 0 ? " " + Generation : string.Empty);
 
     /// <summary>Descrizione con anni e lunghezza, per l'elenco di scelta.</summary>
-    public string Details => Loc.S($"{Years} · lunga {LengthMeters:0.00} m");
+    public string Details => HasWheelbase
+        ? Loc.S($"{Years} · passo {WheelbaseMeters:0.00} m")
+        : Loc.S($"{Years} · passo non indicato");
 
     /// <summary>Testo normalizzato per la ricerca (minuscolo, senza accenti).</summary>
     public string SearchKey { get; } = ReferenceVehicleCatalog.Normalize($"{Make} {Model} {Generation} {Type}");

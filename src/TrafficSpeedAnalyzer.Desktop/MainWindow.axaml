@@ -720,12 +720,12 @@
                                             <c:UiButton Grid.Column="1" Content="{loc:Tr 'Non lo so'}" Margin="8,0,0,0" Padding="12,8"
                                                         Command="{Binding SkipReferenceVehicleCommand}" ToolTip.Tip="{loc:Tr 'Passa all\'auto successiva'}" />
                                         </Grid>
-                                        <!-- Lunghezza inserita a mano, se il modello non è nell'elenco -->
-                                        <TextBlock Classes="caption" Margin="0,10,0,4" Text="{loc:Tr 'Oppure scrivi la lunghezza dell\'auto:'}" />
+                                        <!-- Passo inserito a mano, se il modello non è nell'elenco -->
+                                        <TextBlock Classes="caption" Margin="0,10,0,4" Text="{loc:Tr 'Oppure scrivi il passo dell\'auto (distanza tra i centri delle ruote):'}" />
                                         <Grid ColumnDefinitions="96,Auto,*">
-                                            <TextBox Text="{Binding ManualLengthText, Mode=TwoWay}" PlaceholderText="4,25" />
+                                            <TextBox Text="{Binding ManualLengthText, Mode=TwoWay}" PlaceholderText="2,60" />
                                             <TextBlock Grid.Column="1" Classes="label" Text="{loc:Tr 'metri'}" Margin="8,0,8,0" />
-                                            <c:UiButton Grid.Column="2" Content="{loc:Tr 'Usa questa lunghezza'}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="10,7"
+                                            <c:UiButton Grid.Column="2" Content="{loc:Tr 'Usa questo passo'}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="10,7"
                                                         Command="{Binding UseManualLengthCommand}"
                                                         Appearance="{Binding HasValidManualLength, Converter={StaticResource Pick}, ConverterParameter=Primary|Secondary}" />
                                         </Grid>
